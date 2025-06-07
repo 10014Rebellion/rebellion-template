@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.*;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 
 // import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -87,8 +88,8 @@ public class TunerConstants {
   private static final double kCoupleRatio = 0;
 
   private static final double kDriveGearRatio = 5.08;
-  private static final double kSteerGearRatio = 46.42;
-  private static final Distance kWheelRadius = Inches.of(1.4175);
+  private static final double kSteerGearRatio = 1; // THE ENCODER GEAR RATIO 1:1
+  private static final double kWheelRadius = Units.inchesToMeters(1.4175);
 
   private static final boolean kInvertLeftSide = true;
   private static final boolean kInvertRightSide = false;
@@ -137,45 +138,45 @@ public class TunerConstants {
   private static final int kFrontLeftDriveMotorId = 12;
   private static final int kFrontLeftSteerMotorId = 22;
   private static final int kFrontLeftEncoderId = 22;
-  private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.80908203125);
+  private static final double kFrontLeftEncoderOffset = 0.729;
   private static final boolean kFrontLeftSteerMotorInverted = false;
   private static final boolean kFrontLeftEncoderInverted = false;
 
-  private static final Distance kFrontLeftXPos = Inches.of(12.5);
-  private static final Distance kFrontLeftYPos = Inches.of(13.6875);
+  private static final double kFrontLeftXPos = Units.inchesToMeters(12.5);
+  private static final double kFrontLeftYPos = Units.inchesToMeters(13.6875);
 
   // Front Right
   private static final int kFrontRightDriveMotorId = 11;
   private static final int kFrontRightSteerMotorId = 21;
   private static final int kFrontRightEncoderId = 21;
-  private static final Angle kFrontRightEncoderOffset = Rotations.of(-0.80908203125);
+  private static final double kFrontRightEncoderOffset = 0;
   private static final boolean kFrontRightSteerMotorInverted = false;
   private static final boolean kFrontRightEncoderInverted = false;
 
-  private static final Distance kFrontRightXPos = Inches.of(12.5);
-  private static final Distance kFrontRightYPos = Inches.of(-13.6875);
+  private static final double kFrontRightXPos = Units.inchesToMeters(18.389);
+  private static final double kFrontRightYPos = Units.inchesToMeters(-13.6875);
 
   // Back Left
   private static final int kBackLeftDriveMotorId = 13;
   private static final int kBackLeftSteerMotorId = 23;
   private static final int kBackLeftEncoderId = 23;
-  private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.80908203125);
+  private static final double kBackLeftEncoderOffset = 0;
   private static final boolean kBackLeftSteerMotorInverted = false;
   private static final boolean kBackLeftEncoderInverted = false;
 
-  private static final Distance kBackLeftXPos = Inches.of(-12.5);
-  private static final Distance kBackLeftYPos = Inches.of(13.6875);
+  private static final double kBackLeftXPos = Units.inchesToMeters(-12.5);
+  private static final double kBackLeftYPos = Units.inchesToMeters(13.6875);
 
   // Back Right
   private static final int kBackRightDriveMotorId = 14;
   private static final int kBackRightSteerMotorId = 24;
   private static final int kBackRightEncoderId = 24;
-  private static final Angle kBackRightEncoderOffset = Rotations.of(-0.95166015625);
+  private static final double kBackRightEncoderOffset = 0;
   private static final boolean kBackRightSteerMotorInverted = false;
   private static final boolean kBackRightEncoderInverted = false;
 
-  private static final Distance kBackRightXPos = Inches.of(-12.5);
-  private static final Distance kBackRightYPos = Inches.of(-13.6875);
+  private static final double kBackRightXPos = Units.inchesToMeters(-12.5);
+  private static final double kBackRightYPos = Units.inchesToMeters(-13.6875);
 
   public static final SwerveModuleConstants<
           TalonFXConfiguration, TalonFXSConfiguration, TalonFXSConfiguration>

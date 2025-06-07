@@ -128,6 +128,8 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
     turnConfig.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
     turnConfig.ExternalFeedback.SensorPhase = SensorPhaseValue.Opposed;
+    turnConfig.ExternalFeedback.AbsoluteSensorOffset = constants.EncoderOffset;
+
     turnConfig.MotionMagic.MotionMagicAcceleration =
         turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
@@ -192,8 +194,8 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     // Update turn inputs
     inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
     inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
-    inputs.turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble());
-    inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble());
+    inputs.turnAbsolutePosition = Rotation2d.fromRadians(turnAbsolutePosition.getValueAsDouble());
+    inputs.turnPosition = Rotation2d.fromRadians(turnPosition.getValueAsDouble());
     inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
