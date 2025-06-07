@@ -120,7 +120,8 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     turnConfig.Slot0 = constants.SteerMotorGains;
     turnConfig.ExternalFeedback.FeedbackRemoteSensorID = constants.EncoderId;
-    turnConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.PulseWidth;
+    turnConfig.ExternalFeedback.ExternalFeedbackSensorSource =
+        ExternalFeedbackSensorSourceValue.PulseWidth;
     turnConfig.ExternalFeedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicAcceleration =

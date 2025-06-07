@@ -13,8 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -29,7 +29,7 @@ public class Module {
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final int index;
   private final SwerveModuleConstants<
-          TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
+          TalonFXConfiguration, TalonFXSConfiguration, TalonFXSConfiguration>
       constants;
 
   private final Alert driveDisconnectedAlert;
@@ -40,7 +40,7 @@ public class Module {
   public Module(
       ModuleIO io,
       int index,
-      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
+      SwerveModuleConstants<TalonFXConfiguration, TalonFXSConfiguration, TalonFXSConfiguration>
           constants) {
     this.io = io;
     this.index = index;

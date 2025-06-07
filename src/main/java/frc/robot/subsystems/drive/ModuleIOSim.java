@@ -13,8 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -54,7 +54,7 @@ public class ModuleIOSim implements ModuleIO {
   private double turnAppliedVolts = 0.0;
 
   public ModuleIOSim(
-      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
+      SwerveModuleConstants<TalonFXConfiguration, TalonFXSConfiguration, TalonFXSConfiguration>
           constants) {
     // Create drive and turn sim models
     driveSim =
