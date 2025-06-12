@@ -93,13 +93,15 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
+  private final boolean offsetNinety;
 
   public ModuleIOTalonFXandFXS(
       SwerveModuleConstants<TalonFXConfiguration, TalonFXSConfiguration, TalonFXSConfiguration>
-          constants) {
+          constants, boolean offsetNinety) {
     this.constants = constants;
     driveTalon = new TalonFX(constants.DriveMotorId, TunerConstants.DrivetrainConstants.CANBusName);
     turnTalon = new TalonFXS(constants.SteerMotorId, TunerConstants.DrivetrainConstants.CANBusName);
+    this.offsetNinety = offsetNinety;
 
     // Configure drive motor
     var driveConfig = constants.DriveMotorInitialConfigs;
@@ -129,7 +131,7 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     turnConfig.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
     turnConfig.ExternalFeedback.SensorPhase = SensorPhaseValue.Opposed;
     turnConfig.ExternalFeedback.AbsoluteSensorOffset = constants.EncoderOffset;
-
+    turnConfig.ExternalFeedback.AbsoluteSensorDiscontinuityPoint = 1; // CHANGE to 1 if doing encoder from 0 to 1. This expects it to be from -0.5 to 0.5
     turnConfig.MotionMagic.MotionMagicAcceleration =
         turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
@@ -175,6 +177,10 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon);
   }
 
+  private double getEncoderReading() {
+    return (turnPosition.getValueAsDouble() % 1.0) ;
+  }
+
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     // Refresh all signals
@@ -194,8 +200,8 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     // Update turn inputs
     inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
     inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
-    inputs.turnAbsolutePosition = Rotation2d.fromRadians(turnAbsolutePosition.getValueAsDouble());
-    inputs.turnPosition = Rotation2d.fromRadians(turnPosition.getValueAsDouble());
+    inputs.turnAbsolutePosition = Rotation2d.fromRadians(getEncoderReading());
+    inputs.turnPosition = Rotation2d.fromRadians(getEncoderReading());
     inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
