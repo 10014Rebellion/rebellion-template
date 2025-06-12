@@ -56,10 +56,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFXandFXS(TunerConstants.FrontLeft, false),
-                new ModuleIOTalonFXandFXS(TunerConstants.FrontRight, false),
-                new ModuleIOTalonFXandFXS(TunerConstants.BackLeft, false),
-                new ModuleIOTalonFXandFXS(TunerConstants.BackRight, false));
+                new ModuleIOTalonFXandFXS(TunerConstants.FrontLeft),
+                new ModuleIOTalonFXandFXS(TunerConstants.FrontRight),
+                new ModuleIOTalonFXandFXS(TunerConstants.BackLeft),
+                new ModuleIOTalonFXandFXS(TunerConstants.BackRight));
         break;
 
       case SIM:

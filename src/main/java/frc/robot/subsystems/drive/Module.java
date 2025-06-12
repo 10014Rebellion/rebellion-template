@@ -102,7 +102,7 @@ public class Module {
 
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
-    return inputs.turnPosition;
+    return Rotation2d.fromRotations(inputs.turnPosition.getRotations() % 1.0);
   }
 
   /** Returns the current drive position of the module in meters. */

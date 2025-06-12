@@ -25,7 +25,7 @@ public class TunerConstants {
   // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
   private static final Slot0Configs steerGains =
       new Slot0Configs()
-          .withKP(50)
+          .withKP(10)
           .withKI(0)
           .withKD(0) // 0.5
           .withKS(0) // 0.1
@@ -35,7 +35,7 @@ public class TunerConstants {
   // When using closed-loop control, the drive motor uses the control
   // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
   private static final Slot0Configs driveGains =
-      new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0).withKV(0); // 0.124
+      new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0).withKV(0); // 0.124
 
   // The closed-loop output type to use for the steer motors;
   // This affects the PID/FF gains for the steer motors
@@ -92,7 +92,7 @@ public class TunerConstants {
   private static final double kWheelRadius = Units.inchesToMeters(1.4175);
 
   private static final boolean kInvertLeftSide = true;
-  private static final boolean kInvertRightSide = false;
+  private static final boolean kInvertRightSide = true;
 
   private static final int kPigeonId = 2;
 
@@ -149,7 +149,7 @@ public class TunerConstants {
   private static final int kFrontRightDriveMotorId = 11;
   private static final int kFrontRightSteerMotorId = 21;
   private static final int kFrontRightEncoderId = 21;
-  private static final double kFrontRightEncoderOffset = 0.573;
+  private static final double kFrontRightEncoderOffset = 0.072; // 0.573
   private static final boolean kFrontRightSteerMotorInverted = false;
   private static final boolean kFrontRightEncoderInverted = false;
 
@@ -171,7 +171,7 @@ public class TunerConstants {
   private static final int kBackRightDriveMotorId = 14;
   private static final int kBackRightSteerMotorId = 24;
   private static final int kBackRightEncoderId = 24;
-  private static final double kBackRightEncoderOffset = 0.470;
+  private static final double kBackRightEncoderOffset = 0.962; // 0.470
   private static final boolean kBackRightSteerMotorInverted = false;
   private static final boolean kBackRightEncoderInverted = false;
 

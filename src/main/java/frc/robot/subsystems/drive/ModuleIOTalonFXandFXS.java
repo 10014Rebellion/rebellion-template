@@ -22,6 +22,8 @@ import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
+
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -93,15 +95,13 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
   private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
   private final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
-  private final boolean offsetNinety;
 
   public ModuleIOTalonFXandFXS(
       SwerveModuleConstants<TalonFXConfiguration, TalonFXSConfiguration, TalonFXSConfiguration>
-          constants, boolean offsetNinety) {
+          constants) {
     this.constants = constants;
     driveTalon = new TalonFX(constants.DriveMotorId, TunerConstants.DrivetrainConstants.CANBusName);
     turnTalon = new TalonFXS(constants.SteerMotorId, TunerConstants.DrivetrainConstants.CANBusName);
-    this.offsetNinety = offsetNinety;
 
     // Configure drive motor
     var driveConfig = constants.DriveMotorInitialConfigs;
@@ -126,12 +126,12 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     turnConfig.ExternalFeedback.FeedbackRemoteSensorID = constants.EncoderId;
     turnConfig.ExternalFeedback.ExternalFeedbackSensorSource =
         ExternalFeedbackSensorSourceValue.PulseWidth;
-    turnConfig.ExternalFeedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
+    turnConfig.ExternalFeedback.RotorToSensorRatio = 54.0;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
     turnConfig.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
     turnConfig.ExternalFeedback.SensorPhase = SensorPhaseValue.Opposed;
     turnConfig.ExternalFeedback.AbsoluteSensorOffset = constants.EncoderOffset;
-    turnConfig.ExternalFeedback.AbsoluteSensorDiscontinuityPoint = 1; // CHANGE to 1 if doing encoder from 0 to 1. This expects it to be from -0.5 to 0.5
+    turnConfig.ExternalFeedback.AbsoluteSensorDiscontinuityPoint = 0; // CHANGE to 1 if doing encoder from 0 to 1. This expects it to be from -0.5 to 0.5
     turnConfig.MotionMagic.MotionMagicAcceleration =
         turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
@@ -178,7 +178,7 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
   }
 
   private double getEncoderReading() {
-    return (turnPosition.getValueAsDouble() % 1.0) ;
+    return Math.abs(turnPosition.getValueAsDouble() % 1.0);
   }
 
   @Override
@@ -254,7 +254,7 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
   public void setTurnPosition(Rotation2d rotation) {
     turnTalon.setControl(
         switch (constants.SteerMotorClosedLoopOutput) {
-          case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations());
+          case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations() % 1);
           case TorqueCurrentFOC -> positionTorqueCurrentRequest.withPosition(
               rotation.getRotations());
         });
