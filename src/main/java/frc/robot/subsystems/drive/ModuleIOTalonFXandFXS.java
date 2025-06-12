@@ -45,6 +45,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
 import java.util.Queue;
+import java.util.logging.Logger;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -177,12 +178,13 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon);
   }
 
-  private double getEncoderReading() {
-    return Math.abs(turnPosition.getValueAsDouble() % 1.0);
+  private double getEncoderReadingRot() {
+    return turnPosition.getValueAsDouble() % 1.0;
   }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
+    org.littletonrobotics.junction.Logger.recordOutput("ENCODER: " + constants.SteerMotorId, getEncoderReadingRot());
     // Refresh all signals
     var driveStatus =
         BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
@@ -200,8 +202,8 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     // Update turn inputs
     inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
     inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
-    inputs.turnAbsolutePosition = Rotation2d.fromRadians(getEncoderReading());
-    inputs.turnPosition = Rotation2d.fromRadians(getEncoderReading());
+    inputs.turnAbsolutePosition = Rotation2d.fromRotations(getEncoderReadingRot());
+    inputs.turnPosition = Rotation2d.fromRotations(getEncoderReadingRot());
     inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
