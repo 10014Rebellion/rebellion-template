@@ -22,8 +22,6 @@ import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.PositionVoltage;
-
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -45,7 +43,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
 import java.util.Queue;
-import java.util.logging.Logger;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -132,7 +129,8 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
     turnConfig.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
     turnConfig.ExternalFeedback.SensorPhase = SensorPhaseValue.Opposed;
     turnConfig.ExternalFeedback.AbsoluteSensorOffset = constants.EncoderOffset;
-    turnConfig.ExternalFeedback.AbsoluteSensorDiscontinuityPoint = 0; // CHANGE to 1 if doing encoder from 0 to 1. This expects it to be from -0.5 to 0.5
+    turnConfig.ExternalFeedback.AbsoluteSensorDiscontinuityPoint =
+        0; // CHANGE to 1 if doing encoder from 0 to 1. This expects it to be from -0.5 to 0.5
     turnConfig.MotionMagic.MotionMagicAcceleration =
         turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
@@ -184,7 +182,8 @@ public class ModuleIOTalonFXandFXS implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    org.littletonrobotics.junction.Logger.recordOutput("ENCODER: " + constants.SteerMotorId, getEncoderReadingRot());
+    org.littletonrobotics.junction.Logger.recordOutput(
+        "ENCODER: " + constants.SteerMotorId, getEncoderReadingRot());
     // Refresh all signals
     var driveStatus =
         BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
