@@ -216,3 +216,9 @@ spotless {
         endWithNewline()
     }
 }
+
+if (!System.getenv().containsKey("CI")) {
+    tasks.named('build') {
+        dependsOn 'spotlessApply'
+    }
+}
