@@ -181,7 +181,7 @@ spotless {
     java {
         target fileTree(".") {
             include "**/*.java"
-            exclude "**/build/**", "**/build-*/**", "**/generated/**"
+            exclude "**/build/**", "**/build-*/**", "**/generated/**", "**/BuildConstants.java"
         }
         toggleOffOn()
         googleJavaFormat()
