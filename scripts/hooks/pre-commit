@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./check-gradlew.sh
+./.git/hooks/check-gradlew.sh
 if [ $? -ne 0 ]; then
   exit 1
 fi
