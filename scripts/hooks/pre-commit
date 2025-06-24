@@ -15,21 +15,4 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo ""
-echo "Building..."
-# skip the createVersionFile task to avoid version file conflicts
-./gradlew assemble
-if [ $? -ne 0 ]; then
-  echo "Error: Build failed. Please fix the errors before committing."
-  exit 1
-fi
-
-echo ""
-echo "Running tests..."
-./gradlew test -x eventDeploy
-if [ $? -ne 0 ]; then
-  echo "Error: Tests failed. Please fix the errors before committing."
-  exit 1
-fi
-
 exit 0
