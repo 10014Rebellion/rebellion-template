@@ -1,5 +1,7 @@
 {
   "recommendations": [
-    "richardwillis.vscode-spotless-gradle"
+    "richardwillis.vscode-spotless-gradle",
+    "github.vscode-github-actions",
+    "azemoh.one-monokai"
   ]
 }
