@@ -1,14 +1,30 @@
 #!/bin/sh
-# Cross-platform pre-commit hook for running Spotless formatting
 
-echo "Running spotlessApply..."
+if [ ! -f ./gradlew ]; then
+  echo "Gradle wrapper not found. Please run this script from the root of the project."
+  exit 1
+fi
 
-# Check for unstaged changes (spotlessApply might have changed files)
-if ! git diff --quiet; then
-  echo ""
-  echo "Spotless made changes to your code. Please review and stage the changes before committing."
-  echo "Changes:"
-  git --no-pager diff
+echo "Checking if spotless needs to be run..."
+./gradlew spotlessCheck
+if [ $? -ne 0 ]; then
+  echo "Spotless check failed. Running spotlessApply to fix formatting issues..."
+  ./gradlew spotlessApply
+  echo "Spotless has fixed the formatting issues. Please review the changes before committing."
+  exit 1
+fi
+
+echo "Building..."
+./gradlew assemble
+if [ $? -ne 0 ]; then
+  echo "Build failed. Please fix the errors before committing."
+  exit 1
+fi
+
+echo "Running tests..."
+./gradlew test -x eventDeploy -x createVersionFile
+if [ $? -ne 0 ]; then
+  echo "Tests failed. Please fix the errors before committing."
   exit 1
 fi
 
