@@ -2,6 +2,10 @@
   "recommendations": [
     "richardwillis.vscode-spotless-gradle",
     "github.vscode-github-actions",
-    "azemoh.one-monokai"
+    "azemoh.one-monokai",
+    "gruntfuggly.todo-tree",
+    "mdhsrobotics.wpilibj-integrated-docs",
+    "mortorqrobotics.wpilib-java-snippets",
+    "pomdtr.excalidraw-editor"
   ]
 }
