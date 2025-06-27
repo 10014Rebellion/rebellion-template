@@ -232,3 +232,10 @@ if (!System.getenv().containsKey("CI")) {
         ignoreFailures = true
     }
 }
+
+tasks.spotbugsMain {
+    reports.create("xml") {
+        required = true
+        outputLocation = file("$buildDir/reports/spotbugsXml.xml")
+    }
+}

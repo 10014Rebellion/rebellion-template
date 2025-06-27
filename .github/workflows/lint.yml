@@ -26,3 +26,8 @@ jobs:
 
       - name: Run spotbugs
         run: ./gradlew spotbugsMain
+        
+      - name: Upload Spotbugs report
+        uses: lcollins/spotbugs-github-action@v3.1.0
+        with:
+          path: '**/spotbugsXml.xml'
