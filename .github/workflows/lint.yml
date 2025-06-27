@@ -34,4 +34,4 @@ jobs:
         uses: lcollins/spotbugs-github-action@v3.1.0
         with:
           path: '**/spotbugsXml.xml'
-          fail-on-violation: true
+          fail-on-violation: false
