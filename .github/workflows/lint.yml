@@ -10,6 +10,9 @@ jobs:
   lint:
     name: Spotbugs
     runs-on: ubuntu-latest
+    
+    permissions:
+      checks: write
 
     steps:
       - name: Checkout code
@@ -31,3 +34,4 @@ jobs:
         uses: lcollins/spotbugs-github-action@v3.1.0
         with:
           path: '**/spotbugsXml.xml'
+          fail-on-violation: true
