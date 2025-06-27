@@ -3,6 +3,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2025.3.2"
     id "com.peterabeles.gversion" version "1.10"
     id "com.diffplug.spotless" version "7.0.4"
+    id "com.github.spotbugs" version "6.2.1"
 }
 
 java {
@@ -224,5 +225,10 @@ spotless {
 if (!System.getenv().containsKey("CI")) {
     tasks.named('build') {
         dependsOn 'spotlessApply'
+    }
+
+    // make spotbugs nonfatal on local builds
+    spotbugs {
+        ignoreFailures = true
     }
 }
