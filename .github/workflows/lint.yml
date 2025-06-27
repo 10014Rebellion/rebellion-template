@@ -2,17 +2,17 @@ name: Run linter
 
 on:
   push:
-  pull_request:
+  pull_request_target:
     branches:
       - '**'
+    
+permissions:
+  checks: write
 
 jobs:
   lint:
     name: Spotbugs
     runs-on: ubuntu-latest
-    
-    permissions:
-      checks: write
 
     steps:
       - name: Checkout code
