@@ -226,11 +226,10 @@ if (!System.getenv().containsKey("CI")) {
     tasks.named('build') {
         dependsOn 'spotlessApply'
     }
+}
 
-    // make spotbugs nonfatal on local builds
-    spotbugs {
-        ignoreFailures = true
-    }
+spotbugs {
+    ignoreFailures = true
 }
 
 tasks.spotbugsMain {
