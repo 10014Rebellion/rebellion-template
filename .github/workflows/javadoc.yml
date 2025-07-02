@@ -11,8 +11,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
     steps:
       - name: Generate javadoc for Github Pages
         uses: dev-vince/actions-publish-javadoc@v1.0.1

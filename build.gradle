@@ -238,3 +238,7 @@ tasks.spotbugsMain {
         outputLocation = file("$buildDir/reports/spotbugsXml.xml")
     }
 }
+
+javadoc {
+    exclude '**/BuildConstants.java' // Exclude generated BuildConstants
+}
