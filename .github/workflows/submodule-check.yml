@@ -12,5 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+            submodules: 'recursive'
       - name: Check RebeLib
         run: ./scripts/check-submodule.sh src/main/java/frc/RebeLib
