@@ -1,4 +1,4 @@
-name: Build
+name: Build and Test
 
 on:
   push:
@@ -15,4 +15,6 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
       - name: Build robot code
-        run: ./gradlew build
+        run: ./gradlew assemble
+      - name: Run tests
+        run: ./gradlew test --info --stacktrace

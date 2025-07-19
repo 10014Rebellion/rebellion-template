@@ -11,40 +11,39 @@ import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorController;
 import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorMotor;
 
 public class ElevatorIOSparkMax implements ElevatorIO {
-  private final SparkBase mElevatorSpark;
-  private final RelativeEncoder mElevatorEncoder;
-  private final ProfiledPIDController mElevatorController;
+    private final SparkBase mElevatorSpark;
+    private final RelativeEncoder mElevatorEncoder;
+    private final ProfiledPIDController mElevatorController;
 
-  public ElevatorIOSparkMax() {
-    this.mElevatorSpark = new SparkMax(ElevatorMotor.kMotorID, ElevatorMotor.kMotorType);
-    this.mElevatorEncoder = mElevatorSpark.getEncoder();
-    this.mElevatorController =
-        new ProfiledPIDController(
-            ElevatorController.kP,
-            ElevatorController.kI,
-            ElevatorController.kD,
-            new Constraints(ElevatorController.kMaxVelocity, ElevatorController.kMaxAcceleration));
-  }
+    public ElevatorIOSparkMax() {
+        this.mElevatorSpark = new SparkMax(ElevatorMotor.kMotorID, ElevatorMotor.kMotorType);
+        this.mElevatorEncoder = mElevatorSpark.getEncoder();
+        this.mElevatorController = new ProfiledPIDController(
+                ElevatorController.kP,
+                ElevatorController.kI,
+                ElevatorController.kD,
+                new Constraints(ElevatorController.kMaxVelocity, ElevatorController.kMaxAcceleration));
+    }
 
-  // private FunctionalCommand setPIDCmd() {
-  //   return new FunctionalCommand(
-  //     () -> {
+    // private FunctionalCommand setPIDCmd() {
+    //   return new FunctionalCommand(
+    //     () -> {
 
-  //     },
-  //     () -> {
+    //     },
+    //     () -> {
 
-  //     },
-  //     (interrupted) -> {},
-  //     () -> false,
-  //     this
-  //   );
-  // }
+    //     },
+    //     (interrupted) -> {},
+    //     () -> false,
+    //     this
+    //   );
+    // }
 
-  @Override
-  public void setElevatorOpenLoop(double output) {
-    mElevatorSpark.set(MathUtil.clamp(output, -1, 1));
-  }
+    @Override
+    public void setElevatorOpenLoop(double output) {
+        mElevatorSpark.set(MathUtil.clamp(output, -1, 1));
+    }
 
-  @Override
-  public void setElevatorPosition(Rotation2d rotation) {}
+    @Override
+    public void setElevatorPosition(Rotation2d rotation) {}
 }
