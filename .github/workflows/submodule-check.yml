@@ -1,0 +1,16 @@
+name: Check Submodules
+
+on: 
+  push:
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  RebeLib:
+    name: Check RebeLib
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check RebeLib
+        run: ./scripts/check-submodule.sh src/main/java/frc/RebeLib
