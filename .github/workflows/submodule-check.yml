@@ -16,5 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
             submodules: 'recursive'
+      - name: Make executable
+        run: chmod +x ./scripts/check-submodule.sh
       - name: Check RebeLib
         run: ./scripts/check-submodule.sh src/main/java/frc/RebeLib
