@@ -39,7 +39,7 @@ fi
 CURRENT_HASH=$(git rev-parse HEAD)
 git fetch origin
 git checkout main
-if [ CURRENT_HASH != "$(git rev-parse HEAD)" ]; then
+if [ $CURRENT_HASH != "$(git rev-parse HEAD)" ]; then
     echo "Submodule is on a non-main branch."
     exit 1
 fi
