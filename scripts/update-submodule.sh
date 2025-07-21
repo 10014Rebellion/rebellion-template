@@ -36,8 +36,12 @@ else
 fi
 
 # check if submodule is on a non-main branch
-if [ -n "$(git branch --show-current | grep -i -v -E 'main|master')" ]; then
+CURRENT_HASH=$(git rev-parse HEAD)
+git fetch origin
+git checkout main > /dev/null 2>&1
+if [ CURRENT_HASH != "$(git rev-parse HEAD)"  ]; then
     echo "Submodule is on a non-main branch, allowing update. CI will not allow merge until this is resolved."
+    git checkout $CURRENT_HASH > /dev/null 2>&1
     exit 0
 fi
 
