@@ -34,4 +34,14 @@ public final class Constants {
         /** Replaying from a log file. */
         REPLAY
     }
+
+    public static class DashboardConstants {
+        public static final boolean DASHBOARD_ENABLED = true;
+        public static final String DASHBOARD_PATH = "dashboard";
+        public static final int DASHBOARD_PORT = 5800;
+
+        public static final boolean DEPLOY_SERVER_ENABLED = false;
+        public static final String DEPLOY_SERVER_PATH = "";
+        public static final int DEPLOY_SERVER_PORT = 5801;
+    }
 }
