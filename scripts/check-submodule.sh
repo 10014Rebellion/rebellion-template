@@ -36,7 +36,10 @@ else
 fi
 
 # check if submodule is on a non-main branch
-if [ -n "$(git branch --show-current | grep -i -v -E 'main|master')" ]; then
+CURRENT_HASH=$(git rev-parse HEAD)
+git fetch origin
+git checkout main
+if [ CURRENT_HASH != "$(git rev-parse HEAD)" ]; then
     echo "Submodule is on a non-main branch."
     exit 1
 fi
