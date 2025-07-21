@@ -2,6 +2,8 @@ name: Check formatting
 
 on: 
   push:
+    branches:
+      - '**'
   pull_request:
     branches:
       - '**'
