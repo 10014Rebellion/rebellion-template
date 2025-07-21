@@ -1,6 +1,6 @@
 # Rebellion Template
 
-[![Build and Test](https://github.com/rylanmoseley/rebellion-template/actions/workflows/build.yml/badge.svg)](https://github.com/rylanmoseley/rebellion-template/actions/workflows/build.yml)
+[![Build and Test](https://github.com/10014Rebellion/rebellion-template/actions/workflows/build.yml/badge.svg)](https://github.com/10014Rebellion/rebellion-template/actions/workflows/build.yml)
 <!-- //TODO Update this URL so it points to the right repo -->
 
 ## Setting up the environment
@@ -8,6 +8,7 @@
 ### Requirements
 
 - git (w/ git bash on Windows)
+- WPILib
 
 ### Installing
 
