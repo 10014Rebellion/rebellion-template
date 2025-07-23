@@ -2,10 +2,14 @@
   "recommendations": [
     "richardwillis.vscode-spotless-gradle",
     "github.vscode-github-actions",
+    "usernamehw.errorlens",
     "azemoh.one-monokai",
     "gruntfuggly.todo-tree",
+    "visualstudioexptteam.vscodeintellicode",
     "mdhsrobotics.wpilibj-integrated-docs",
     "mortorqrobotics.wpilib-java-snippets",
-    "pomdtr.excalidraw-editor"
+    "pomdtr.excalidraw-editor",
+    "wpilibsuite.vscode-wpilib",
+    "onlyutkarsh.git-config-user-profiles"
   ]
 }
