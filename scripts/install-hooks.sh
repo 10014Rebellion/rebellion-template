@@ -19,3 +19,20 @@ fi
 
 echo ""
 echo "git hooks installed successfully"
+
+echo "installing hooks for RebeLib..."
+
+chmod +x -v scripts/rebelib/hooks/**
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to set execute permissions on RebeLib hooks."
+  exit 1
+fi
+
+cp -vrfa scripts/rebelib/hooks/ .git/modules/src/main/java/frc/RebeLib/
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to copy RebeLib hooks. Please check the scripts/rebelib/hooks directory."
+  exit 1
+fi
+
+echo ""
+echo "RebeLib hooks installed successfully"
