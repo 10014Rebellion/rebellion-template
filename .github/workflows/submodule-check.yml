@@ -1,0 +1,21 @@
+name: Check Submodules
+
+on: 
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  RebeLib:
+    name: Check RebeLib
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+            submodules: 'recursive'
+      - name: Make executable
+        run: chmod +x ./scripts/check-submodule.sh
+      - name: Check RebeLib
+        run: ./scripts/check-submodule.sh src/main/java/frc/RebeLib

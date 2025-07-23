@@ -12,11 +12,25 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate javadoc for Github Pages
-        uses: dev-vince/actions-publish-javadoc@v1.0.1
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            submodules: 'recursive'
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
           java-version: '17'
-          java-distribution: 'temurin'
-          project: 'gradle'
-          branch: 'javadocs'
+
+      - name: Generate Javadoc
+        run: gradle javadoc
+        shell: bash
+      
+      - name: Publish javadoc to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: javadocs
+          publish_dir: build/docs/javadoc
+          force_orphan: true

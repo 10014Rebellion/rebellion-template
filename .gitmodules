@@ -1,0 +1,3 @@
+[submodule "src/main/java/frc/RebeLib"]
+	path = src/main/java/frc/RebeLib
+	url = https://github.com/10014Rebellion/RebeLib

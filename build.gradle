@@ -181,13 +181,13 @@ task(eventDeploy) {
 createVersionFile.dependsOn(eventDeploy)
 
 // Spotless formatting
-// project.compileJava.dependsOn(spotlessApply)
 spotless {
     java {
         target fileTree(".") {
             include "**/*.java"
             exclude "**/build/**", "**/build-*/**", "**/generated/**", "**/BuildConstants.java"
         }
+        licenseHeaderFile "${project.rootDir}/LicenseHeader.txt"
         toggleOffOn()
         palantirJavaFormat()
         removeUnusedImports()

@@ -1,20 +1,12 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// REBELLION 10014
 
 package frc.robot;
 
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.DashboardConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -75,6 +67,45 @@ public class Robot extends LoggedRobot {
 
         // Start AdvantageKit logger
         Logger.start();
+
+        // start dashboard webserver
+        if (DashboardConstants.DASHBOARD_ENABLED) {
+            System.out.println("Starting Dashboard Webserver");
+            System.out.println("Dashboard directory: "
+                    + Filesystem.getDeployDirectory()
+                    + "/"
+                    + DashboardConstants.DASHBOARD_PATH);
+            try {
+                WebServer.start(
+                        DashboardConstants.DASHBOARD_PORT,
+                        Filesystem.getDeployDirectory() + "/" + DashboardConstants.DASHBOARD_PATH);
+                if (Robot.isSimulation()) {
+                    java.awt.Desktop.getDesktop()
+                            .browse(java.net.URI.create("http://127.0.0.1:" + DashboardConstants.DASHBOARD_PORT));
+                }
+            } catch (Exception e) {
+                System.out.println("Dashboard Webserver failed to start: " + e.getMessage());
+            }
+        }
+        // host deploy directory webserver
+        if (DashboardConstants.DEPLOY_SERVER_ENABLED) {
+            System.out.println("Starting Deploy Webserver");
+            System.out.println("Deploy directory: "
+                    + Filesystem.getDeployDirectory()
+                    + "/"
+                    + DashboardConstants.DEPLOY_SERVER_PATH);
+            try {
+                WebServer.start(
+                        DashboardConstants.DEPLOY_SERVER_PORT,
+                        Filesystem.getDeployDirectory() + "/" + DashboardConstants.DEPLOY_SERVER_PATH);
+                if (Robot.isSimulation()) {
+                    java.awt.Desktop.getDesktop()
+                            .browse(java.net.URI.create("http://127.0.0.1:" + DashboardConstants.DEPLOY_SERVER_PORT));
+                }
+            } catch (Exception e) {
+                System.out.println("Deploy Webserver failed to start: " + e.getMessage());
+            }
+        }
 
         // Check for valid swerve config
         // var modules =
