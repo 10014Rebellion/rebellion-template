@@ -28,11 +28,13 @@ const nt4Client = new NT4_Client(
     () => {
         // on connection
         console.log("Connected to NT4 server");
+        connected = true;
         // TODO display connected state in UI
     },
     () => {
         // on disconnect
         console.log("Disconnected from NT4 server");
+        connected = false;
         // TODO display disconnected state in UI
     }
 );
@@ -49,7 +51,7 @@ window.addEventListener("load", () => {
 
     // connect to websocket
     nt4Client.connect();
-})
+});
 
 setInterval(() => {
     var timestamp = topics["/AdvantageKit/Timestamp"].value || 0;
