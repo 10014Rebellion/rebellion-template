@@ -28,11 +28,7 @@ jobs:
         shell: bash
 
       - name: Cleanup Javadocs branch
-        run: find PATH -maxdepth 1 -type f -delete
-        shell: bash
-      
-      - name: More cleanup
-        run: rm -rf gradle scripts src vendordeps .github .vscode
+        run: find . -maxdepth 1 -type f -delete & rm -rf gradle scripts src vendordeps .github .vscode
         shell: bash
       
       - name: Publish javadoc to GitHub Pages
