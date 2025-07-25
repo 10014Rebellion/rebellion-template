@@ -26,6 +26,14 @@ jobs:
       - name: Generate Javadoc
         run: gradle javadoc
         shell: bash
+
+      - name: Cleanup Javadocs branch
+        run: find PATH -maxdepth 1 -type f -delete
+        shell: bash
+      
+      - name: More cleanup
+        run: rm -rf gradle scripts src vendordeps .github .vscode
+        shell: bash
       
       - name: Publish javadoc to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -34,3 +42,4 @@ jobs:
           publish_branch: javadocs
           publish_dir: build/docs/javadoc
           destination_dir: docs/${{ github.head_ref || github.ref_name }}
+          force_orphan: true
