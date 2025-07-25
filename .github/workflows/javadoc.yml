@@ -33,4 +33,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: javadocs
           publish_dir: build/docs/javadoc
-          destination_dir: docs/${{ github.ref_name }}
+          destination_dir: docs/${{ github.head_ref || github.ref_name }}
