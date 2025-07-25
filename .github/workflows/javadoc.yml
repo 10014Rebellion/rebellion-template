@@ -4,9 +4,9 @@ permissions:
   contents: write
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
+      - **
 
 jobs:
   publish:
@@ -33,4 +33,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: javadocs
           publish_dir: build/docs/javadoc
-          force_orphan: true
+          destination_dir: docs/${{ github.ref_name }}
