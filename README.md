@@ -15,7 +15,7 @@
 Open git bash or your sh of choice and run the following commands:
 
 ```sh
-git clone <the URL of this repository>.git
+git clone --recurse-submodules --remote-submodules <the URL of this repository>.git
 cd <the name of the repository>
 ./scripts/install-hooks.sh
 ```
