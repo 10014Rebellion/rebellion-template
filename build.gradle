@@ -157,6 +157,22 @@ task(eventDeploy) {
 
             if (branch.startsWith(branchPrefix)) {
                 exec {
+                    workingDir(projectDir + "/src/main/java/frc/RebeLib")
+                    executable 'git'
+                    args 'checkout', '-b', branch
+                }
+                exec {
+                    workingDir(projectDir + "/src/main/java/frc/RebeLib")
+                    executable 'git'
+                    args 'add', '-A'
+                }
+                exec {
+                    workingDir(projectDir + "/src/main/java/frc/RebeLib")
+                    executable 'git'
+                    args 'commit', '-m', commitMessage
+                    ignoreExitValue = false
+                }
+                exec {
                     workingDir(projectDir)
                     executable 'git'
                     args 'add', '-A'
@@ -165,7 +181,7 @@ task(eventDeploy) {
                     workingDir(projectDir)
                     executable 'git'
                     args 'commit', '-m', commitMessage
-                    ignoreExitValue = true
+                    ignoreExitValue = false
                 }
 
                 println "Committed to branch: '$branch'"
