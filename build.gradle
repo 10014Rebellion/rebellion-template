@@ -2,7 +2,7 @@ plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2025.3.2"
     id "com.peterabeles.gversion" version "1.10"
-    id "com.diffplug.spotless" version "7.0.4"
+    id "com.diffplug.spotless" version "7.2.1"
     id "com.github.spotbugs" version "6.2.1"
 }
 
@@ -182,6 +182,8 @@ createVersionFile.dependsOn(eventDeploy)
 
 // Spotless formatting
 spotless {
+    encoding 'UTF-8'
+    lineEndings 'UNIX'
     java {
         target fileTree(".") {
             include "**/*.java"
@@ -189,8 +191,9 @@ spotless {
         }
         licenseHeaderFile "${project.rootDir}/LicenseHeader.txt"
         toggleOffOn()
-        palantirJavaFormat()
         removeUnusedImports()
+        palantirJavaFormat()
+        formatAnnotations()
         trimTrailingWhitespace()
         endWithNewline()
     }
