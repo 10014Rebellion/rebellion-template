@@ -1,8 +1,8 @@
 // REBELLION 10014
 
-package frc.lib.subsystems.drive;
+package frc.robot.subsystems.drive;
 
-import static frc.lib.util.PhoenixUtil.*;
+import static frc.lib.PhoenixUtil.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

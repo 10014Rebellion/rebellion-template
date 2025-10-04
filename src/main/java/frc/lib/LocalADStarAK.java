@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.lib.util;
+package frc.lib;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;

@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.lib.subsystems.drive;
+package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
