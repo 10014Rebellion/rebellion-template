@@ -1,7 +1,5 @@
 #!/bin/sh
 
-./scripts/update-submodule.sh src/main/java/frc/RebeLib
-
 ./scripts/check-gradlew.sh
 if [ $? -ne 0 ]; then
   exit 1
