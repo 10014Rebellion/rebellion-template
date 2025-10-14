@@ -128,7 +128,7 @@ public class RemappableTrigger implements BooleanSupplier {
      * @return this trigger, so calls can be chained
      */
     public Trigger whileFalse(Command command) {
-        return internalTrigger.whileTrue(command);
+        return internalTrigger.whileFalse(command);
     }
 
     /**
