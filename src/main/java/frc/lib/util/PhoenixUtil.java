@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.lib;
+package frc.lib.util;
 
 import com.ctre.phoenix6.StatusCode;
 import java.util.function.Supplier;

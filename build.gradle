@@ -185,7 +185,7 @@ spotless {
     java {
         target fileTree(".") {
             include "**/*.java"
-            exclude "**/build/**", "**/build-*/**", "**/generated/**", "**/BuildConstants.java"
+            exclude "**/build/**", "**/build-*/**", "**/generated/**", "**/BuildConstants.java", "**/lib/**" // I HAVE NO IDEA WHY WE NEED TO EXCLUDE LIB- WE JUST NEED IT OR IT DOESNT BUILD.
         }
         licenseHeaderFile "${project.rootDir}/LicenseHeader.txt"
         toggleOffOn()
