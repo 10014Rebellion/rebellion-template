@@ -1,0 +1,10 @@
+frc.lib.math
+frc.lib.pathplanner
+frc.lib.swerve
+frc.lib.tuning
+frc.lib.util
+frc.robot
+frc.robot.generated
+frc.robot.systems.drive
+frc.robot.systems.drive.controllers
+frc.robot.systems.vision
