@@ -1,0 +1,21 @@
+@keyframes progress {
+    100% {
+        color: red;
+    }
+
+    50% {
+        color: orange;
+    }
+
+    32.5% {
+        color: yellow;
+    }
+
+    0% {
+        color: lime;
+    }
+    }
+
+    .progress {
+    animation: 100s ease-in-out calc(-1s * var(--progress)) paused progress;
+}
