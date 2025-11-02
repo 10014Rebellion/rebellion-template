@@ -160,7 +160,8 @@ public class Drive extends SubsystemBase {
             robotConfig = RobotConfig.fromGUISettings();
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("<< PATH PLANNER SETTINGS DID NOT CORRECTLY LOAD. PLEASE MAKE SURE PATH PLANNER IS INSTALLED AND UP TO DATE >>>");
+            System.out.println(
+                    "<< PATH PLANNER SETTINGS DID NOT CORRECTLY LOAD. PLEASE MAKE SURE PATH PLANNER IS INSTALLED AND UP TO DATE >>>");
         }
 
         setpointGenerator = new SwerveSetpointGenerator(
