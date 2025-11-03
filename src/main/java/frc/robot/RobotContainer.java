@@ -21,12 +21,11 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
     // Subsystems
     private final Drive mDrive;
-    private final StateTracker mStateStracker;
 
     private final LoggedDashboardChooser<Command> driverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
 
     public RobotContainer() {
-        mStateStracker = new StateTracker();
+        new StateTracker();
 
         switch (Constants.currentMode) {
             case REAL:

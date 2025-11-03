@@ -133,11 +133,11 @@ public class GeomUtil {
                 Math.min(
                         Math.abs(rotation2.minus(rotation1).getRadians()),
                         Math.abs(rotation2
-                                .minus(Rotation2d.fromDegrees(2 * Math.PI))
+                                .minus(Rotation2d.k180deg)
                                 .minus(rotation1)
                                 .getRadians())),
                 Math.abs(rotation2
-                        .minus(rotation1.minus(Rotation2d.fromDegrees(2 * Math.PI)))
+                        .minus(rotation1.minus(Rotation2d.k180deg))
                         .getRadians())));
     }
 }
