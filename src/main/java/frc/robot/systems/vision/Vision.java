@@ -4,7 +4,6 @@ package frc.robot.systems.vision;
 
 import static frc.robot.systems.vision.VisionConstants.KUseSingleTagTransform;
 import static frc.robot.systems.vision.VisionConstants.kAmbiguityThreshold;
-import static frc.robot.systems.vision.VisionConstants.kMultiStdDevs;
 import static frc.robot.systems.vision.VisionConstants.kSingleStdDevs;
 
 import java.util.Optional;
@@ -23,137 +22,137 @@ import frc.lib.tuning.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision {
-    private CameraIO[] cameras;
-    private CameraIOInputsAutoLogged[] camerasData;
+    private CameraIO[] mCameras;
+    private CameraIOInputsAutoLogged[] mCamerasData;
 
-    private static final LoggedTunableNumber kSingleXYStdev = new LoggedTunableNumber("Vision/kSingleXYStdev",
+    private static final LoggedTunableNumber tSingleXYStdev = new LoggedTunableNumber("Vision/kSingleXYStdev",
             kSingleStdDevs.get(0));
-    private static final LoggedTunableNumber kMultiXYStdev = new LoggedTunableNumber("Vision/kMultiXYStdev",
-            kMultiStdDevs.get(0));
 
     public static final AprilTagFieldLayout k2025Field = AprilTagFieldLayout
             .loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
-    public Vision(CameraIO[] cameras) {
-        Logger.recordOutput("Vision/UseSingleTagTransform", KUseSingleTagTransform);
-        this.cameras = cameras;
-        camerasData = new CameraIOInputsAutoLogged[cameras.length];
-        for (int i = 0; i < cameras.length; i++) {
-            camerasData[i] = new CameraIOInputsAutoLogged();
+    public Vision(CameraIO[] pCameras) {
+        this.mCameras = pCameras;
+        this.mCamerasData = new CameraIOInputsAutoLogged[pCameras.length];
+        
+        for (int i = 0; i < pCameras.length; i++) {
+            mCamerasData[i] = new CameraIOInputsAutoLogged();
         }
+
+        Logger.recordOutput("Vision/UseSingleTagTransform", KUseSingleTagTransform);
     }
 
-    public void periodic(Pose2d lastRobotPose, Pose2d simOdomPose) {
-        for (int i = 0; i < cameras.length; i++) {
-            cameras[i].updateInputs(camerasData[i], lastRobotPose, simOdomPose);
-            Logger.processInputs("Vision/" + camerasData[i].camName, camerasData[i]);
+    public void periodic(Pose2d pLastRobotPose, Pose2d pSimOdomPose) {
+        for (int i = 0; i < mCameras.length; i++) {
+            mCameras[i].updateInputs(mCamerasData[i], pLastRobotPose, pSimOdomPose);
+            Logger.processInputs("Vision/" + mCamerasData[i].iCamName, mCamerasData[i]);
         }
     }
 
     public VisionObservation[] getVisionObservations() {
-        VisionObservation[] observations = new VisionObservation[cameras.length];
-        for (int i = 0; i < camerasData.length; i++) {
-            observations[i] = processCameraObservation(camerasData[i]);
+        VisionObservation[] observations = new VisionObservation[mCameras.length];
+        for (int i = 0; i < mCamerasData.length; i++) {
+            observations[i] = processCameraObservation(mCamerasData[i]);
         }
         return observations;
     }
     
 
-    private VisionObservation processCameraObservation(CameraIOInputsAutoLogged camData) {
-        if (!camData.hasTarget || !camData.hasBeenUpdated) {
-            return makeInvalidObservation(camData);
+    private VisionObservation processCameraObservation(CameraIOInputsAutoLogged pCamData) {
+        if (!pCamData.iHasTarget || !pCamData.iHasBeenUpdated) {
+            return makeInvalidObservation(pCamData);
         }
     
         int usableTags = 0;
         double totalDistance = 0.0;
     
-        for (int i = 0; i < camData.latestTagTransforms.length; i++) {
-            if (camData.latestTagTransforms[i] != null &&
-                camData.latestTagAmbiguities[i] < kAmbiguityThreshold) {
-                totalDistance += camData.latestTagTransforms[i].getTranslation().getNorm();
+        for (int i = 0; i < pCamData.iLatestTagTransforms.length; i++) {
+            if (pCamData.iLatestTagTransforms[i] != null &&
+                pCamData.iLatestTagAmbiguities[i] < kAmbiguityThreshold) {
+                totalDistance += pCamData.iLatestTagTransforms[i].getTranslation().getNorm();
                 usableTags++;
             }
         }
     
         if (usableTags == 0) {
-            return makeUntrustedObservation(camData);
+            return makeUntrustedObservation(pCamData);
         }
     
         double avgDist = totalDistance / usableTags;
         double xyScalar = Math.pow(avgDist, 2) / usableTags;
     
         if (usableTags == 1) {
-            return processSingleTagObservation(camData, avgDist, xyScalar);
+            return processSingleTagObservation(pCamData, avgDist, xyScalar);
         } else {
-            return makeVisionObservation(camData.latestEstimatedRobotPose.toPose2d(),
-                    kMultiXYStdev.get() * xyScalar, camData);
+            return makeVisionObservation(pCamData.iLatestEstimatedRobotPose.toPose2d(),
+            tSingleXYStdev.get() * xyScalar, pCamData);
         }
     }
 
-    private VisionObservation processSingleTagObservation(CameraIOInputsAutoLogged camData, double avgDist, double xyScalar) {
-        if (avgDist > VisionConstants.kMaxTrustDistance) {
-            return makeUntrustedObservation(camData);
+    private VisionObservation processSingleTagObservation(CameraIOInputsAutoLogged pCamData, double pAvgDist, double pXYScalar) {
+        if (pAvgDist > VisionConstants.kMaxTrustDistance) {
+            return makeUntrustedObservation(pCamData);
         }
     
         Pose2d pose;
         if (KUseSingleTagTransform) {
-            Optional<Pose3d> tagPoseOpt = k2025Field.getTagPose(camData.singleTagAprilTagID);
+            Optional<Pose3d> tagPoseOpt = k2025Field.getTagPose(pCamData.iSingleTagAprilTagID);
             if (tagPoseOpt.isEmpty()) {
                 DriverStation.reportWarning("<<< COULD NOT FIND TAG ON FIELD! >>>", true);
-                return makeUntrustedObservation(camData);
+                return makeUntrustedObservation(pCamData);
             }
             pose = tagPoseOpt.get().toPose2d()
                     .plus(new Transform2d(
-                            camData.cameraToApriltag.getX(),
-                            camData.cameraToApriltag.getY(),
-                            camData.cameraToApriltag.getRotation().toRotation2d()))
-                    .plus(toTransform2d(camData.cameraToRobot.inverse()));
+                            pCamData.iCameraToApriltag.getX(),
+                            pCamData.iCameraToApriltag.getY(),
+                            pCamData.iCameraToApriltag.getRotation().toRotation2d()))
+                    .plus(toTransform2d(pCamData.iCameraToRobot.inverse()));
         } else {
-            pose = camData.latestEstimatedRobotPose.toPose2d();
+            pose = pCamData.iLatestEstimatedRobotPose.toPose2d();
         }
     
-        return makeVisionObservation(pose, kSingleXYStdev.get() * xyScalar, camData);
+        return makeVisionObservation(pose, tSingleXYStdev.get() * pXYScalar, pCamData);
     }
     
     
 
-    private Transform2d toTransform2d(Transform3d transform) {
-        return new Transform2d(transform.getX(), transform.getY(), transform.getRotation().toRotation2d());
+    private Transform2d toTransform2d(Transform3d pTransform) {
+        return new Transform2d(pTransform.getX(), pTransform.getY(), pTransform.getRotation().toRotation2d());
     }
 
-    public void logVisionObservation(VisionObservation observation, String state) {
-        Logger.recordOutput("Vision/Observation/" + observation.camName + "/State", state);
-        Logger.recordOutput("Vision/Observation/" + observation.camName + "/Timestamp", observation.timeStamp());
-        Logger.recordOutput("Vision/Observation/" + observation.camName + "/Pose", observation.pose());
-        Logger.recordOutput("Vision/Observation/" + observation.camName + "/hasObserved", observation.hasObserved());
-        Logger.recordOutput("Vision/Observation/" + observation.camName + "/StdDevs", observation.stdDevs());
+    public void logVisionObservation(VisionObservation pObservation, String pState) {
+        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/State", pState);
+        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/Timestamp", pObservation.timeStamp());
+        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/Pose", pObservation.pose());
+        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/hasObserved", pObservation.hasObserved());
+        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/StdDevs", pObservation.stdDevs());
     }
 
-    private VisionObservation makeVisionObservation(Pose2d pose, double xyStdev, CameraIOInputsAutoLogged camData) {
+    private VisionObservation makeVisionObservation(Pose2d pPose, double pXYStdev, CameraIOInputsAutoLogged pCamData) {
         return new VisionObservation(
                 true,
-                pose,
-                VecBuilder.fill(xyStdev, xyStdev, Double.MAX_VALUE),
-                camData.latestTimestamp,
-                camData.camName);
+                pPose,
+                VecBuilder.fill(pXYStdev, pXYStdev, Double.MAX_VALUE),
+                pCamData.iLatestTimestamp,
+                pCamData.iCamName);
     }
     
-    private VisionObservation makeUntrustedObservation(CameraIOInputsAutoLogged camData) {
+    private VisionObservation makeUntrustedObservation(CameraIOInputsAutoLogged pCamData) {
         return new VisionObservation(
                 true,
-                camData.latestEstimatedRobotPose.toPose2d(),
+                pCamData.iLatestEstimatedRobotPose.toPose2d(),
                 VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE),
-                camData.latestTimestamp,
-                camData.camName);
+                pCamData.iLatestTimestamp,
+                pCamData.iCamName);
     }
     
-    private VisionObservation makeInvalidObservation(CameraIOInputsAutoLogged camData) {
+    private VisionObservation makeInvalidObservation(CameraIOInputsAutoLogged pCamData) {
         return new VisionObservation(
                 false,
                 new Pose2d(),
                 VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE),
-                camData.latestTimestamp,
-                camData.camName);
+                pCamData.iLatestTimestamp,
+                pCamData.iCamName);
     }
     
 

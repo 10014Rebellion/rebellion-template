@@ -4,7 +4,6 @@ package frc.robot.systems.vision;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -28,9 +27,9 @@ import edu.wpi.first.wpilibj.RobotBase;
  * Imagine a birds eye view of the bot, 0deg is north, 90 is west, -90 is east, and 180 is south
  */
 public class VisionConstants {
-        public static final double kMaxTrustDistance = 3.5;
+    public static final double kMaxTrustDistance = 3.5; // >>> TODO: Maybe? TUNE ME, you probably wont have to but yk just in case
 
-    // From CAD and decided by you in configuration
+    // Best to get these from CAD, or in person.
     public static final String kLeftCamName = "FrontLeft-OV9281"; // >>> TODO: TUNE ME
     public static final Orientation kLeftCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
     public static final Transform3d kLeftCamTransform = new Transform3d(
@@ -65,6 +64,21 @@ public class VisionConstants {
      */
     public static final boolean KUseSingleTagTransform = false;
 
+    
+    public enum CameraSimConfigs {
+        resWidth(960),
+        resHeight(720),
+        fovDeg(95),
+        avgErrorPx(0.3),
+        errorStdDevPx(0.2),
+        fps(60),
+        avgLatencyMs(5),
+        latencyStdDevMs(15);
+    
+        public final double value;
+        CameraSimConfigs(double value) { this.value = value; }
+    }
+
     // >>> TODO: TUNE ME <<<
     // Tuned by using AdvantageScope data analysis tool(Normal distribution)
     public static final Vector<N3> kSingleStdDevs =
@@ -73,8 +87,6 @@ public class VisionConstants {
             (RobotBase.isReal()) ? VecBuilder.fill(0.23188, 0.23188, 5.0) : VecBuilder.fill(0.23, 0.23, 5.0);
 
     public static final double kAmbiguityThreshold = (RobotBase.isReal()) ? 0.2 : 1.0;
-
-    public static final Rotation2d kOV2311DiagonalCameraFOV = Rotation2d.fromDegrees(95.0); // >>> TODO: TUNE ME
 
     public static enum Orientation {
         BACK,
