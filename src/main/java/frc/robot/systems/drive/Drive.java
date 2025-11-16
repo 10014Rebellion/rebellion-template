@@ -135,7 +135,6 @@ public class Drive extends SubsystemBase {
     private Pose2d goalPose = new Pose2d();
 
     /* TUNABLE NUMBERS FOR DRIVEBASE CONSTANTS AND TESTS */
-    private static final LoggedTunableNumber mSpeedLevel = new LoggedTunableNumber("Drive/DriveSpeed", 0);
     private static final LoggedTunableNumber driftRate =
             new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
     private static final LoggedTunableNumber rotationDriftTestSpeedDeg =

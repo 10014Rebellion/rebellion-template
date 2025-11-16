@@ -17,7 +17,6 @@ import frc.robot.FieldConstants;
 import frc.robot.StateTracker;
 import frc.robot.StateTracker.ReefFace;
 import frc.robot.systems.drive.DriveConstants;
-import frc.robot.systems.vision.Vision;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -153,7 +152,7 @@ public class GoalPoseChooser {
 
     public static Pose2d getTargetPose(int pTagID, double pXOffsetM, double pYOffsetM) {
         Pose2d tagPose =
-                Vision.k2025Field.getTagPose(pTagID).map(Pose3d::toPose2d).orElse(null);
+                FieldConstants.kFieldLayout.getTagPose(pTagID).map(Pose3d::toPose2d).orElse(null);
 
         Translation2d tagTranslation = tagPose.getTranslation()
                 .plus(new Translation2d(

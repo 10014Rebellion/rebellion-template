@@ -1,14 +1,18 @@
 package frc.robot.systems.vision;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.Constants.Mode;
 import frc.robot.systems.vision.VisionConstants.CameraSimConfigs;
+import frc.robot.systems.vision.VisionConstants.Orientation;
+
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
@@ -26,19 +30,21 @@ public class CameraIOPV implements CameraIO {
     private PhotonCamera mPhotonCam;
     private PhotonPoseEstimator mPoseEstimator;
     private Transform3d mCameraTransform;
+    private final Orientation mOrientation;
 
     private VisionSystemSim mVisionSim;
     private PhotonCameraSim mCameraSim;
 
-    public CameraIOPV(String pName, Transform3d pCameraTransform) {
+    public CameraIOPV(String pName, Transform3d pCameraTransform, Orientation pOrientation) {
         this.mCamName = pName;
         this.mPhotonCam = new PhotonCamera(mCamName);
         this.mCameraTransform = pCameraTransform;
+        this.mOrientation = pOrientation;
         
         PhotonCamera.setVersionCheckEnabled(false); // Avoid version spam
 
         mPoseEstimator = new PhotonPoseEstimator(
-            AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark),
+            FieldConstants.kFieldLayout,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
             pCameraTransform
         );
@@ -52,7 +58,7 @@ public class CameraIOPV implements CameraIO {
     
     private void setupSimulation() {
         mVisionSim = new VisionSystemSim("main");
-        mVisionSim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark));
+        mVisionSim.addAprilTags(FieldConstants.kFieldLayout);
 
         SimCameraProperties cameraProps = new SimCameraProperties();
         cameraProps.setCalibration(
@@ -86,16 +92,28 @@ public class CameraIOPV implements CameraIO {
 
             if (!pInputs.iHasBeenUpdated) return;
 
-            // TODO: Don't only get the last result
-            PhotonPipelineResult result = unreadResults.get(unreadResults.size() - 1);
-            Optional<EstimatedRobotPose> latestEstimatedRobotPose = mPoseEstimator.update(result);
+            PhotonPipelineResult latestValidResult = null;
+            Optional<EstimatedRobotPose> latestEstimatedRobotPose = Optional.empty();
+
+            for (PhotonPipelineResult r : unreadResults) {
+                Optional<EstimatedRobotPose> maybePose = mPoseEstimator.update(r);
+                if (maybePose.isPresent()) {
+                    latestValidResult = r;
+                    latestEstimatedRobotPose = maybePose;
+                }
+            }
 
             pInputs.iIsConnected = mPhotonCam.isConnected();
-            pInputs.iHasTarget = result.hasTargets();
 
-            if (!pInputs.iHasTarget) return;
+            if (latestValidResult == null || !latestValidResult.hasTargets()) {
+                DriverStation.reportWarning("No valid pose found in unread PhotonVision results for " + mCamName, false);
+                pInputs.iHasTarget = false;
+                return;
+            }
 
-            PhotonTrackedTarget target = result.getBestTarget();
+            pInputs.iHasTarget = true;
+
+            PhotonTrackedTarget target = latestValidResult.getBestTarget();
             pInputs.iCameraToApriltag = target.getBestCameraToTarget();
             pInputs.iRobotToApriltag = target.getBestCameraToTarget().plus(mCameraTransform);
             pInputs.iSingleTagAprilTagID = target.getFiducialId();
@@ -103,10 +121,14 @@ public class CameraIOPV implements CameraIO {
             pInputs.iYaw = target.getYaw();
             pInputs.iPitch = target.getPitch();
             pInputs.iArea = target.getArea();
-            pInputs.iLatencySeconds = result.metadata.getLatencyMillis() / 1000.0;
+            pInputs.iLatencySeconds = latestValidResult.metadata.getLatencyMillis() / 1000.0;
+            pInputs.iLatestTimestamp = latestValidResult.getTimestampSeconds();
 
             latestEstimatedRobotPose.ifPresent(est -> {
-                pInputs.iLatestEstimatedRobotPose = est.estimatedPose;
+                if (mOrientation == Orientation.BACK) 
+                    pInputs.iLatestEstimatedRobotPose = est.estimatedPose.transformBy(new Transform3d(new Translation3d(), new Rotation3d(0.0, 0.0, Math.PI)));
+                else 
+                    pInputs.iLatestEstimatedRobotPose = est.estimatedPose;
 
                 int count = est.targetsUsed.size();
                 Transform3d[] tagTransforms = new Transform3d[count];
@@ -120,7 +142,6 @@ public class CameraIOPV implements CameraIO {
                 pInputs.iNumberOfTargets = count;
                 pInputs.iLatestTagTransforms = tagTransforms;
                 pInputs.iLatestTagAmbiguities = ambiguities;
-                pInputs.iLatestTimestamp = result.getTimestampSeconds();
             });
             
         } catch (Exception e) {

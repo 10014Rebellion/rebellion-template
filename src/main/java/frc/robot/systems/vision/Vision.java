@@ -5,11 +5,8 @@ package frc.robot.systems.vision;
 import static frc.robot.systems.vision.VisionConstants.KUseSingleTagTransform;
 import static frc.robot.systems.vision.VisionConstants.kAmbiguityThreshold;
 import static frc.robot.systems.vision.VisionConstants.kSingleStdDevs;
-
+import static frc.robot.systems.vision.VisionConstants.kMultiStdDevs;
 import java.util.Optional;
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,17 +16,17 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.FieldConstants;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Vision {
     private CameraIO[] mCameras;
     private CameraIOInputsAutoLogged[] mCamerasData;
 
-    private static final LoggedTunableNumber tSingleXYStdev = new LoggedTunableNumber("Vision/kSingleXYStdev",
-            kSingleStdDevs.get(0));
+    private static final LoggedTunableNumber tSingleXYStdev = new LoggedTunableNumber("Vision/kSingleXYStdev", kSingleStdDevs.get(0));
+    private static final LoggedTunableNumber tMultiXYStdev = new LoggedTunableNumber("Vision/kMultiXYStdev", kMultiStdDevs.get(0));
 
-    public static final AprilTagFieldLayout k2025Field = AprilTagFieldLayout
-            .loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
     public Vision(CameraIO[] pCameras) {
         this.mCameras = pCameras;
@@ -84,8 +81,11 @@ public class Vision {
         if (usableTags == 1) {
             return processSingleTagObservation(pCamData, avgDist, xyScalar);
         } else {
-            return makeVisionObservation(pCamData.iLatestEstimatedRobotPose.toPose2d(),
-            tSingleXYStdev.get() * xyScalar, pCamData);
+            return makeVisionObservation(
+                pCamData.iLatestEstimatedRobotPose.toPose2d(),
+                tMultiXYStdev.get() * xyScalar, 
+                pCamData
+            );
         }
     }
 
@@ -96,7 +96,7 @@ public class Vision {
     
         Pose2d pose;
         if (KUseSingleTagTransform) {
-            Optional<Pose3d> tagPoseOpt = k2025Field.getTagPose(pCamData.iSingleTagAprilTagID);
+            Optional<Pose3d> tagPoseOpt = FieldConstants.kFieldLayout.getTagPose(pCamData.iSingleTagAprilTagID);
             if (tagPoseOpt.isEmpty()) {
                 DriverStation.reportWarning("<<< COULD NOT FIND TAG ON FIELD! >>>", true);
                 return makeUntrustedObservation(pCamData);
@@ -132,7 +132,11 @@ public class Vision {
         return new VisionObservation(
                 true,
                 pPose,
-                VecBuilder.fill(pXYStdev, pXYStdev, Double.MAX_VALUE),
+                VecBuilder.fill(
+                    pXYStdev, 
+                    pXYStdev, 
+                    Double.MAX_VALUE
+                ),
                 pCamData.iLatestTimestamp,
                 pCamData.iCamName);
     }
