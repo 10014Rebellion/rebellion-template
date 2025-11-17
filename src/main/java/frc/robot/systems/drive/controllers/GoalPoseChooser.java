@@ -151,8 +151,10 @@ public class GoalPoseChooser {
     }
 
     public static Pose2d getTargetPose(int pTagID, double pXOffsetM, double pYOffsetM) {
-        Pose2d tagPose =
-                FieldConstants.kFieldLayout.getTagPose(pTagID).map(Pose3d::toPose2d).orElse(null);
+        Pose2d tagPose = FieldConstants.kFieldLayout
+                .getTagPose(pTagID)
+                .map(Pose3d::toPose2d)
+                .orElse(null);
 
         Translation2d tagTranslation = tagPose.getTranslation()
                 .plus(new Translation2d(

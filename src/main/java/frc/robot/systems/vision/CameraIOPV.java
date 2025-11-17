@@ -1,3 +1,5 @@
+// REBELLION 10014
+
 package frc.robot.systems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -12,7 +14,6 @@ import frc.robot.Constants.Mode;
 import frc.robot.game.FieldConstants;
 import frc.robot.systems.vision.VisionConstants.CameraSimConfigs;
 import frc.robot.systems.vision.VisionConstants.Orientation;
-
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
@@ -40,14 +41,11 @@ public class CameraIOPV implements CameraIO {
         this.mPhotonCam = new PhotonCamera(mCamName);
         this.mCameraTransform = pCameraTransform;
         this.mOrientation = pOrientation;
-        
+
         PhotonCamera.setVersionCheckEnabled(false); // Avoid version spam
 
         mPoseEstimator = new PhotonPoseEstimator(
-            FieldConstants.kFieldLayout,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            pCameraTransform
-        );
+                FieldConstants.kFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, pCameraTransform);
 
         mPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_LAST_POSE);
 
@@ -55,17 +53,16 @@ public class CameraIOPV implements CameraIO {
             setupSimulation();
         }
     }
-    
+
     private void setupSimulation() {
         mVisionSim = new VisionSystemSim("main");
         mVisionSim.addAprilTags(FieldConstants.kFieldLayout);
 
         SimCameraProperties cameraProps = new SimCameraProperties();
         cameraProps.setCalibration(
-            (int) CameraSimConfigs.resWidth.value, 
-            (int) CameraSimConfigs.resHeight.value, 
-            new Rotation2d(CameraSimConfigs.fovDeg.value)
-        );
+                (int) CameraSimConfigs.resWidth.value,
+                (int) CameraSimConfigs.resHeight.value,
+                new Rotation2d(CameraSimConfigs.fovDeg.value));
         cameraProps.setCalibError(CameraSimConfigs.avgErrorPx.value, CameraSimConfigs.errorStdDevPx.value);
         cameraProps.setFPS(CameraSimConfigs.fps.value);
         cameraProps.setAvgLatencyMs(CameraSimConfigs.avgLatencyMs.value);
@@ -74,7 +71,6 @@ public class CameraIOPV implements CameraIO {
         mCameraSim = new PhotonCameraSim(mPhotonCam, cameraProps);
         mVisionSim.addCamera(mCameraSim, mCameraTransform);
     }
-
 
     @Override
     public void updateInputs(CameraIOInputs pInputs, Pose2d pLastRobotPose, Pose2d pSimOdomPose) {
@@ -106,7 +102,8 @@ public class CameraIOPV implements CameraIO {
             pInputs.iIsConnected = mPhotonCam.isConnected();
 
             if (latestValidResult == null || !latestValidResult.hasTargets()) {
-                DriverStation.reportWarning("No valid pose found in unread PhotonVision results for " + mCamName, false);
+                DriverStation.reportWarning(
+                        "No valid pose found in unread PhotonVision results for " + mCamName, false);
                 pInputs.iHasTarget = false;
                 return;
             }
@@ -125,10 +122,10 @@ public class CameraIOPV implements CameraIO {
             pInputs.iLatestTimestamp = latestValidResult.getTimestampSeconds();
 
             latestEstimatedRobotPose.ifPresent(est -> {
-                if (mOrientation == Orientation.BACK) 
-                    pInputs.iLatestEstimatedRobotPose = est.estimatedPose.transformBy(new Transform3d(new Translation3d(), new Rotation3d(0.0, 0.0, Math.PI)));
-                else 
-                    pInputs.iLatestEstimatedRobotPose = est.estimatedPose;
+                if (mOrientation == Orientation.BACK)
+                    pInputs.iLatestEstimatedRobotPose = est.estimatedPose.transformBy(
+                            new Transform3d(new Translation3d(), new Rotation3d(0.0, 0.0, Math.PI)));
+                else pInputs.iLatestEstimatedRobotPose = est.estimatedPose;
 
                 int count = est.targetsUsed.size();
                 Transform3d[] tagTransforms = new Transform3d[count];
@@ -137,13 +134,13 @@ public class CameraIOPV implements CameraIO {
                 for (int i = 0; i < count; i++) {
                     tagTransforms[i] = est.targetsUsed.get(i).getBestCameraToTarget();
                     ambiguities[i] = est.targetsUsed.get(i).getPoseAmbiguity();
-                }            
+                }
 
                 pInputs.iNumberOfTargets = count;
                 pInputs.iLatestTagTransforms = tagTransforms;
                 pInputs.iLatestTagAmbiguities = ambiguities;
             });
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             resetInputs(pInputs);

@@ -230,22 +230,7 @@ public class Drive extends SubsystemBase {
                 this);
     }
 
-    /*
-     * If you broke it into functions: updateData -> setChassisSpeeds(data, state) -> runSwerve(speeds)
-     * Periodic Logic:
-     * Data Collection(Modules, gyro, Vision, odometry)
-     * Update Controllers use
-     * Setting Chassis Speeds based on driveState
-     * Teleop sets based of joystick, Autons sets based on pathplanner(ppDesiredSpeeds), etc. etc.
-     * runSwerve() function sets the desired state to modules
-     * State is set by setDriveState() and related commands which also resets the controllers
-     */
-    @Override
-    public void periodic() {
-        ///////////////////// DATA COLLECTION AND UPDATE CONTROLLERS AND ODOMETRY \\\\\\\\\\\\\\\\\\
-        /* Modules */
-        for (Module module : modules) module.periodic();
-
+    private void updateSensorsAndOdometry() {
         /* GYRO */
         gyro.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
@@ -265,31 +250,24 @@ public class Drive extends SubsystemBase {
             if (observation.hasObserved())
                 poseEstimator.addVisionMeasurement(observation.pose(), observation.timeStamp(), observation.stdDevs());
 
-            Logger.recordOutput(
-                    observation.camName() + "/stdDevX", observation.stdDevs().get(0));
-            Logger.recordOutput(
-                    observation.camName() + "/stdDevY", observation.stdDevs().get(1));
-            Logger.recordOutput(
-                    observation.camName() + "/stdDevTheta",
-                    observation.stdDevs().get(2));
-            // Logger.recordOutput(observation.camName()+"/TransformFromOdometry",
-            // odometry.getPoseMeters().minus(observation.pose()));
+            Logger.recordOutput(observation.camName() + "/stdDevX", observation.stdDevs().get(0));
+            Logger.recordOutput(observation.camName() + "/stdDevY", observation.stdDevs().get(1));
+            Logger.recordOutput(observation.camName() + "/stdDevTheta", observation.stdDevs().get(2));
         }
 
         poseEstimator.update(robotRotation, getModulePositions());
         odometry.update(robotRotation, getModulePositions());
 
         field.setRobotPose(getPoseEstimate());
+    }
 
-        // Logger.recordOutput("Drive/Odometry/FieldCurrentChassisSpeeds",
-        // ChassisSpeeds.fromRobotRelativeSpeeds(getRobotChassisSpeeds(), robotRotation));
-
-        /* Updating Controllers */
+    private void updateDriveControllers() {
         headingController.updateHeadingController();
         autoAlignController.updateAlignmentControllers();
         GoalPoseChooser.updateSideStuff();
+    }
 
-        ///////////////////// SETTING DESIRED SPEEDS FROM DRIVE STATE \\\\\\\\\\\\\\\\\\
+    private void computeDesiredSpeeds() {
         ChassisSpeeds teleopSpeeds =
                 teleopController.computeChassiSpeeds(getPoseEstimate().getRotation(), getRobotChassisSpeeds(), false);
         switch (driveState) {
@@ -312,8 +290,7 @@ public class Drive extends SubsystemBase {
                         headingController.getSnapOutput(getPoseEstimate().getRotation()));
                 break;
             case INTAKE_HEADING_ALIGN:
-                goalRotation = AllianceFlipUtil.apply(
-                        GoalPoseChooser.getIntakePose(getPoseEstimate()).getRotation());
+                goalRotation = AllianceFlipUtil.apply(GoalPoseChooser.getIntakePose(getPoseEstimate()).getRotation());
                 desiredSpeeds = new ChassisSpeeds(
                         teleopSpeeds.vxMetersPerSecond,
                         teleopSpeeds.vyMetersPerSecond,
@@ -327,8 +304,6 @@ public class Drive extends SubsystemBase {
                         headingController.getSnapOutput(getPoseEstimate().getRotation()));
                 break;
             case DRIVE_TO_CORAL:
-                desiredSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                break;
             case DRIVE_TO_INTAKE:
                 desiredSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
                 break;
@@ -343,9 +318,10 @@ public class Drive extends SubsystemBase {
             case DRIVE_TO_ALGAE:
                 // desiredSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
                 ChassisSpeeds algaeAlignSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                double forwardJoy = (goalPose.getX() > AllianceFlipUtil.apply(frc.robot.game.FieldConstants.kReefCenter.getX()))
-                        ? -teleopSpeeds.vxMetersPerSecond
-                        : teleopSpeeds.vxMetersPerSecond;
+                double forwardJoy =
+                        (goalPose.getX() > AllianceFlipUtil.apply(frc.robot.game.FieldConstants.kReefCenter.getX()))
+                                ? -teleopSpeeds.vxMetersPerSecond
+                                : teleopSpeeds.vxMetersPerSecond;
                 if (AllianceFlipUtil.shouldFlip()) forwardJoy *= -1;
                 desiredSpeeds = new ChassisSpeeds(
                         /* Flips speed to preserve field relative. Not best solution, but probably good enough? */
@@ -389,8 +365,16 @@ public class Drive extends SubsystemBase {
             default:
                 /* Defaults to Teleop control if no other cases are run*/
         }
+    }
 
-        ///////////////////////// SETS DESIRED CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\\\\\\\\\
+    @Override
+    public void periodic() {
+        for (Module module : modules) module.periodic();
+
+        updateSensorsAndOdometry();
+        updateDriveControllers();
+        computeDesiredSpeeds();
+        
         if (desiredSpeeds != null) runSwerve(desiredSpeeds);
     }
 
@@ -409,8 +393,6 @@ public class Drive extends SubsystemBase {
         driveState = state;
         switch (driveState) {
             case PROCESSOR_HEADING_ALIGN:
-                headingController.reset(getPoseEstimate().getRotation(), gyroInputs.yawVelocityPS);
-                break;
             case REEF_HEADING_ALIGN:
                 headingController.reset(getPoseEstimate().getRotation(), gyroInputs.yawVelocityPS);
                 break;

@@ -17,7 +17,6 @@ import frc.robot.systems.vision.CameraIOPV;
 import frc.robot.systems.vision.Vision;
 import frc.robot.systems.vision.VisionConstants;
 import frc.robot.systems.vision.VisionConstants.Orientation;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -39,8 +38,12 @@ public class RobotContainer {
                         },
                         new GyroIOPigeon2(),
                         new Vision(new CameraIO[] {
-                            new CameraIOPV(VisionConstants.kRightCamName, VisionConstants.kRightCamTransform, Orientation.BACK),
-                            new CameraIOPV(VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
+                            new CameraIOPV(
+                                    VisionConstants.kRightCamName,
+                                    VisionConstants.kRightCamTransform,
+                                    Orientation.BACK),
+                            new CameraIOPV(
+                                    VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
                         }));
                 break;
 
@@ -54,8 +57,12 @@ public class RobotContainer {
                         },
                         new GyroIO() {},
                         new Vision(new CameraIO[] {
-                            new CameraIOPV(VisionConstants.kRightCamName, VisionConstants.kRightCamTransform, Orientation.BACK),
-                            new CameraIOPV(VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
+                            new CameraIOPV(
+                                    VisionConstants.kRightCamName,
+                                    VisionConstants.kRightCamTransform,
+                                    Orientation.BACK),
+                            new CameraIOPV(
+                                    VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
                         }));
                 break;
 

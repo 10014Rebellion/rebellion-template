@@ -27,7 +27,8 @@ import edu.wpi.first.wpilibj.RobotBase;
  * Imagine a birds eye view of the bot, 0deg is north, 90 is west, -90 is east, and 180 is south
  */
 public class VisionConstants {
-    public static final double kMaxTrustDistance = 3.5; // >>> TODO: Maybe? TUNE ME, you probably wont have to but yk just in case
+    public static final double kMaxTrustDistance =
+            3.5; // >>> TODO: Maybe? TUNE ME, you probably wont have to but yk just in case
 
     // Best to get these from CAD, or in person.
     public static final String kLeftCamName = "FrontLeft-OV9281"; // >>> TODO: TUNE ME
@@ -53,7 +54,7 @@ public class VisionConstants {
                     Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
                     ),
             new Rotation3d(
-                    Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME 
+                    Units.degreesToRadians(0.0), // Roll: No side tilt // >>> TODO: TUNE ME
                     Units.degreesToRadians(0.0), // Pitch: No upward tilt // >>> TODO: TUNE ME
                     Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
                     ));
@@ -64,7 +65,6 @@ public class VisionConstants {
      */
     public static final boolean KUseSingleTagTransform = false;
 
-    
     public enum CameraSimConfigs {
         resWidth(960),
         resHeight(720),
@@ -74,9 +74,12 @@ public class VisionConstants {
         fps(60),
         avgLatencyMs(5),
         latencyStdDevMs(15);
-    
+
         public final double value;
-        CameraSimConfigs(double value) { this.value = value; }
+
+        CameraSimConfigs(double value) {
+            this.value = value;
+        }
     }
 
     // >>> TODO: TUNE ME <<<
