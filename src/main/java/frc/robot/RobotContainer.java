@@ -21,7 +21,6 @@ import frc.robot.systems.vision.VisionConstants.Orientation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
-    // Subsystems
     private final Drive mDrive;
 
     private final LoggedDashboardChooser<Command> driverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");

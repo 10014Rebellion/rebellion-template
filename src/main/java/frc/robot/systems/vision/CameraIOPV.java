@@ -8,8 +8,8 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
-import frc.robot.FieldConstants;
 import frc.robot.Constants.Mode;
+import frc.robot.game.FieldConstants;
 import frc.robot.systems.vision.VisionConstants.CameraSimConfigs;
 import frc.robot.systems.vision.VisionConstants.Orientation;
 

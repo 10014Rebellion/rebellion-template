@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot;
+package frc.robot.game;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;

@@ -2,7 +2,6 @@
 
 package frc.robot.systems.drive;
 
-import static frc.robot.FieldConstants.*;
 import static frc.robot.systems.drive.DriveConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -44,7 +43,7 @@ import frc.lib.swerve.LocalADStarAK;
 import frc.lib.swerve.SwerveUtils;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.lib.tuning.SysIDCharacterization;
-import frc.robot.FieldConstants;
+import frc.robot.game.FieldConstants;
 import frc.robot.systems.drive.controllers.GoalPoseChooser;
 import frc.robot.systems.drive.controllers.GoalPoseChooser.CHOOSER_STRATEGY;
 import frc.robot.systems.drive.controllers.HeadingController;
@@ -344,7 +343,7 @@ public class Drive extends SubsystemBase {
             case DRIVE_TO_ALGAE:
                 // desiredSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
                 ChassisSpeeds algaeAlignSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                double forwardJoy = (goalPose.getX() > AllianceFlipUtil.apply(FieldConstants.kReefCenter.getX()))
+                double forwardJoy = (goalPose.getX() > AllianceFlipUtil.apply(frc.robot.game.FieldConstants.kReefCenter.getX()))
                         ? -teleopSpeeds.vxMetersPerSecond
                         : teleopSpeeds.vxMetersPerSecond;
                 if (AllianceFlipUtil.shouldFlip()) forwardJoy *= -1;
@@ -739,7 +738,7 @@ public class Drive extends SubsystemBase {
     public double distanceFromReefCenter() {
         return getPoseEstimate()
                 .getTranslation()
-                .getDistance(AllianceFlipUtil.apply(kReefCenter).getTranslation());
+                .getDistance(AllianceFlipUtil.apply(FieldConstants.kReefCenter).getTranslation());
     }
 
     public void acceptJoystickInputs(
