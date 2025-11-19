@@ -6,12 +6,12 @@ import static frc.robot.systems.drive.DriveConstants.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.systems.drive.Drive;
-import frc.robot.systems.drive.GyroIO;
-import frc.robot.systems.drive.GyroIOPigeon2;
-import frc.robot.systems.drive.Module;
-import frc.robot.systems.drive.ModuleIO;
-import frc.robot.systems.drive.ModuleIOFXFXS;
-import frc.robot.systems.drive.ModuleIOSim;
+import frc.robot.systems.drive.gyro.GyroIO;
+import frc.robot.systems.drive.gyro.GyroIOPigeon2;
+import frc.robot.systems.drive.modules.Module;
+import frc.robot.systems.drive.modules.ModuleIO;
+import frc.robot.systems.drive.modules.ModuleIOFXFXS;
+import frc.robot.systems.drive.modules.ModuleIOSim;
 import frc.robot.systems.vision.CameraIO;
 import frc.robot.systems.vision.CameraIOPV;
 import frc.robot.systems.vision.Vision;

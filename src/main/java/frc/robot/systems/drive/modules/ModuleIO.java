@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot.systems.drive;
+package frc.robot.systems.drive.modules;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;

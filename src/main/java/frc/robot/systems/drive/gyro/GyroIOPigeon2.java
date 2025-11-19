@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot.systems.drive;
+package frc.robot.systems.drive.gyro;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.systems.drive.DriveConstants;
 
 public class GyroIOPigeon2 implements GyroIO {
     private Pigeon2 gyro = new Pigeon2(2, DriveConstants.kDriveCANBusName);

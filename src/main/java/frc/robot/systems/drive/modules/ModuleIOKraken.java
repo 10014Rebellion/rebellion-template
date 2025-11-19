@@ -1,26 +1,23 @@
 // REBELLION 10014
 
-package frc.robot.systems.drive;
+package frc.robot.systems.drive.modules;
 
 import static frc.robot.systems.drive.DriveConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorPhaseValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -28,9 +25,10 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.systems.drive.DriveConstants;
 import frc.robot.systems.drive.DriveConstants.ModuleHardwareConfig;
 
-public class ModuleIOFXFXS implements ModuleIO {
+public class ModuleIOKraken implements ModuleIO {
     private TalonFX driveMotor;
     private VelocityTorqueCurrentFOC driveControl = new VelocityTorqueCurrentFOC(0.0);
     private VoltageOut driveVoltageControl = new VoltageOut(0.0);
@@ -45,7 +43,7 @@ public class ModuleIOFXFXS implements ModuleIO {
     private StatusSignal<Temperature> driveTempCelsius;
     private StatusSignal<AngularAcceleration> driveAccelerationMPSS;
 
-    private TalonFXS azimuthMotor;
+    private TalonFX azimuthMotor;
     private PositionDutyCycle azimuthPositionControl = new PositionDutyCycle(0.0);
     private VoltageOut azimuthVoltageControl = new VoltageOut(0.0);
     private double azimuthAppliedVolts = 0.0;
@@ -58,11 +56,11 @@ public class ModuleIOFXFXS implements ModuleIO {
     // private StatusSignal<Current> azimuthTorqueCurrent;
     private StatusSignal<Temperature> azimuthTemp;
 
-    // private CANcoder absoluteEncoder;
-    // private StatusSignal<Angle> absolutePositionSignal;
-    // private Rotation2d absoluteEncoderOffset;
+    private CANcoder absoluteEncoder;
+    private StatusSignal<Angle> absolutePositionSignal;
+    private Rotation2d absoluteEncoderOffset;
 
-    public ModuleIOFXFXS(ModuleHardwareConfig config) {
+    public ModuleIOKraken(ModuleHardwareConfig config) {
         /* DRIVE INSTANTIATION AND CONFIGURATION */
         driveMotor = new TalonFX(config.driveID(), DriveConstants.kDriveCANBusName);
         var driveConfig = new TalonFXConfiguration();
@@ -71,8 +69,6 @@ public class ModuleIOFXFXS implements ModuleIO {
         driveConfig.CurrentLimits.StatorCurrentLimit = kDriveStatorAmpLimit;
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveConfig.CurrentLimits.SupplyCurrentLimit = kDriveSupplyAmpLimit;
-        driveConfig.CurrentLimits.SupplyCurrentLowerLimit = 60.0;
-        driveConfig.CurrentLimits.SupplyCurrentLowerTime = 5.0;
 
         // foc
         driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
@@ -101,40 +97,37 @@ public class ModuleIOFXFXS implements ModuleIO {
         driveMotor.getConfigurator().apply(driveConfig);
 
         /* CANCODER INSTANTIATION AND CONFIGURATION */
-        // absoluteEncoderOffset = config.offset();
-        // absoluteEncoder = new CANcoder(config.encoderID(), Constants.kCanbusName);
-        // absolutePositionSignal = absoluteEncoder.getAbsolutePosition();
-        // var encoderConfig = new CANcoderConfiguration();
-        // absoluteEncoder.getConfigurator().apply(encoderConfig);
+        absoluteEncoderOffset = Rotation2d.fromRotations(config.offset());
+        absoluteEncoder = new CANcoder(config.encoderID(), DriveConstants.kDriveCANBusName);
+        absolutePositionSignal = absoluteEncoder.getAbsolutePosition();
+        var encoderConfig = new CANcoderConfiguration();
+        absoluteEncoder.getConfigurator().apply(encoderConfig);
 
-        // BaseStatusSignal.setUpdateFrequencyForAll(50.0, absolutePositionSignal);
-        // absoluteEncoder.optimizeBusUtilization();
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, absolutePositionSignal);
+        absoluteEncoder.optimizeBusUtilization();
 
         /* AZIMUTH INSTANTIATION AND CONFIGURATION */
-        azimuthMotor = new TalonFXS(config.azimuthID(), DriveConstants.kDriveCANBusName);
-        var turnConfig = new TalonFXSConfiguration();
+        azimuthMotor = new TalonFX(config.azimuthID(), DriveConstants.kDriveCANBusName);
+        var turnConfig = new TalonFXConfiguration();
         azimuthMotor.getConfigurator().apply(turnConfig);
 
         turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         turnConfig.CurrentLimits.StatorCurrentLimit = kAzimuthStatorAmpLimit;
-        turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        turnConfig.Slot0.kP = kModuleControllerConfigs.azimuthController().getP();
-        turnConfig.Slot0.kI = kModuleControllerConfigs.azimuthController().getI();
-        turnConfig.Slot0.kD = kModuleControllerConfigs.azimuthController().getD();
-        turnConfig.ExternalFeedback.FeedbackRemoteSensorID = config.azimuthID();
-        turnConfig.ExternalFeedback.ExternalFeedbackSensorSource = ExternalFeedbackSensorSourceValue.PulseWidth;
-        turnConfig.ExternalFeedback.RotorToSensorRatio = 54.0;
-        turnConfig.Commutation.MotorArrangement = MotorArrangementValue.NEO550_JST;
-
-        turnConfig.ExternalFeedback.SensorPhase = SensorPhaseValue.Opposed;
-        turnConfig.ExternalFeedback.AbsoluteSensorOffset = config.offset();
-        turnConfig.ExternalFeedback.AbsoluteSensorDiscontinuityPoint = 0;
 
         turnConfig.Voltage.PeakForwardVoltage = kPeakVoltage;
         turnConfig.Voltage.PeakReverseVoltage = -kPeakVoltage;
+        turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         turnConfig.MotorOutput.Inverted =
                 kTurnMotorInvert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+        turnConfig.Feedback.SensorToMechanismRatio = kAzimuthMotorGearing;
+        turnConfig.Slot0.kP = kModuleControllerConfigs.azimuthController().getP();
+        turnConfig.Slot0.kD = kModuleControllerConfigs.azimuthController().getD();
         turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+
+        /* Configured but FOC not used on azimuth, just drive motors */
+        turnConfig.TorqueCurrent.PeakForwardTorqueCurrent = kAzimuthFOCAmpLimit;
+        turnConfig.TorqueCurrent.PeakReverseTorqueCurrent = -kAzimuthFOCAmpLimit;
 
         azimuthMotor.getConfigurator().apply(turnConfig);
 
@@ -146,7 +139,7 @@ public class ModuleIOFXFXS implements ModuleIO {
         // azimuthTorqueCurrent = azimuthMotor.getTorqueCurrent();
         azimuthTemp = azimuthMotor.getDeviceTemp();
 
-        // resetAzimuthEncoder();
+        resetAzimuthEncoder();
     }
 
     @Override
@@ -178,7 +171,7 @@ public class ModuleIOFXFXS implements ModuleIO {
                         azimuthTemp,
                         azimuthPosition)
                 .isOK();
-        inputs.azimuthPosition = Rotation2d.fromRotations(azimuthPosition.getValueAsDouble() % 1);
+        inputs.azimuthPosition = Rotation2d.fromRotations(azimuthPosition.getValueAsDouble());
         inputs.azimuthVelocity = Rotation2d.fromRotations(azimuthVelocity.getValueAsDouble());
         inputs.azimuthAppliedVolts = azimuthAppliedVolts;
         inputs.azimuthMotorVolts = azimuthVoltage.getValueAsDouble();
@@ -187,9 +180,10 @@ public class ModuleIOFXFXS implements ModuleIO {
         // inputs.azimuthTorqueCurrentAmps = azimuthTorqueCurrent.getValueAsDouble();
         inputs.azimuthTemperatureCelsius = azimuthTemp.getValueAsDouble();
 
-        // inputs.isCancoderConnected = BaseStatusSignal.refreshAll(absolutePositionSignal).isOK();
-        // inputs.azimuthAbsolutePosition =
-        // Rotation2d.fromRotations(absolutePositionSignal.getValueAsDouble()).minus(absoluteEncoderOffset);
+        inputs.isCancoderConnected =
+                BaseStatusSignal.refreshAll(absolutePositionSignal).isOK();
+        inputs.azimuthAbsolutePosition = Rotation2d.fromRotations(absolutePositionSignal.getValueAsDouble())
+                .minus(absoluteEncoderOffset);
     }
 
     /////////// DRIVE MOTOR METHODS \\\\\\\\\\\
@@ -222,13 +216,14 @@ public class ModuleIOFXFXS implements ModuleIO {
     }
 
     /////////// CANCODER METHODS \\\\\\\\\\\
-    // @Override
-    // public void resetAzimuthEncoder() {
-    //     /* Sets azimuth encoder rotation using CANCoder */
-    //     azimuthMotor.setPosition(Rotation2d.fromRotations(
-    //         absoluteEncoder.getAbsolutePosition().getValueAsDouble())
-    //         .minus(absoluteEncoderOffset).getRotations());
-    // }
+    @Override
+    public void resetAzimuthEncoder() {
+        /* Sets azimuth encoder rotation using CANCoder */
+        azimuthMotor.setPosition(
+                Rotation2d.fromRotations(absoluteEncoder.getAbsolutePosition().getValueAsDouble())
+                        .minus(absoluteEncoderOffset)
+                        .getRotations());
+    }
 
     /////////// AZIMUTH MOTOR METHODS \\\\\\\\\\\
     @Override

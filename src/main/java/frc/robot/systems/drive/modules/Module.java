@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot.systems.drive;
+package frc.robot.systems.drive.modules;
 
 import static frc.robot.systems.drive.DriveConstants.kModuleControllerConfigs;
 
@@ -10,6 +10,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.tuning.LoggedTunableNumber;
+import frc.robot.systems.drive.DriveConstants;
+import frc.robot.systems.drive.ModuleInputsAutoLogged;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Module {

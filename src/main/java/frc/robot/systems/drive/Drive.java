@@ -51,6 +51,8 @@ import frc.robot.systems.drive.controllers.HolonomicController;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.drive.controllers.ManualTeleopController;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
+import frc.robot.systems.drive.gyro.GyroIO;
+import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.vision.Vision;
 import frc.robot.systems.vision.Vision.VisionObservation;
 import java.util.function.BooleanSupplier;
@@ -81,7 +83,6 @@ public class Drive extends SubsystemBase {
         DOWN,
         LEFT,
         RIGHT,
-        // TESTS
         DRIFT_TEST,
         LINEAR_TEST,
         SYSID_CHARACTERIZATION,
@@ -267,6 +268,15 @@ public class Drive extends SubsystemBase {
         GoalPoseChooser.updateSideStuff();
     }
 
+    public void setDesiredSpeeds(ChassisSpeeds pSpeeds) {
+        desiredSpeeds = pSpeeds;
+    }
+
+    public void setGoalRotation(Rotation2d pRotation) {
+        goalRotation = pRotation;
+    }
+
+
     private void computeDesiredSpeeds() {
         ChassisSpeeds teleopSpeeds =
                 teleopController.computeChassiSpeeds(getPoseEstimate().getRotation(), getRobotChassisSpeeds(), false);
@@ -309,7 +319,7 @@ public class Drive extends SubsystemBase {
                 break;
             case DRIVE_TO_BARGE:
                 ChassisSpeeds autoAlignSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                ;
+                
                 desiredSpeeds = new ChassisSpeeds(
                         autoAlignSpeeds.vxMetersPerSecond,
                         teleopSpeeds.vyMetersPerSecond,
@@ -603,11 +613,6 @@ public class Drive extends SubsystemBase {
     public Command waitUnitllAutoAlignFinishes() {
         return new WaitUntilCommand(() -> autoAlignDelay.calculate(autoAlignController.atGoal()));
     }
-
-    // public Command waitUnitllIntakeAutoAlignFinishes() {
-    //     return new WaitUntilCommand(()-> autoAlignController.atGoal() ||
-    //         autoAlignTimeout.calculate(autoAlignController.atPositionTimeout()));
-    // }
 
     public BooleanSupplier waitUnitllAutoAlignFinishesSupplier() {
         return () -> autoAlignController.atGoal();
