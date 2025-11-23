@@ -88,7 +88,7 @@ public class Vision {
 
     private VisionObservation processSingleTagObservation(
             CameraIOInputsAutoLogged pCamData, double pAvgDist, double pXYScalar) {
-        if (pAvgDist > VisionConstants.kMaxTrustDistance) {
+        if (pAvgDist > VisionConstants.kMaxTrustDistanceMSingletag) {
             return makeUntrustedObservation(pCamData);
         }
 

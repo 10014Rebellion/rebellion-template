@@ -84,8 +84,7 @@ public class DriveConstants {
                     new PIDController(9.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0))
             : new ModuleControlConfig(
                     new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005),
-                    new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0)
-              );
+                    new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0));
 
     /* MODULE SPECIFIC CONSTANTS */
     /* If 180 was added, the person who got the offset had the bevel gears on the wrong side when he did it */

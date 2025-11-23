@@ -42,8 +42,6 @@ public class CameraIOPV implements CameraIO {
         this.mCameraTransform = pCameraTransform;
         this.mOrientation = pOrientation;
 
-        PhotonCamera.setVersionCheckEnabled(false); // Avoid version spam
-
         mPoseEstimator = new PhotonPoseEstimator(
                 FieldConstants.kFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, pCameraTransform);
 
@@ -88,16 +86,9 @@ public class CameraIOPV implements CameraIO {
 
             if (!pInputs.iHasBeenUpdated) return;
 
-            PhotonPipelineResult latestValidResult = null;
-            Optional<EstimatedRobotPose> latestEstimatedRobotPose = Optional.empty();
-
-            for (PhotonPipelineResult r : unreadResults) {
-                Optional<EstimatedRobotPose> maybePose = mPoseEstimator.update(r);
-                if (maybePose.isPresent()) {
-                    latestValidResult = r;
-                    latestEstimatedRobotPose = maybePose;
-                }
-            }
+            
+            PhotonPipelineResult latestValidResult = unreadResults.get(unreadResults.size()-1);
+            Optional<EstimatedRobotPose> latestEstimatedRobotPose = mPoseEstimator.update(latestValidResult);
 
             pInputs.iIsConnected = mPhotonCam.isConnected();
 

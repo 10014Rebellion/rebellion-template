@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot.systems.drive.controllers;
+package frc.robot.game;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -15,13 +15,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.math.AllianceFlipUtil;
 import frc.robot.StateTracker;
 import frc.robot.StateTracker.ReefFace;
-import frc.robot.game.FieldConstants;
 import frc.robot.systems.drive.DriveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /* Chooses pose based of strategy and psoe */
-public class GoalPoseChooser {
+public class GameGoalPoseChooser {
     public static enum CHOOSER_STRATEGY {
         kTest,
         kReefHexagonal,
@@ -242,9 +241,8 @@ public class GoalPoseChooser {
         return reefFace;
     }
 
-    public static final double kDistBetweenBranchesCenter = Units.inchesToMeters(13); // MAKE THIS 13 BEFORE A MATCH
-    public static final double kDistBetweenBranchesCenterWithAlgae = Units.inchesToMeters(13);
-    // made the auton positions no longer have the extra 0.5 inch distance between branches
+    public static final double kDistBetweenBranchesCenter = Units.inchesToMeters(13); 
+    public static final double kDistBetweenBranchesCenterWithAlgae = Units.inchesToMeters(13.25);
     public static final double kClawOffset = Units.inchesToMeters(-1); // Drive Left = -.  Drive Right = +
 
     // Positive to the left, negative to thr right, all in meters

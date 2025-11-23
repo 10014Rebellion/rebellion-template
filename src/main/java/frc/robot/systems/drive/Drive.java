@@ -44,19 +44,23 @@ import frc.lib.swerve.SwerveUtils;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.lib.tuning.SysIDCharacterization;
 import frc.robot.game.FieldConstants;
-import frc.robot.systems.drive.controllers.GoalPoseChooser;
-import frc.robot.systems.drive.controllers.GoalPoseChooser.CHOOSER_STRATEGY;
+import frc.robot.game.GameDriveManager;
+import frc.robot.game.GameGoalPoseChooser;
+import frc.robot.game.GameDriveManager.GameDriveStates;
 import frc.robot.systems.drive.controllers.HeadingController;
 import frc.robot.systems.drive.controllers.HolonomicController;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
 import frc.robot.systems.drive.controllers.ManualTeleopController;
 import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.systems.drive.gyro.GyroIO;
+import frc.robot.systems.drive.gyro.GyroInputsAutoLogged;
 import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.vision.Vision;
 import frc.robot.systems.vision.Vision.VisionObservation;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -70,19 +74,13 @@ public class Drive extends SubsystemBase {
         TELEOP,
         TELEOP_SNIPER,
         POV_SNIPER,
-        PROCESSOR_HEADING_ALIGN,
-        INTAKE_HEADING_ALIGN,
-        REEF_HEADING_ALIGN,
-        DRIVE_TO_CORAL,
-        DRIVE_TO_ALGAE,
-        DRIVE_TO_INTAKE,
-        DRIVE_TO_BARGE,
+        HEADING_ALIGN,
+        AUTO_ALIGN,
+        LINE_ALIGN, // TODO: Implement this.
         AUTON,
         STOP,
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
+
+        // TUNING
         DRIFT_TEST,
         LINEAR_TEST,
         SYSID_CHARACTERIZATION,
@@ -90,81 +88,81 @@ public class Drive extends SubsystemBase {
     }
 
     /* HARDWARE LAYERS */
-    private Module[] modules;
-    private GyroIO gyro;
-    private GyroInputsAutoLogged gyroInputs = new GyroInputsAutoLogged();
-    private Vision vision;
+    private Module[] mModules;
+    private GyroIO mGyro;
+    private GyroInputsAutoLogged mGyroInputs = new GyroInputsAutoLogged();
+    private Vision mVision;
 
     /* LOCALIZATION(tracks position and orientation of robot) */
-    private Rotation2d robotRotation;
-    private SwerveDriveOdometry odometry;
-    private SwerveDrivePoseEstimator poseEstimator;
-    private Field2d field = new Field2d();
+    private Rotation2d mRobotRotation;
+    private SwerveDriveOdometry mOdometry;
+    private SwerveDrivePoseEstimator mPoseEstimator;
+    private Field2d mField = new Field2d();
 
     /* PATHPLANNER AND SETPOINT GENERATOR(USED IN TELEOP) */
-    public static RobotConfig robotConfig;
-    private final SwerveSetpointGenerator setpointGenerator;
-    private SwerveSetpoint previousSetpoint =
+    public static RobotConfig mRobotConfig;
+    private final SwerveSetpointGenerator mSetpointGenerator;
+    private SwerveSetpoint mPreviousSetpoint =
             new SwerveSetpoint(new ChassisSpeeds(), SwerveUtils.zeroStates(), DriveFeedforwards.zeros(4));
 
     /* STATE OF DRIVEBASE */
     @AutoLogOutput(key = "Drive/State")
-    private DriveState driveState = DriveState.TELEOP;
-
-    private boolean useGenerator = true;
+    private DriveState mDriveState = DriveState.TELEOP;
+    private boolean mUseGenerator = true;
 
     /* SETPOINTS */
-    private ChassisSpeeds desiredSpeeds = new ChassisSpeeds();
-    private ChassisSpeeds ppDesiredSpeeds = new ChassisSpeeds();
-    private DriveFeedforwards pathPlanningFF = DriveFeedforwards.zeros(4);
-    private PathConstraints driveConstraints = DriveConstants.kAutoDriveConstraints;
+    private ChassisSpeeds mDesiredSpeeds = new ChassisSpeeds();
+    private ChassisSpeeds mPPDesiredSpeeds = new ChassisSpeeds();
+    private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
+    private PathConstraints mDriveConstraints = DriveConstants.kAutoDriveConstraints;
 
-    private SwerveModuleState[] prevStates = SwerveUtils.zeroStates();
+    private SwerveModuleState[] mPrevStates = SwerveUtils.zeroStates();
 
     /* CONTROLLERS(are used to set chassis speeds) */
-    private ManualTeleopController teleopController = new ManualTeleopController();
+    private ManualTeleopController mTeleopController = new ManualTeleopController();
 
-    private HeadingController headingController = new HeadingController();
+    private HeadingController mHeadingController = new HeadingController();
 
     @AutoLogOutput(key = "Drive/HeadingController/GoalRotation")
-    private Rotation2d goalRotation = new Rotation2d();
+    private Supplier<Rotation2d> mGoalRotationSup = () -> new Rotation2d();
 
-    private HolonomicController autoAlignController = new HolonomicController();
+    private HolonomicController mAutoAlignController = new HolonomicController();
 
     @AutoLogOutput(key = "Drive/HeadingController/GoalPose")
-    private Pose2d goalPose = new Pose2d();
+    private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
+
+    private GameDriveManager mGameDriveManager = new GameDriveManager(this);
 
     /* TUNABLE NUMBERS FOR DRIVEBASE CONSTANTS AND TESTS */
-    private static final LoggedTunableNumber driftRate =
+    private static final LoggedTunableNumber tDriftRate =
             new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
-    private static final LoggedTunableNumber rotationDriftTestSpeedDeg =
+    private static final LoggedTunableNumber tRotationDriftTestSpeedDeg =
             new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
-    private static final LoggedTunableNumber linearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
+    private static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
 
-    Debouncer autoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
-    Debouncer autoAlignDelay = new Debouncer(0.1, DebounceType.kRising);
+    private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 
     public Drive(Module[] modules, GyroIO gyro, Vision vision) {
-        this.modules = modules;
-        this.gyro = gyro;
-        this.vision = vision;
+        this.mModules = modules;
+        this.mGyro = gyro;
+        this.mVision = vision;
 
-        robotRotation = gyroInputs.yawPosition;
+        mRobotRotation = mGyroInputs.yawPosition;
 
-        odometry = new SwerveDriveOdometry(kKinematics, getRobotRotation(), getModulePositions());
-        poseEstimator =
-                new SwerveDrivePoseEstimator(kKinematics, getRobotRotation(), getModulePositions(), new Pose2d());
+        mOdometry = new SwerveDriveOdometry(kKinematics, getmRobotRotation(), getModulePositions());
+        mPoseEstimator =
+                new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
         try {
             /* Incase if pathplanner doesn't currently load */
-            robotConfig = RobotConfig.fromGUISettings();
+            mRobotConfig = RobotConfig.fromGUISettings();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(
                     "<< PATH PLANNER SETTINGS DID NOT CORRECTLY LOAD. PLEASE MAKE SURE PATH PLANNER IS INSTALLED AND UP TO DATE >>>");
         }
 
-        setpointGenerator = new SwerveSetpointGenerator(
-                robotConfig, // The robot configuration. This is the same config for pathplanner as well
+        mSetpointGenerator = new SwerveSetpointGenerator(
+                mRobotConfig, // The robot configuration. This is the same config for pathplanner as well
                 kMaxAzimuthAngularRadiansPS // The max rotation velocity of a swerve module in radians per second.
                 );
 
@@ -176,13 +174,13 @@ public class Drive extends SubsystemBase {
                 this::setPose,
                 this::getRobotChassisSpeeds,
                 (speeds, ff) -> {
-                    driveState = DriveState.AUTON;
-                    ppDesiredSpeeds = new ChassisSpeeds(
+                    mDriveState = DriveState.AUTON;
+                    mPPDesiredSpeeds = new ChassisSpeeds(
                             speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
-                    pathPlanningFF = ff;
+                    mPathPlanningFF = ff;
                 },
                 new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID),
-                robotConfig,
+                mRobotConfig,
                 () -> DriverStation.getAlliance().isPresent()
                         && DriverStation.getAlliance().get() == Alliance.Red,
                 this);
@@ -193,25 +191,155 @@ public class Drive extends SubsystemBase {
         PathPlannerLogging.setLogTargetPoseCallback(
                 (targetPose) -> Logger.recordOutput("Drive/Odometry/TrajectorySetpoint", targetPose));
 
-        SmartDashboard.putData(field);
+        SmartDashboard.putData(mField);
 
-        headingController.setHeadingGoal(() -> goalRotation);
+        mHeadingController.setHeadingGoal(mGoalRotationSup);
     }
 
+    @Override
+    public void periodic() {
+        for (Module module : mModules) module.periodic();
+
+        updateSensorsAndOdometry();
+        updateDriveControllers();
+        computeDesiredSpeeds();
+
+        if (mDesiredSpeeds != null) runSwerve(mDesiredSpeeds);
+    }
+
+    private void updateSensorsAndOdometry() {
+        /* GYRO */
+        mGyro.updateInputs(mGyroInputs);
+        Logger.processInputs("Drive/Gyro", mGyroInputs);
+        if (mGyroInputs.connected) mRobotRotation = mGyroInputs.yawPosition;
+        else
+            mRobotRotation = Rotation2d.fromRadians(
+                    (mPoseEstimator.getEstimatedPosition().getRotation().getRadians()
+                                    /* D=vt. Uses modules and IK to estimate turn */
+                                    + getRobotChassisSpeeds().omegaRadiansPerSecond * 0.02)
+                            /* Scopes result between 0 and 360 */
+                            % 360.0);
+
+        /* VISION */
+        mVision.periodic(mPoseEstimator.getEstimatedPosition(), mOdometry.getPoseMeters());
+        VisionObservation[] observations = mVision.getVisionObservations();
+        for (VisionObservation observation : observations) {
+            if (observation.hasObserved())
+                mPoseEstimator.addVisionMeasurement(observation.pose(), observation.timeStamp(), observation.stdDevs());
+
+            Logger.recordOutput(
+                    observation.camName() + "/stdDevX", observation.stdDevs().get(0));
+            Logger.recordOutput(
+                    observation.camName() + "/stdDevY", observation.stdDevs().get(1));
+            Logger.recordOutput(
+                    observation.camName() + "/stdDevTheta",
+                    observation.stdDevs().get(2));
+        }
+
+        mPoseEstimator.update(mRobotRotation, getModulePositions());
+        mOdometry.update(mRobotRotation, getModulePositions());
+
+        mField.setRobotPose(getPoseEstimate());
+    }
+
+    private void updateDriveControllers() {
+        mHeadingController.updateHeadingController();
+        mAutoAlignController.updateAlignmentControllers();
+        GameGoalPoseChooser.updateSideStuff();
+    }
+
+    private void computeDesiredSpeeds() {
+        ChassisSpeeds teleopSpeeds =
+                mTeleopController.computeChassiSpeeds(getPoseEstimate().getRotation(), getRobotChassisSpeeds(), false);
+        switch (mDriveState) {
+            case TELEOP:
+                mDesiredSpeeds = teleopSpeeds;
+                break;
+            case TELEOP_SNIPER:
+                mDesiredSpeeds = mTeleopController.computeChassiSpeeds(
+                        getPoseEstimate().getRotation(), getRobotChassisSpeeds(), true);
+                break;
+            case POV_SNIPER:
+                mDesiredSpeeds = mTeleopController.computeSniperPOVChassisSpeeds(
+                        getPoseEstimate().getRotation(), false);
+                break;
+            case HEADING_ALIGN: 
+                mDesiredSpeeds = new ChassisSpeeds(
+                    teleopSpeeds.vxMetersPerSecond,
+                    teleopSpeeds.vyMetersPerSecond,
+                    mHeadingController.getSnapOutput(getPoseEstimate().getRotation()));
+                break;
+            case AUTO_ALIGN: 
+                mDesiredSpeeds = mAutoAlignController.calculate(mGoalPoseSup.get(), getPoseEstimate());
+                break;
+            case AUTON:
+                mDesiredSpeeds = mPPDesiredSpeeds;
+                break;
+            case DRIFT_TEST:
+                mDesiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                        new ChassisSpeeds(
+                                tLinearTestSpeedMPS.get(), 0.0, Math.toRadians(tRotationDriftTestSpeedDeg.get())),
+                        mRobotRotation);
+                break;
+            case LINEAR_TEST:
+                mDesiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                        new ChassisSpeeds(tLinearTestSpeedMPS.get(), 0.0, 0.0), mRobotRotation);
+                break;
+                /* Set by characterization commands in the CHARACTERIZATION header. Wheel characterization is currently unimplemented */
+            case SYSID_CHARACTERIZATION:
+            case WHEEL_CHARACTERIZATION:
+                /* If null, then PID isn't set, so characterization can set motors w/o interruption */
+                mDesiredSpeeds = null;
+            case STOP:
+                for (int i = 0; i < mModules.length; i++) {
+                    mModules[i].setDesiredState(new SwerveModuleState(0.0, mModules[i].getCurrentState().angle));
+                }
+                break;
+            default:
+                /* Defaults to Teleop control if no other cases are run*/
+        }
+    }
+
+    ///////////////////////// GAME STATES \\\\\\\\\\\\\\\\\\\\\\\\
+    public Command getGameDriveCommand(GameDriveStates pGameDriveStates) {
+        return mGameDriveManager.getSetGameDriveStateCmd(pGameDriveStates);
+    }
+
+    ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\ 
+    public Command setToTeleop() {
+        return setDriveStateCommandContinued(DriveState.TELEOP);
+    }
+
+    public Command setToTeleopSniper() {
+        return setDriveStateCommandContinued(DriveState.TELEOP_SNIPER);
+    }
+
+    public Command setToPOVSniper() {
+        return setDriveStateCommandContinued(DriveState.POV_SNIPER);
+    }
+
+    public Command setToStop() {
+        return setDriveStateCommandContinued(DriveState.STOP);
+    }
+
+    public Command setToDriftTest() {
+        return setDriveStateCommandContinued(DriveState.DRIFT_TEST);
+    }
+
+    public Command setToLinearTest() {
+        return setDriveStateCommandContinued(DriveState.LINEAR_TEST);
+    }
+
+    public Command setToSysIDCharacterization() {
+        return setDriveStateCommandContinued(DriveState.SYSID_CHARACTERIZATION);
+    }
+
+    public Command setToWheelCharacterization() {
+        return setDriveStateCommandContinued(DriveState.WHEEL_CHARACTERIZATION);
+    }
+    
     public Command customFollowPathComamnd(PathPlannerPath path) {
-        return new FollowPathCommand(
-                path,
-                this::getPoseEstimate,
-                this::getRobotChassisSpeeds,
-                (speeds, ff) -> {
-                    ppDesiredSpeeds = speeds;
-                    pathPlanningFF = ff;
-                },
-                new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID),
-                robotConfig,
-                () -> DriverStation.getAlliance().isPresent()
-                        && DriverStation.getAlliance().get() == Alliance.Red,
-                this);
+        return customFollowPathComamnd(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
     }
 
     public Command customFollowPathComamnd(PathPlannerPath path, PPHolonomicDriveController drivePID) {
@@ -220,253 +348,86 @@ public class Drive extends SubsystemBase {
                 this::getPoseEstimate,
                 this::getRobotChassisSpeeds,
                 (speeds, ff) -> {
-                    driveState = DriveState.AUTON;
-                    ppDesiredSpeeds = speeds;
-                    pathPlanningFF = ff;
+                    setDriveState(DriveState.AUTON);
+                    mPPDesiredSpeeds = speeds;
+                    mPathPlanningFF = ff;
                 },
                 drivePID,
-                robotConfig,
-                () -> DriverStation.getAlliance().isPresent()
-                        && DriverStation.getAlliance().get() == Alliance.Red,
+                mRobotConfig,
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red),
                 this);
     }
-
-    private void updateSensorsAndOdometry() {
-        /* GYRO */
-        gyro.updateInputs(gyroInputs);
-        Logger.processInputs("Drive/Gyro", gyroInputs);
-        if (gyroInputs.connected) robotRotation = gyroInputs.yawPosition;
-        else
-            robotRotation = Rotation2d.fromRadians(
-                    (poseEstimator.getEstimatedPosition().getRotation().getRadians()
-                                    /* D=vt. Uses modules and IK to estimate turn */
-                                    + getRobotChassisSpeeds().omegaRadiansPerSecond * 0.02)
-                            /* Scopes result between 0 and 360 */
-                            % 360.0);
-
-        /* VISION */
-        vision.periodic(poseEstimator.getEstimatedPosition(), odometry.getPoseMeters());
-        VisionObservation[] observations = vision.getVisionObservations();
-        for (VisionObservation observation : observations) {
-            if (observation.hasObserved())
-                poseEstimator.addVisionMeasurement(observation.pose(), observation.timeStamp(), observation.stdDevs());
-
-            Logger.recordOutput(observation.camName() + "/stdDevX", observation.stdDevs().get(0));
-            Logger.recordOutput(observation.camName() + "/stdDevY", observation.stdDevs().get(1));
-            Logger.recordOutput(observation.camName() + "/stdDevTheta", observation.stdDevs().get(2));
-        }
-
-        poseEstimator.update(robotRotation, getModulePositions());
-        odometry.update(robotRotation, getModulePositions());
-
-        field.setRobotPose(getPoseEstimate());
+ 
+    /*
+     * Reference GameDriveManager to use game-specific implementation of this command
+     * @param Goal strategy, based on where you're aligning
+     * @param Constraint type, linear or on an axis
+     */
+    public Command setToGenericAutoAlign(Supplier<Pose2d> pGoalPoseSup, ConstraintType pConstraintType) {
+        return
+            new InstantCommand(() -> {
+                mGoalPoseSup = pGoalPoseSup;
+                mAutoAlignController.setConstraintType(pConstraintType, getPoseEstimate(), mGoalPoseSup.get());
+                mAutoAlignController.reset(
+                    getPoseEstimate(),
+                    ChassisSpeeds.fromRobotRelativeSpeeds(
+                        getRobotChassisSpeeds(), 
+                        getPoseEstimate().getRotation()
+                    ),
+                    mGoalPoseSup.get()
+                );
+            }).andThen(setDriveStateCommandContinued(DriveState.AUTO_ALIGN));
     }
 
-    private void updateDriveControllers() {
-        headingController.updateHeadingController();
-        autoAlignController.updateAlignmentControllers();
-        GoalPoseChooser.updateSideStuff();
+    /*
+     * Reference GameDriveManager to use game-specific implementation of this command
+     * @param The desired rotation 
+     */
+    public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation) {
+        return
+            new InstantCommand(() -> {
+                mGoalRotationSup = pGoalRotation;
+                mHeadingController.setHeadingGoal(mGoalRotationSup);
+                mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.yawVelocityPS);
+            }).andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
     }
 
-    public void setDesiredSpeeds(ChassisSpeeds pSpeeds) {
-        desiredSpeeds = pSpeeds;
-    }
-
-    public void setGoalRotation(Rotation2d pRotation) {
-        goalRotation = pRotation;
-    }
-
-
-    private void computeDesiredSpeeds() {
-        ChassisSpeeds teleopSpeeds =
-                teleopController.computeChassiSpeeds(getPoseEstimate().getRotation(), getRobotChassisSpeeds(), false);
-        switch (driveState) {
-            case TELEOP:
-                desiredSpeeds = teleopSpeeds;
-                break;
-            case TELEOP_SNIPER:
-                desiredSpeeds = teleopController.computeChassiSpeeds(
-                        getPoseEstimate().getRotation(), getRobotChassisSpeeds(), true);
-                break;
-            case POV_SNIPER:
-                desiredSpeeds = teleopController.computeSniperPOVChassisSpeeds(
-                        getPoseEstimate().getRotation());
-                break;
-            case PROCESSOR_HEADING_ALIGN:
-                goalRotation = AllianceFlipUtil.apply(Rotation2d.fromDegrees(90.0));
-                desiredSpeeds = new ChassisSpeeds(
-                        teleopSpeeds.vxMetersPerSecond,
-                        teleopSpeeds.vyMetersPerSecond,
-                        headingController.getSnapOutput(getPoseEstimate().getRotation()));
-                break;
-            case INTAKE_HEADING_ALIGN:
-                goalRotation = AllianceFlipUtil.apply(GoalPoseChooser.getIntakePose(getPoseEstimate()).getRotation());
-                desiredSpeeds = new ChassisSpeeds(
-                        teleopSpeeds.vxMetersPerSecond,
-                        teleopSpeeds.vyMetersPerSecond,
-                        headingController.getSnapOutput(getPoseEstimate().getRotation()));
-                break;
-            case REEF_HEADING_ALIGN:
-                goalRotation = AllianceFlipUtil.apply(GoalPoseChooser.turnFromReefOrigin(getPoseEstimate()));
-                desiredSpeeds = new ChassisSpeeds(
-                        teleopSpeeds.vxMetersPerSecond,
-                        teleopSpeeds.vyMetersPerSecond,
-                        headingController.getSnapOutput(getPoseEstimate().getRotation()));
-                break;
-            case DRIVE_TO_CORAL:
-            case DRIVE_TO_INTAKE:
-                desiredSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                break;
-            case DRIVE_TO_BARGE:
-                ChassisSpeeds autoAlignSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                
-                desiredSpeeds = new ChassisSpeeds(
-                        autoAlignSpeeds.vxMetersPerSecond,
-                        teleopSpeeds.vyMetersPerSecond,
-                        autoAlignSpeeds.omegaRadiansPerSecond);
-                break;
-            case DRIVE_TO_ALGAE:
-                // desiredSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                ChassisSpeeds algaeAlignSpeeds = autoAlignController.calculate(goalPose, getPoseEstimate());
-                double forwardJoy =
-                        (goalPose.getX() > AllianceFlipUtil.apply(frc.robot.game.FieldConstants.kReefCenter.getX()))
-                                ? -teleopSpeeds.vxMetersPerSecond
-                                : teleopSpeeds.vxMetersPerSecond;
-                if (AllianceFlipUtil.shouldFlip()) forwardJoy *= -1;
-                desiredSpeeds = new ChassisSpeeds(
-                        /* Flips speed to preserve field relative. Not best solution, but probably good enough? */
-                        forwardJoy, algaeAlignSpeeds.vyMetersPerSecond, algaeAlignSpeeds.omegaRadiansPerSecond);
-                break;
-            case AUTON:
-                desiredSpeeds = ppDesiredSpeeds;
-                break;
-            case UP:
-                desiredSpeeds = new ChassisSpeeds(0.5, 0.0, teleopSpeeds.omegaRadiansPerSecond);
-                break;
-            case DOWN:
-                desiredSpeeds = new ChassisSpeeds(-0.5, 0.0, teleopSpeeds.omegaRadiansPerSecond);
-                break;
-            case LEFT:
-                desiredSpeeds = new ChassisSpeeds(0.0, -0.5, teleopSpeeds.omegaRadiansPerSecond);
-                break;
-            case RIGHT:
-                desiredSpeeds = new ChassisSpeeds(0.0, 0.5, teleopSpeeds.omegaRadiansPerSecond);
-                break;
-            case DRIFT_TEST:
-                desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                        new ChassisSpeeds(
-                                linearTestSpeedMPS.get(), 0.0, Math.toRadians(rotationDriftTestSpeedDeg.get())),
-                        robotRotation);
-                break;
-            case LINEAR_TEST:
-                desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                        new ChassisSpeeds(linearTestSpeedMPS.get(), 0.0, 0.0), robotRotation);
-                break;
-                /* Set by characterization commands in the CHARACTERIZATION header. Wheel characterization is currently unimplemented */
-            case SYSID_CHARACTERIZATION:
-            case WHEEL_CHARACTERIZATION:
-                /* If null, then PID isn't set, so characterization can set motors w/o interruption */
-                desiredSpeeds = null;
-            case STOP:
-                for (int i = 0; i < modules.length; i++) {
-                    modules[i].setDesiredState(new SwerveModuleState(0.0, modules[i].getCurrentState().angle));
-                }
-                break;
-            default:
-                /* Defaults to Teleop control if no other cases are run*/
-        }
-    }
-
-    @Override
-    public void periodic() {
-        for (Module module : modules) module.periodic();
-
-        updateSensorsAndOdometry();
-        updateDriveControllers();
-        computeDesiredSpeeds();
-        
-        if (desiredSpeeds != null) runSwerve(desiredSpeeds);
-    }
-
-    ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\
-    public Command setDriveStateCommand(DriveState state) {
+    ////// BASE STATES \\\\\\
+    private Command setDriveStateCommand(DriveState state) {
         return Commands.runOnce(() -> setDriveState(state), this);
     }
 
     /* Set's state initially, and doesn't end till interruped by another drive command */
-    public Command setDriveStateCommandContinued(DriveState state) {
+    private Command setDriveStateCommandContinued(DriveState state) {
         return new FunctionalCommand(() -> setDriveState(state), () -> {}, (interrupted) -> {}, () -> false, this);
     }
 
     /* Sets the drive state used in periodic(), and handles init condtions like resetting PID controllers */
-    public void setDriveState(DriveState state) {
-        driveState = state;
-        switch (driveState) {
-            case PROCESSOR_HEADING_ALIGN:
-            case REEF_HEADING_ALIGN:
-                headingController.reset(getPoseEstimate().getRotation(), gyroInputs.yawVelocityPS);
-                break;
-            case DRIVE_TO_CORAL:
-                goalPose = GoalPoseChooser.getGoalPose(CHOOSER_STRATEGY.kReefHexagonal, getPoseEstimate());
-                autoAlignController.setConstraintType(ConstraintType.LINEAR, getPoseEstimate(), goalPose);
-                autoAlignController.reset(
-                        getPoseEstimate(),
-                        ChassisSpeeds.fromRobotRelativeSpeeds(
-                                getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
-                        goalPose);
-                break;
-            case DRIVE_TO_INTAKE:
-                goalPose = GoalPoseChooser.getGoalPose(CHOOSER_STRATEGY.kIntake, getPoseEstimate());
-                autoAlignController.setConstraintType(ConstraintType.LINEAR, getPoseEstimate(), goalPose);
-                autoAlignController.reset(
-                        getPoseEstimate(),
-                        ChassisSpeeds.fromRobotRelativeSpeeds(
-                                getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
-                        goalPose);
-                break;
-            case DRIVE_TO_ALGAE:
-                goalPose = GoalPoseChooser.getGoalPose(CHOOSER_STRATEGY.kReefHexagonal, getPoseEstimate());
-                autoAlignController.setConstraintType(ConstraintType.AXIS, getPoseEstimate(), goalPose);
-                autoAlignController.reset(
-                        getPoseEstimate(),
-                        ChassisSpeeds.fromRobotRelativeSpeeds(
-                                getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
-                        goalPose);
-                break;
-            case DRIVE_TO_BARGE:
-                goalPose = GoalPoseChooser.getGoalPose(CHOOSER_STRATEGY.kNet, getPoseEstimate());
-                autoAlignController.setConstraintType(ConstraintType.AXIS, getPoseEstimate(), goalPose);
-                autoAlignController.reset(
-                        getPoseEstimate(),
-                        ChassisSpeeds.fromRobotRelativeSpeeds(
-                                getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
-                        goalPose);
-                break;
-            default:
-        }
+    private void setDriveState(DriveState state) {
+        mDriveState = state;
     }
 
     ////////////// CHASSIS SPEED TO MODULES \\\\\\\\\\\\\\\\
     /* Sets the desired swerve module states to the robot */
     public void runSwerve(ChassisSpeeds speeds) {
-        desiredSpeeds = SwerveUtils.discretize(speeds, driftRate.get());
+        mDesiredSpeeds = SwerveUtils.discretize(speeds, tDriftRate.get());
 
         /* Logs all the possible drive states, great for debugging */
         SwerveUtils.logPossibleDriveStates(
-                kDoExtraLogging, desiredSpeeds, getModuleStates(), previousSetpoint, robotRotation);
+                kDoExtraLogging, mDesiredSpeeds, getModuleStates(), mPreviousSetpoint, mRobotRotation);
 
         SwerveModuleState[] unOptimizedSetpointStates = new SwerveModuleState[4];
-        SwerveModuleState[] setpointStates = kKinematics.toSwerveModuleStates(desiredSpeeds);
+        SwerveModuleState[] setpointStates = kKinematics.toSwerveModuleStates(mDesiredSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, kMaxLinearSpeedMPS);
 
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
 
         if (DriverStation.isAutonomous()) {
-            previousSetpoint =
-                    setpointGenerator.generateSetpoint(previousSetpoint, desiredSpeeds, kAutoDriveConstraints, 0.02);
+            mPreviousSetpoint =
+                    mSetpointGenerator.generateSetpoint(mPreviousSetpoint, mDesiredSpeeds, kAutoDriveConstraints, 0.02);
         } else {
-            previousSetpoint =
-                    setpointGenerator.generateSetpoint(previousSetpoint, desiredSpeeds, driveConstraints, 0.02);
+            mPreviousSetpoint =
+                    mSetpointGenerator.generateSetpoint(mPreviousSetpoint, mDesiredSpeeds, mDriveConstraints, 0.02);
         }
 
         /* Only for logging purposes */
@@ -476,25 +437,25 @@ public class Drive extends SubsystemBase {
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
 
         for (int i = 0; i < 4; i++) {
-            if (useGenerator) {
+            if (mUseGenerator) {
                 /* Logs the drive feedforward stuff */
-                SwerveUtils.logDriveFeedforward(previousSetpoint.feedforwards(), i);
+                SwerveUtils.logDriveFeedforward(mPreviousSetpoint.feedforwards(), i);
 
                 setpointStates[i] = new SwerveModuleState(
-                        previousSetpoint.moduleStates()[i].speedMetersPerSecond,
+                        mPreviousSetpoint.moduleStates()[i].speedMetersPerSecond,
                         /* setpointAngle = currentAngle if the speed is less than 0.01 */
                         SwerveUtils.removeAzimuthJitter(
-                                previousSetpoint.moduleStates()[i], modules[i].getCurrentState()));
+                                mPreviousSetpoint.moduleStates()[i], mModules[i].getCurrentState()));
 
                 unOptimizedSetpointStates[i] = SwerveUtils.copyState(setpointStates[i]);
 
-                setpointStates[i].optimize(modules[i].getCurrentState().angle);
+                setpointStates[i].optimize(mModules[i].getCurrentState().angle);
 
                 /* Feedforward cases based on driveState */
                 /* 0 unless in auto or auto-align */
                 double driveAmps = calculateDriveFeedforward(
-                        previousSetpoint,
-                        modules[i].getCurrentState(),
+                        mPreviousSetpoint,
+                        mModules[i].getCurrentState(),
                         unOptimizedSetpointStates[i],
                         setpointStates[i],
                         i);
@@ -503,31 +464,31 @@ public class Drive extends SubsystemBase {
                  * Multiplies by cos(angleError) to stop the drive from going in the wrong direction
                  * when azimuth angle changes
                  */
-                setpointStates[i].cosineScale(modules[i].getCurrentState().angle);
+                setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
 
                 double directionOfVelChange =
-                        Math.signum(setpointStates[i].speedMetersPerSecond - prevStates[i].speedMetersPerSecond);
+                        Math.signum(setpointStates[i].speedMetersPerSecond - mPrevStates[i].speedMetersPerSecond);
                 Logger.recordOutput("Drive/Module/Feedforward/" + i + "/dir", directionOfVelChange);
-                if (driveState.equals(DriveState.AUTON)) {
+                if (mDriveState.equals(DriveState.AUTON)) {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
                 }
 
-                optimizedSetpointStates[i] = modules[i].setDesiredStateWithAmpFF(setpointStates[i], driveAmps);
+                optimizedSetpointStates[i] = mModules[i].setDesiredStateWithAmpFF(setpointStates[i], driveAmps);
 
                 moduleTorques[i] =
                         new SwerveModuleState((driveAmps * kMaxLinearSpeedMPS / 80), optimizedSetpointStates[i].angle);
             } else {
                 setpointStates[i] = new SwerveModuleState(
                         setpointStates[i].speedMetersPerSecond,
-                        SwerveUtils.removeAzimuthJitter(setpointStates[i], modules[i].getCurrentState()));
+                        SwerveUtils.removeAzimuthJitter(setpointStates[i], mModules[i].getCurrentState()));
 
-                setpointStates[i].optimize(modules[i].getCurrentState().angle);
-                setpointStates[i].cosineScale(modules[i].getCurrentState().angle);
-                optimizedSetpointStates[i] = modules[i].setDesiredState(setpointStates[i]);
+                setpointStates[i].optimize(mModules[i].getCurrentState().angle);
+                setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
+                optimizedSetpointStates[i] = mModules[i].setDesiredState(setpointStates[i]);
             }
         }
 
-        prevStates = optimizedSetpointStates;
+        mPrevStates = optimizedSetpointStates;
 
         Logger.recordOutput("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Logger.recordOutput("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
@@ -536,7 +497,7 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput(
                 "Drive/Odometry/FieldSetpointChassisSpeed",
                 ChassisSpeeds.fromRobotRelativeSpeeds(
-                        kKinematics.toChassisSpeeds(optimizedSetpointStates), robotRotation));
+                        kKinematics.toChassisSpeeds(optimizedSetpointStates), mRobotRotation));
         Logger.recordOutput("Drive/Swerve/ModuleTorqueFF", moduleTorques);
     }
 
@@ -547,12 +508,12 @@ public class Drive extends SubsystemBase {
             SwerveModuleState unoptimizedState,
             SwerveModuleState optimizedState,
             int i) {
-        switch (driveState) {
+        switch (mDriveState) {
             case AUTON:
                 /* No need to optimize for Choreo, as it handles it under the hood */
-                return SwerveUtils.convertChoreoNewtonsToAmps(currentState, pathPlanningFF, i);
-            case DRIVE_TO_CORAL:
-            case DRIVE_TO_INTAKE:
+                return SwerveUtils.convertChoreoNewtonsToAmps(currentState, mPathPlanningFF, i);
+                // TODO: Fix this.
+            case AUTO_ALIGN:
                 return SwerveUtils.optimizeTorque(
                         unoptimizedState,
                         optimizedState,
@@ -563,23 +524,15 @@ public class Drive extends SubsystemBase {
         }
     }
 
-    public Command setDriveProfile(DriverProfiles profile) {
-        return new InstantCommand(() -> {
-            teleopController.updateTuneablesWithProfiles(profile);
-
-            GoalPoseChooser.setSwapSides(profile.swapSides());
-        });
-    }
-
     ////////////// LOCALIZATION(MAINLY RESETING LOGIC) \\\\\\\\\\\\\\\\
     public void resetGyro() {
         /* Robot is usually facing the other way(relative to field) when doing cycles on red side, so gyro is reset to 180 */
-        robotRotation = DriverStation.getAlliance().isPresent()
+        mRobotRotation = DriverStation.getAlliance().isPresent()
                         && DriverStation.getAlliance().get().equals(Alliance.Red)
                 ? Rotation2d.fromDegrees(180.0)
                 : Rotation2d.fromDegrees(0.0);
-        gyro.resetGyro(robotRotation);
-        setPose(new Pose2d(new Translation2d(), robotRotation));
+        mGyro.resetGyro(mRobotRotation);
+        setPose(new Pose2d(new Translation2d(), mRobotRotation));
     }
 
     public void setPose(Pose2d pose) {
@@ -587,16 +540,24 @@ public class Drive extends SubsystemBase {
     }
 
     public void setPoses(Pose2d estimatorPose, Pose2d odometryPose) {
-        robotRotation = estimatorPose.getRotation();
-        gyro.resetGyro(robotRotation);
+        mRobotRotation = estimatorPose.getRotation();
+        mGyro.resetGyro(mRobotRotation);
         // Safe to pass in odometry poses because of the syncing
         // between gyro and pose estimator in reset gyro function
-        poseEstimator.resetPosition(getRobotRotation(), getModulePositions(), estimatorPose);
-        odometry.resetPosition(getRobotRotation(), getModulePositions(), odometryPose);
+        mPoseEstimator.resetPosition(getmRobotRotation(), getModulePositions(), estimatorPose);
+        mOdometry.resetPosition(getmRobotRotation(), getModulePositions(), odometryPose);
     }
 
     public void resetModulesEncoders() {
-        for (int i = 0; i < 4; i++) modules[i].resetAzimuthEncoder();
+        for (int i = 0; i < 4; i++) mModules[i].resetAzimuthEncoder();
+    }
+
+    public Command setDriveProfile(DriverProfiles profile) {
+        return new InstantCommand(() -> {
+            mTeleopController.updateTuneablesWithProfiles(profile);
+
+            GameGoalPoseChooser.setSwapSides(profile.swapSides());
+        });
     }
 
     //////////////////////// CHARACTERIZATION \\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -610,25 +571,17 @@ public class Drive extends SubsystemBase {
                         this));
     }
 
-    public Command waitUnitllAutoAlignFinishes() {
-        return new WaitUntilCommand(() -> autoAlignDelay.calculate(autoAlignController.atGoal()));
-    }
-
-    public BooleanSupplier waitUnitllAutoAlignFinishesSupplier() {
-        return () -> autoAlignController.atGoal();
-    }
-
     /* Runs the robot forward at a voltage */
     public void runLinearCharcterization(double volts) {
         setDriveState(DriveState.SYSID_CHARACTERIZATION);
-        for (int i = 0; i < 4; i++) modules[i].runCharacterization(volts);
+        for (int i = 0; i < 4; i++) mModules[i].runCharacterization(volts);
     }
 
     public void setForwardAmperagesForAllModules(double amps) {
         for (int i = 0; i < 4; i++) {
-            modules[i].setDesiredVelocity(null);
-            modules[i].setDriveAmperage(amps);
-            modules[i].setDesiredRotation(Rotation2d.fromDegrees(0.0));
+            mModules[i].setDesiredVelocity(null);
+            mModules[i].setDriveAmperage(amps);
+            mModules[i].setDesiredRotation(Rotation2d.fromDegrees(0.0));
         }
     }
 
@@ -645,30 +598,30 @@ public class Drive extends SubsystemBase {
     /* Runs the rotate's robot at a voltage */
     public void runAngularCharacterization(double volts) {
         setDriveState(DriveState.SYSID_CHARACTERIZATION);
-        modules[0].runCharacterization(volts, Rotation2d.fromDegrees(-45.0));
-        modules[1].runCharacterization(-volts, Rotation2d.fromDegrees(45.0));
-        modules[2].runCharacterization(volts, Rotation2d.fromDegrees(45.0));
-        modules[3].runCharacterization(-volts, Rotation2d.fromDegrees(-45.0));
+        mModules[0].runCharacterization(volts, Rotation2d.fromDegrees(-45.0));
+        mModules[1].runCharacterization(-volts, Rotation2d.fromDegrees(45.0));
+        mModules[2].runCharacterization(volts, Rotation2d.fromDegrees(45.0));
+        mModules[3].runCharacterization(-volts, Rotation2d.fromDegrees(-45.0));
     }
 
     public void runMOICharacterization(double amps) {
         setDriveState(DriveState.SYSID_CHARACTERIZATION);
-        modules[0].setDriveAmperage(amps);
-        modules[1].setDriveAmperage(-amps);
-        modules[2].setDriveAmperage(amps);
-        modules[3].setDriveAmperage(-amps);
+        mModules[0].setDriveAmperage(amps);
+        mModules[1].setDriveAmperage(-amps);
+        mModules[2].setDriveAmperage(amps);
+        mModules[3].setDriveAmperage(-amps);
 
-        modules[0].setDesiredRotation(Rotation2d.fromDegrees(-45.0));
-        modules[1].setDesiredRotation(Rotation2d.fromDegrees(45.0));
-        modules[2].setDesiredRotation(Rotation2d.fromDegrees(45.0));
-        modules[3].setDesiredRotation(Rotation2d.fromDegrees(-45.0));
+        mModules[0].setDesiredRotation(Rotation2d.fromDegrees(-45.0));
+        mModules[1].setDesiredRotation(Rotation2d.fromDegrees(45.0));
+        mModules[2].setDesiredRotation(Rotation2d.fromDegrees(45.0));
+        mModules[3].setDesiredRotation(Rotation2d.fromDegrees(-45.0));
 
         Logger.recordOutput(
                 "Drive/MOI/RadiansVelocity",
-                modules[0].getInputs().driveVelocityMPS / DriveConstants.kDrivebaseRadiusMeters);
+                mModules[0].getInputs().driveVelocityMPS / DriveConstants.kDrivebaseRadiusMeters);
         Logger.recordOutput(
                 "Drive/MOI/DriveTorqueNM",
-                (SwerveUtils.getTorqueOfKrakenDriveMotor(modules[0].getInputs().driveTorqueCurrentAmps)
+                (SwerveUtils.getTorqueOfKrakenDriveMotor(mModules[0].getInputs().driveTorqueCurrentAmps)
                                 * kDriveMotorGearing
                                 / kWheelRadiusMeters)
                         * kDrivebaseRadiusMeters);
@@ -678,30 +631,30 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key = "Drive/Swerve/MeasuredStates")
     public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
-        for (int i = 0; i < 4; i++) states[i] = modules[i].getCurrentState();
+        for (int i = 0; i < 4; i++) states[i] = mModules[i].getCurrentState();
         return states;
     }
 
     @AutoLogOutput(key = "Drive/Swerve/ModulePositions")
     public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; i++) positions[i] = modules[i].getCurrentPosition();
+        for (int i = 0; i < 4; i++) positions[i] = mModules[i].getCurrentPosition();
         return positions;
     }
 
     @AutoLogOutput(key = "Drive/Odometry/PoseEstimate")
     public Pose2d getPoseEstimate() {
-        return (RobotBase.isReal()) ? poseEstimator.getEstimatedPosition() : getOdometryPose();
+        return (RobotBase.isReal()) ? mPoseEstimator.getEstimatedPosition() : getOdometryPose();
     }
 
     @AutoLogOutput(key = "Drive/Odometry/OdometryPose")
     public Pose2d getOdometryPose() {
-        return odometry.getPoseMeters();
+        return mOdometry.getPoseMeters();
     }
 
     @AutoLogOutput(key = "Drive/Odometry/RobotRotation")
-    public Rotation2d getRobotRotation() {
-        return robotRotation;
+    public Rotation2d getmRobotRotation() {
+        return mRobotRotation;
     }
 
     @AutoLogOutput(key = "Drive/Odometry/RobotChassisSpeeds")
@@ -711,13 +664,13 @@ public class Drive extends SubsystemBase {
 
     @AutoLogOutput(key = "Drive/Odometry/DesiredChassisSpeeds")
     public ChassisSpeeds getDesiredChassisSpeeds() {
-        return desiredSpeeds;
+        return mDesiredSpeeds;
     }
 
     @AutoLogOutput(key = "Drive/Tolerance/HeadingController")
     public boolean inHeadingTolerance() {
         /* Accounts for angle wrapping issues with rotation 2D error */
-        return GeomUtil.getSmallestChangeInRotation(robotRotation, goalRotation).getDegrees()
+        return GeomUtil.getSmallestChangeInRotation(mRobotRotation, mGoalRotationSup.get()).getDegrees()
                 < HeadingController.toleranceDegrees.get();
     }
 
@@ -733,18 +686,26 @@ public class Drive extends SubsystemBase {
             DoubleSupplier ySupplier,
             DoubleSupplier thetaSupplier,
             DoubleSupplier povSupplierDegrees) {
-        teleopController.acceptJoystickInputs(xSupplier, ySupplier, thetaSupplier, povSupplierDegrees);
+        mTeleopController.acceptJoystickInputs(xSupplier, ySupplier, thetaSupplier, povSupplierDegrees);
     }
 
     public boolean atGoal() {
-        return autoAlignController.atGoal() && driveState == DriveState.DRIVE_TO_CORAL;
+        return mDriveState == DriveState.AUTO_ALIGN && mAutoAlignController.atGoal();
     }
 
     public boolean notAtGoal() {
-        return !autoAlignController.atGoal();
+        return mDriveState != DriveState.AUTO_ALIGN || !mAutoAlignController.atGoal();
     }
 
     public boolean getDriveToPoseTolerance() {
-        return autoAlignController.atGoal();
+        return mAutoAlignController.atGoal();
+    }
+
+    public Command waitUnitllAutoAlignFinishes() {
+        return new WaitUntilCommand(() -> mAutoAlignTimeout.calculate(mAutoAlignController.atGoal()));
+    }
+
+    public BooleanSupplier waitUnitllAutoAlignFinishesSupplier() {
+        return () -> mAutoAlignController.atGoal();
     }
 }

@@ -111,7 +111,7 @@ public class ManualTeleopController {
      * Takes in the POV angle and then moves the robot in that angle at sniper speeds
      * If the driver wants simply controlled direction at low speeds for the robot to make little linear adjustments
      */
-    public ChassisSpeeds computeSniperPOVChassisSpeeds(Rotation2d robotAngle) {
+    public ChassisSpeeds computeSniperPOVChassisSpeeds(Rotation2d robotAngle, boolean pIsFieldOriented) {
         double omegaAdjustedJoystickInput = MathUtil.applyDeadband(
                 omegaSupplier.getAsDouble(), driverProfile.rotationDeadband().get());
 
@@ -140,10 +140,10 @@ public class ManualTeleopController {
                         * Math.sin(Math.toRadians(povSupplierDegrees.getAsDouble())),
                 DriveConstants.kMaxRotationSpeedRadiansPS * omegaJoystickInput);
 
-        // if (fieldRelative) {
-        //     desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        //         desiredSpeeds, robotAngle);
-        // }
+        if (pIsFieldOriented) {
+            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                desiredSpeeds, robotAngle);
+        }
 
         return desiredSpeeds;
     }
