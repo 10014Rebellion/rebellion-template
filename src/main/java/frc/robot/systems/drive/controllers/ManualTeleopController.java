@@ -12,63 +12,54 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.systems.drive.DriveConstants;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 /* Controls the pose of the robot using 3 PID controllers and Feedforward */
 public class ManualTeleopController {
-    public static TuneableDriverProfile driverProfile = new TuneableDriverProfile(kDefaultProfiles);
+    public static TuneableDriverProfile mDriverProfile = new TuneableDriverProfile(kDefaultProfiles);
 
-    private boolean fieldRelative = true;
+    private boolean mFieldRelative = true;
 
-    private DoubleSupplier xSupplier;
-    private DoubleSupplier ySupplier;
-    private DoubleSupplier omegaSupplier;
+    private DoubleSupplier mXSupplier;
+    private DoubleSupplier mYSupplier;
+    private DoubleSupplier mOmegaSupplier;
 
-    private DoubleSupplier povSupplierDegrees;
+    private Supplier<Rotation2d> mPOVSupplier;
 
     public ManualTeleopController() {}
 
     public void acceptJoystickInputs(
-            DoubleSupplier xSupplier,
-            DoubleSupplier ySupplier,
-            DoubleSupplier omegaSupplier,
-            DoubleSupplier povSupplierDegrees) {
-        this.xSupplier = xSupplier;
-        this.ySupplier = ySupplier;
-        this.omegaSupplier = omegaSupplier;
-
-        this.povSupplierDegrees = povSupplierDegrees;
+            DoubleSupplier pXSupplier,
+            DoubleSupplier pYSupplier,
+            DoubleSupplier pOmegaSupplier,
+            DoubleSupplier pPOVSupplierDegrees) {
+        this.mXSupplier = pXSupplier;
+        this.mYSupplier = pYSupplier;
+        this.mOmegaSupplier = pOmegaSupplier;
+        this.mPOVSupplier = () -> Rotation2d.fromDegrees(pPOVSupplierDegrees.getAsDouble());
     }
 
     public ChassisSpeeds computeChassiSpeeds(
-            Rotation2d robotAngle, ChassisSpeeds currentRobotRelativeSpeeds, boolean joystickSniper) {
+            Rotation2d pRobotAngle, ChassisSpeeds pCurrentRobotRelativeSpeeds, boolean pIsJoystickSniper) {
         double xAdjustedJoystickInput = MathUtil.applyDeadband(
-                xSupplier.getAsDouble(), driverProfile.linearDeadBand().get());
+                mXSupplier.getAsDouble(), mDriverProfile.linearDeadBand().get());
         double yAdjustedJoystickInput = MathUtil.applyDeadband(
-                ySupplier.getAsDouble(), driverProfile.linearDeadBand().get());
+                mYSupplier.getAsDouble(), mDriverProfile.linearDeadBand().get());
         double omegaAdjustedJoystickInput = MathUtil.applyDeadband(
-                omegaSupplier.getAsDouble(), driverProfile.rotationDeadband().get());
+                mOmegaSupplier.getAsDouble(), mDriverProfile.rotationDeadband().get());
 
         // EXPONENTS CAN ONLY BE INTEGERS FOR THIS TO WORK DUE TO MODULUS
-        int linearExp = (int) Math.round(driverProfile.linearInputsExponent().get());
-        int rotationExp =
-                (int) Math.round(driverProfile.rotationInputsExponent().get());
+        int linearExp = (int) Math.round(mDriverProfile.linearInputsExponent().get());
+        int rotationExp = (int) Math.round(mDriverProfile.rotationInputsExponent().get());
 
-        // Should never exceed 1 for exponent control to work. Clamped later as an edge case, but not a concern with
-        // XBox Controllers HID class
-        double xJoystickScalar =
-                getSniperScalar(joystickSniper) * driverProfile.linearScalar().get();
-        double yJoystickScalar =
-                getSniperScalar(joystickSniper) * driverProfile.linearScalar().get();
-        double omegaJoystickScalar =
-                getSniperScalar(joystickSniper) * driverProfile.linearScalar().get();
+        double xJoystickScalar = getSniperScalar(pIsJoystickSniper) * mDriverProfile.linearScalar().get();
+        double yJoystickScalar = getSniperScalar(pIsJoystickSniper) * mDriverProfile.linearScalar().get();
+        double omegaJoystickScalar = getSniperScalar(pIsJoystickSniper) * mDriverProfile.linearScalar().get();
 
         double xScaledJoystickInput = zerotoOneClamp(xJoystickScalar) * Math.pow(xAdjustedJoystickInput, linearExp);
         double yScaledJoystickInput = zerotoOneClamp(yJoystickScalar) * Math.pow(yAdjustedJoystickInput, linearExp);
-        double omegaJoystickInput =
-                zerotoOneClamp(omegaJoystickScalar) * Math.pow(omegaAdjustedJoystickInput, rotationExp);
+        double omegaJoystickInput = zerotoOneClamp(omegaJoystickScalar) * Math.pow(omegaAdjustedJoystickInput, rotationExp);
 
-        /* If the exponent is an even number it's always positive */
-        /* You lose the sign when it's squared, so you have to multiply it back in  */
         if (linearExp % 2 == 0) {
             xScaledJoystickInput *= Math.signum(xAdjustedJoystickInput);
             yScaledJoystickInput *= Math.signum(yAdjustedJoystickInput);
@@ -87,7 +78,7 @@ public class ManualTeleopController {
          */
         if (DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get().equals(Alliance.Red))
-            robotAngle = robotAngle.plus(Rotation2d.k180deg);
+            pRobotAngle = pRobotAngle.plus(Rotation2d.k180deg);
         // Logger.recordOutput("Drive/Teleop/offsetAngle", robotAngle);
 
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
@@ -95,33 +86,23 @@ public class ManualTeleopController {
                 DriveConstants.kMaxLinearSpeedMPS * yScaledJoystickInput,
                 DriveConstants.kMaxRotationSpeedRadiansPS * omegaJoystickInput);
 
-        if (fieldRelative) {
-            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredSpeeds, robotAngle);
+        if (mFieldRelative) {
+            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredSpeeds, pRobotAngle);
         }
 
         return desiredSpeeds;
     }
 
-    /* Wheter to use the snipler scalar or not based on the cnodition */
     public double getSniperScalar(boolean isSniper) {
-        return isSniper ? driverProfile.sniperControl().get() : 1.0;
+        return isSniper ? mDriverProfile.sniperControl().get() : 1.0;
     }
 
-    /*
-     * Takes in the POV angle and then moves the robot in that angle at sniper speeds
-     * If the driver wants simply controlled direction at low speeds for the robot to make little linear adjustments
-     */
-    public ChassisSpeeds computeSniperPOVChassisSpeeds(Rotation2d robotAngle, boolean pIsFieldOriented) {
-        double omegaAdjustedJoystickInput = MathUtil.applyDeadband(
-                omegaSupplier.getAsDouble(), driverProfile.rotationDeadband().get());
+    public ChassisSpeeds computeSniperPOVChassisSpeeds(Rotation2d pRobotAngle, boolean pIsFieldOriented) {
+        double omegaAdjustedJoystickInput = MathUtil.applyDeadband(mOmegaSupplier.getAsDouble(), mDriverProfile.rotationDeadband().get());
 
-        int rotationExp =
-                (int) Math.round(driverProfile.rotationInputsExponent().get());
+        int rotationExp = (int) Math.round(mDriverProfile.rotationInputsExponent().get());
 
-        /* If the exponent is an even number it's always positive */
-        /* You lose the sign when it's squared, so you have to multiply it back in  */
-        double omegaJoystickScalar =
-                getSniperScalar(true) * driverProfile.linearScalar().get();
+        double omegaJoystickScalar = getSniperScalar(true) * mDriverProfile.linearScalar().get();
 
         double omegaJoystickInput =
                 zerotoOneClamp(omegaJoystickScalar) * Math.pow(omegaAdjustedJoystickInput, rotationExp);
@@ -130,38 +111,37 @@ public class ManualTeleopController {
             omegaJoystickInput *= Math.signum(omegaAdjustedJoystickInput);
         }
 
-        /* Does polar to rectangular where POV degree is theta, kSniperControl * maxSpeed is r */
+        /* Does polar to rectangular where POV degree is theta, kSniperControl * maxSpeed is r */ 
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
-                -driverProfile.sniperControl().get()
+                -mDriverProfile.sniperControl().get()
                         * kMaxLinearSpeedMPS
-                        * Math.cos(Math.toRadians(povSupplierDegrees.getAsDouble())),
-                driverProfile.sniperControl().get()
+                        * Math.cos(mPOVSupplier.get().getRadians()),
+                mDriverProfile.sniperControl().get()
                         * kMaxLinearSpeedMPS
-                        * Math.sin(Math.toRadians(povSupplierDegrees.getAsDouble())),
+                        * Math.sin(mPOVSupplier.get().getRadians()),
                 DriveConstants.kMaxRotationSpeedRadiansPS * omegaJoystickInput);
 
         if (pIsFieldOriented) {
-            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                desiredSpeeds, robotAngle);
+            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredSpeeds, pRobotAngle);
         }
 
         return desiredSpeeds;
     }
 
     public void toggleFieldOriented() {
-        fieldRelative = !fieldRelative;
+        mFieldRelative = !mFieldRelative;
     }
 
     private double zerotoOneClamp(double val) {
         return MathUtil.clamp(val, 0.0, 1.0);
     }
 
-    public void updateTuneablesWithProfiles(DriverProfiles profiles) {
-        driverProfile = new TuneableDriverProfile(profiles);
+    public void updateTuneablesWithProfiles(DriverProfiles pProfiles) {
+        mDriverProfile = new TuneableDriverProfile(pProfiles);
     }
 
-    public TuneableDriverProfile getDriverProfile() {
-        return driverProfile;
+    public TuneableDriverProfile getmDriverProfile() {
+        return mDriverProfile;
     }
 
     public static record DriverProfiles(

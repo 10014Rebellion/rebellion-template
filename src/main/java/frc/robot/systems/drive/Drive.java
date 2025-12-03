@@ -45,8 +45,8 @@ import frc.lib.tuning.LoggedTunableNumber;
 import frc.lib.tuning.SysIDCharacterization;
 import frc.robot.game.FieldConstants;
 import frc.robot.game.GameDriveManager;
-import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.game.GameDriveManager.GameDriveStates;
+import frc.robot.game.GameGoalPoseChooser;
 import frc.robot.systems.drive.controllers.HeadingController;
 import frc.robot.systems.drive.controllers.HolonomicController;
 import frc.robot.systems.drive.controllers.HolonomicController.ConstraintType;
@@ -60,7 +60,6 @@ import frc.robot.systems.vision.Vision.VisionObservation;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -108,6 +107,7 @@ public class Drive extends SubsystemBase {
     /* STATE OF DRIVEBASE */
     @AutoLogOutput(key = "Drive/State")
     private DriveState mDriveState = DriveState.TELEOP;
+
     private boolean mUseGenerator = true;
 
     /* SETPOINTS */
@@ -263,13 +263,13 @@ public class Drive extends SubsystemBase {
                 mDesiredSpeeds = mTeleopController.computeSniperPOVChassisSpeeds(
                         getPoseEstimate().getRotation(), false);
                 break;
-            case HEADING_ALIGN: 
+            case HEADING_ALIGN:
                 mDesiredSpeeds = new ChassisSpeeds(
-                    teleopSpeeds.vxMetersPerSecond,
-                    teleopSpeeds.vyMetersPerSecond,
-                    mHeadingController.getSnapOutput(getPoseEstimate().getRotation()));
+                        teleopSpeeds.vxMetersPerSecond,
+                        teleopSpeeds.vyMetersPerSecond,
+                        mHeadingController.getSnapOutput(getPoseEstimate().getRotation()));
                 break;
-            case AUTO_ALIGN: 
+            case AUTO_ALIGN:
                 mDesiredSpeeds = mAutoAlignController.calculate(mGoalPoseSup.get(), getPoseEstimate());
                 break;
             case AUTON:
@@ -305,7 +305,7 @@ public class Drive extends SubsystemBase {
         return mGameDriveManager.getSetGameDriveStateCmd(pGameDriveStates);
     }
 
-    ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\ 
+    ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\
     public Command setToTeleop() {
         return setDriveStateCommandContinued(DriveState.TELEOP);
     }
@@ -337,7 +337,7 @@ public class Drive extends SubsystemBase {
     public Command setToWheelCharacterization() {
         return setDriveStateCommandContinued(DriveState.WHEEL_CHARACTERIZATION);
     }
-    
+
     public Command customFollowPathComamnd(PathPlannerPath path) {
         return customFollowPathComamnd(path, new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID));
     }
@@ -357,39 +357,36 @@ public class Drive extends SubsystemBase {
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red),
                 this);
     }
- 
+
     /*
      * Reference GameDriveManager to use game-specific implementation of this command
      * @param Goal strategy, based on where you're aligning
      * @param Constraint type, linear or on an axis
      */
     public Command setToGenericAutoAlign(Supplier<Pose2d> pGoalPoseSup, ConstraintType pConstraintType) {
-        return
-            new InstantCommand(() -> {
-                mGoalPoseSup = pGoalPoseSup;
-                mAutoAlignController.setConstraintType(pConstraintType, getPoseEstimate(), mGoalPoseSup.get());
-                mAutoAlignController.reset(
-                    getPoseEstimate(),
-                    ChassisSpeeds.fromRobotRelativeSpeeds(
-                        getRobotChassisSpeeds(), 
-                        getPoseEstimate().getRotation()
-                    ),
-                    mGoalPoseSup.get()
-                );
-            }).andThen(setDriveStateCommandContinued(DriveState.AUTO_ALIGN));
+        return new InstantCommand(() -> {
+                    mGoalPoseSup = pGoalPoseSup;
+                    mAutoAlignController.setConstraintType(pConstraintType, getPoseEstimate(), mGoalPoseSup.get());
+                    mAutoAlignController.reset(
+                            getPoseEstimate(),
+                            ChassisSpeeds.fromRobotRelativeSpeeds(
+                                    getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
+                            mGoalPoseSup.get());
+                })
+                .andThen(setDriveStateCommandContinued(DriveState.AUTO_ALIGN));
     }
 
     /*
      * Reference GameDriveManager to use game-specific implementation of this command
-     * @param The desired rotation 
+     * @param The desired rotation
      */
     public Command setToGenericHeadingAlign(Supplier<Rotation2d> pGoalRotation) {
-        return
-            new InstantCommand(() -> {
-                mGoalRotationSup = pGoalRotation;
-                mHeadingController.setHeadingGoal(mGoalRotationSup);
-                mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.yawVelocityPS);
-            }).andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
+        return new InstantCommand(() -> {
+                    mGoalRotationSup = pGoalRotation;
+                    mHeadingController.setHeadingGoal(mGoalRotationSup);
+                    mHeadingController.reset(getPoseEstimate().getRotation(), mGyroInputs.yawVelocityPS);
+                })
+                .andThen(setDriveStateCommandContinued(DriveState.HEADING_ALIGN));
     }
 
     ////// BASE STATES \\\\\\
@@ -670,7 +667,8 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key = "Drive/Tolerance/HeadingController")
     public boolean inHeadingTolerance() {
         /* Accounts for angle wrapping issues with rotation 2D error */
-        return GeomUtil.getSmallestChangeInRotation(mRobotRotation, mGoalRotationSup.get()).getDegrees()
+        return GeomUtil.getSmallestChangeInRotation(mRobotRotation, mGoalRotationSup.get())
+                        .getDegrees()
                 < HeadingController.toleranceDegrees.get();
     }
 

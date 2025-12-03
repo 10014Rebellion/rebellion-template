@@ -241,7 +241,7 @@ public class GameGoalPoseChooser {
         return reefFace;
     }
 
-    public static final double kDistBetweenBranchesCenter = Units.inchesToMeters(13); 
+    public static final double kDistBetweenBranchesCenter = Units.inchesToMeters(13);
     public static final double kDistBetweenBranchesCenterWithAlgae = Units.inchesToMeters(13.25);
     public static final double kClawOffset = Units.inchesToMeters(-1); // Drive Left = -.  Drive Right = +
 

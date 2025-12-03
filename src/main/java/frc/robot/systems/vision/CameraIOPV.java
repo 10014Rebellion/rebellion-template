@@ -86,8 +86,7 @@ public class CameraIOPV implements CameraIO {
 
             if (!pInputs.iHasBeenUpdated) return;
 
-            
-            PhotonPipelineResult latestValidResult = unreadResults.get(unreadResults.size()-1);
+            PhotonPipelineResult latestValidResult = unreadResults.get(unreadResults.size() - 1);
             Optional<EstimatedRobotPose> latestEstimatedRobotPose = mPoseEstimator.update(latestValidResult);
 
             pInputs.iIsConnected = mPhotonCam.isConnected();

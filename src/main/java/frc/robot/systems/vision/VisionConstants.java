@@ -27,7 +27,8 @@ import edu.wpi.first.wpilibj.RobotBase;
  * Imagine a birds eye view of the bot, 0deg is north, 90 is west, -90 is east, and 180 is south
  */
 public class VisionConstants {
-    public static final double kMaxTrustDistanceMSingletag = 3.5; // >>> TODO: Maybe? TUNE ME, you probably wont have to but yk just in case
+    public static final double kMaxTrustDistanceMSingletag =
+            3.5; // >>> TODO: Maybe? TUNE ME, you probably wont have to but yk just in case
 
     // Best to get these from CAD, or in person.
     public static final String kLeftCamName = "FrontLeft-OV9281"; // >>> TODO: TUNE ME
