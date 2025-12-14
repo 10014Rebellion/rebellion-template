@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 
 public class DriveConstants {
     ///////////////////// DRIVE BASE \\\\\\\\\\\\\\\\\\\\\\\
@@ -95,19 +94,6 @@ public class DriveConstants {
     public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(13, 23, 23, 0.065);
 
     public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(14, 24, 24, 0.454);
-
-    public static final DriverProfiles kDefaultProfiles =
-            new DriverProfiles(1, 3, 0.075, 1.0, 3.0, 0.1, 0.2, true, "Default");
-
-    public static final DriverProfiles kBosco = new DriverProfiles(1, 3, 0.075, 0.5, 3.0, 0.1, 0.2, true, "Bosco");
-
-    public static final DriverProfiles kEli = new DriverProfiles(1, 3, 0.075, 1.0, 3.0, 0.1, 0.2, true, "Eli");
-
-    public static final DriverProfiles kIshita = new DriverProfiles(0.7, 3, 0.075, 0.5, 3.0, 0.1, 0.2, true, "Ishita");
-
-    public static final DriverProfiles kNikki = new DriverProfiles(0.5, 3, 0.075, 0.5, 3.0, 0.1, 0.2, true, "Nikki");
-
-    public static DriverProfiles[] kProfiles = {kDefaultProfiles, kBosco, kEli, kIshita, kNikki};
 
     public static record ModuleHardwareConfig(int driveID, int azimuthID, int encoderID, double offset) {}
 

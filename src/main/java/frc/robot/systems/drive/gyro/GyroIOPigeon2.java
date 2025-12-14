@@ -13,28 +13,28 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.systems.drive.DriveConstants;
 
 public class GyroIOPigeon2 implements GyroIO {
-    private Pigeon2 gyro = new Pigeon2(2, DriveConstants.kDriveCANBusName);
+    private Pigeon2 mGyro = new Pigeon2(2, DriveConstants.kDriveCANBusName);
 
-    private StatusSignal<Angle> yaw = gyro.getYaw();
-    private StatusSignal<AngularVelocity> yawVelocity = gyro.getAngularVelocityXWorld();
+    private StatusSignal<Angle> mYaw = mGyro.getYaw();
+    private StatusSignal<AngularVelocity> mYawVelocity = mGyro.getAngularVelocityXWorld();
 
     public GyroIOPigeon2() {
-        gyro.getConfigurator().apply(new Pigeon2Configuration());
-        gyro.getConfigurator().setYaw(0.0);
-        BaseStatusSignal.setUpdateFrequencyForAll(50.0, yaw, yawVelocity);
+        mGyro.getConfigurator().apply(new Pigeon2Configuration());
+        mGyro.getConfigurator().setYaw(0.0);
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, mYaw, mYawVelocity);
 
-        gyro.optimizeBusUtilization();
+        mGyro.optimizeBusUtilization();
     }
 
     @Override
     public void updateInputs(GyroInputs inputs) {
-        inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
-        inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
-        inputs.yawVelocityPS = Rotation2d.fromDegrees(yawVelocity.getValueAsDouble());
+        inputs.iConnected = BaseStatusSignal.refreshAll(mYaw, mYawVelocity).equals(StatusCode.OK);
+        inputs.iYawPosition = Rotation2d.fromDegrees(mYaw.getValueAsDouble());
+        inputs.iYawVelocityPS = Rotation2d.fromDegrees(mYawVelocity.getValueAsDouble());
     }
 
     @Override
     public void resetGyro(Rotation2d rotation) {
-        gyro.setYaw(rotation.getDegrees());
+        mGyro.setYaw(rotation.getDegrees());
     }
 }

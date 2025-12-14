@@ -26,7 +26,7 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-public class CameraIOPV implements CameraIO {
+public class CameraIOPVTag implements CameraIO {
     private String mCamName;
     private PhotonCamera mPhotonCam;
     private PhotonPoseEstimator mPoseEstimator;
@@ -36,7 +36,7 @@ public class CameraIOPV implements CameraIO {
     private VisionSystemSim mVisionSim;
     private PhotonCameraSim mCameraSim;
 
-    public CameraIOPV(String pName, Transform3d pCameraTransform, Orientation pOrientation) {
+    public CameraIOPVTag(String pName, Transform3d pCameraTransform, Orientation pOrientation) {
         this.mCamName = pName;
         this.mPhotonCam = new PhotonCamera(mCamName);
         this.mCameraTransform = pCameraTransform;
@@ -47,7 +47,7 @@ public class CameraIOPV implements CameraIO {
 
         mPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_LAST_POSE);
 
-        if (Constants.currentMode == Mode.SIM) {
+        if (Constants.kCurrentMode == Mode.SIM) {
             setupSimulation();
         }
     }
@@ -76,7 +76,7 @@ public class CameraIOPV implements CameraIO {
         pInputs.iCameraToRobot = mCameraTransform;
 
         try {
-            if (Constants.currentMode == Mode.SIM) {
+            if (Constants.kCurrentMode == Mode.SIM) {
                 mVisionSim.update(pSimOdomPose);
             }
 

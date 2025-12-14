@@ -152,7 +152,7 @@ public class ModuleIOFXFXS implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleInputs inputs) {
-        inputs.isDriveConnected = BaseStatusSignal.refreshAll(
+        inputs.iIsDriveConnected = BaseStatusSignal.refreshAll(
                         driveVelocityMPS,
                         drivePositionM,
                         driveVoltage,
@@ -161,17 +161,17 @@ public class ModuleIOFXFXS implements ModuleIO {
                         driveTorqueCurrent,
                         driveTempCelsius)
                 .isOK();
-        inputs.drivePositionM = (drivePositionM.getValueAsDouble());
-        inputs.driveVelocityMPS = (driveVelocityMPS.getValueAsDouble());
-        inputs.driveAppliedVolts = driveAppliedVolts;
-        inputs.driveMotorVolts = driveVoltage.getValueAsDouble();
-        inputs.driveSupplyCurrentAmps = driveSupplyCurrent.getValueAsDouble();
-        inputs.driveStatorCurrentAmps = driveStatorCurrent.getValueAsDouble();
-        inputs.driveTorqueCurrentAmps = driveTorqueCurrent.getValueAsDouble();
-        inputs.driveTemperatureCelsius = driveTempCelsius.getValueAsDouble();
-        inputs.driveAccelerationMPSS = driveAccelerationMPSS.getValueAsDouble();
+        inputs.iDrivePositionM = (drivePositionM.getValueAsDouble());
+        inputs.iDriveVelocityMPS = (driveVelocityMPS.getValueAsDouble());
+        inputs.iDriveAppliedVolts = driveAppliedVolts;
+        inputs.iDriveMotorVolts = driveVoltage.getValueAsDouble();
+        inputs.iDriveSupplyCurrentAmps = driveSupplyCurrent.getValueAsDouble();
+        inputs.iDriveStatorCurrentAmps = driveStatorCurrent.getValueAsDouble();
+        inputs.iDriveTorqueCurrentAmps = driveTorqueCurrent.getValueAsDouble();
+        inputs.iDriveTemperatureCelsius = driveTempCelsius.getValueAsDouble();
+        inputs.iDriveAccelerationMPSS = driveAccelerationMPSS.getValueAsDouble();
 
-        inputs.isAzimuthConnected = BaseStatusSignal.refreshAll(
+        inputs.iIsAzimuthConnected = BaseStatusSignal.refreshAll(
                         azimuthVelocity,
                         azimuthVoltage,
                         azimuthStatorCurrent,
@@ -179,14 +179,14 @@ public class ModuleIOFXFXS implements ModuleIO {
                         azimuthTemp,
                         azimuthPosition)
                 .isOK();
-        inputs.azimuthPosition = Rotation2d.fromRotations(azimuthPosition.getValueAsDouble() % 1);
-        inputs.azimuthVelocity = Rotation2d.fromRotations(azimuthVelocity.getValueAsDouble());
-        inputs.azimuthAppliedVolts = azimuthAppliedVolts;
-        inputs.azimuthMotorVolts = azimuthVoltage.getValueAsDouble();
-        inputs.azimuthStatorCurrentAmps = azimuthStatorCurrent.getValueAsDouble();
-        inputs.azimuthSupplyCurrentAmps = azimuthSupplyCurrent.getValueAsDouble();
+        inputs.iAzimuthPosition = Rotation2d.fromRotations(azimuthPosition.getValueAsDouble() % 1);
+        inputs.iAzimuthVelocity = Rotation2d.fromRotations(azimuthVelocity.getValueAsDouble());
+        inputs.iAzimuthAppliedVolts = azimuthAppliedVolts;
+        inputs.iAzimuthMotorVolts = azimuthVoltage.getValueAsDouble();
+        inputs.iAzimuthStatorCurrentAmps = azimuthStatorCurrent.getValueAsDouble();
+        inputs.iAzimuthSupplyCurrentAmps = azimuthSupplyCurrent.getValueAsDouble();
         // inputs.azimuthTorqueCurrentAmps = azimuthTorqueCurrent.getValueAsDouble();
-        inputs.azimuthTemperatureCelsius = azimuthTemp.getValueAsDouble();
+        inputs.iAzimuthTemperatureCelsius = azimuthTemp.getValueAsDouble();
 
         // inputs.isCancoderConnected = BaseStatusSignal.refreshAll(absolutePositionSignal).isOK();
         // inputs.azimuthAbsolutePosition =

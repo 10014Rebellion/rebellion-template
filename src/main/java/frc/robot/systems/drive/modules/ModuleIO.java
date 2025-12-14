@@ -8,29 +8,29 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ModuleIO {
     @AutoLog
     public static class ModuleInputs {
-        public boolean isDriveConnected = true;
-        public double drivePositionM = 0.0;
-        public double driveVelocityMPS = 0.0;
-        public double driveStatorCurrentAmps = 0.0;
-        public double driveSupplyCurrentAmps = 0.0;
-        public double driveTorqueCurrentAmps = 0.0;
-        public double driveTemperatureCelsius = 0.0;
-        public double driveAppliedVolts = 0.0;
-        public double driveMotorVolts = 0.0;
-        public double driveAccelerationMPSS = 0.0;
+        public boolean iIsDriveConnected = true;
+        public double iDrivePositionM = 0.0;
+        public double iDriveVelocityMPS = 0.0;
+        public double iDriveStatorCurrentAmps = 0.0;
+        public double iDriveSupplyCurrentAmps = 0.0;
+        public double iDriveTorqueCurrentAmps = 0.0;
+        public double iDriveTemperatureCelsius = 0.0;
+        public double iDriveAppliedVolts = 0.0;
+        public double iDriveMotorVolts = 0.0;
+        public double iDriveAccelerationMPSS = 0.0;
 
-        public boolean isAzimuthConnected = true;
-        public Rotation2d azimuthPosition = new Rotation2d();
-        public Rotation2d azimuthVelocity = new Rotation2d();
-        public double azimuthStatorCurrentAmps = 0.0;
-        public double azimuthSupplyCurrentAmps = 0.0;
-        // public double azimuthTorqueCurrentAmps = 0.0;
-        public double azimuthTemperatureCelsius = 0.0;
-        public double azimuthAppliedVolts = 0.0;
-        public double azimuthMotorVolts = 0.0;
+        public boolean iIsAzimuthConnected = true;
+        public Rotation2d iAzimuthPosition = new Rotation2d();
+        public Rotation2d iAzimuthVelocity = new Rotation2d();
+        public double iAzimuthStatorCurrentAmps = 0.0;
+        public double iAzimuthSupplyCurrentAmps = 0.0;
 
-        public boolean isCancoderConnected = true;
-        public Rotation2d azimuthAbsolutePosition = new Rotation2d();
+        public double iAzimuthTemperatureCelsius = 0.0;
+        public double iAzimuthAppliedVolts = 0.0;
+        public double iAzimuthMotorVolts = 0.0;
+
+        public boolean iIsCancoderConnected = true;
+        public Rotation2d iAzimuthAbsolutePosition = new Rotation2d();
     }
 
     public default void updateInputs(ModuleInputs inputs) {}

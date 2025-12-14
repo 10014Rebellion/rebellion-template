@@ -11,18 +11,13 @@ import frc.lib.tuning.LoggedTunableNumber;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-/* Controls the heading of the robot using PID and Feedforward
- * Thoroughly tested at NTX and showed positive results
- * https://docs.google.com/document/d/1NHhyKmQlgkni1lrRiwqWf7-vbZUfIpNTPCeMLEWlYcE/edit?usp=sharing
- * Past research on topic. PID+FF strategy is commonly used for small distance(0-5 meter) drive to pose control
- */
 public class HeadingController {
-    public static final LoggedTunableNumber snapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 4.0);
-    public static final LoggedTunableNumber snapI = new LoggedTunableNumber("SwerveHeadingController/Snap/kI", 0.0);
-    public static final LoggedTunableNumber snapD = new LoggedTunableNumber("SwerveHeadingController/Snap/kD", 0.0);
-    public static final LoggedTunableNumber snapMaxVDPS =
+    public static final LoggedTunableNumber mSnapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 4.0);
+    public static final LoggedTunableNumber mSnapI = new LoggedTunableNumber("SwerveHeadingController/Snap/kI", 0.0);
+    public static final LoggedTunableNumber mSnapD = new LoggedTunableNumber("SwerveHeadingController/Snap/kD", 0.0);
+    public static final LoggedTunableNumber mSnapMaxVDPS =
             new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxV", 1000.0);
-    public static final LoggedTunableNumber snapMaxADPSS =
+    public static final LoggedTunableNumber mSnapMaxADPSS =
             new LoggedTunableNumber("SwerveHeadingController/Snap/kMaxA", 1000.0);
 
     // public static final LoggedTunableNumber stablizingP =
@@ -32,25 +27,24 @@ public class HeadingController {
     // public static final LoggedTunableNumber stablizingD =
     //     new LoggedTunableNumber("SwerveHeadingController/Stabilizing/kD", 0.0);
 
-    public static final LoggedTunableNumber toleranceDegrees =
+    public static final LoggedTunableNumber mToleranceDegrees =
             new LoggedTunableNumber("SwerveHeadingController/Tolerance", 0.75);
 
-    private ProfiledPIDController snapController;
+    private ProfiledPIDController mSnapController;
 
-    private PIDController stabilizingController;
+    private PIDController mStabilizingController;
 
-    private Supplier<Rotation2d> goal;
+    private Supplier<Rotation2d> mGoal;
 
     public HeadingController() {
-        snapController = new ProfiledPIDController(
-                snapP.get(),
-                snapI.get(),
-                snapD.get(),
-                new TrapezoidProfile.Constraints(snapMaxVDPS.get(), snapMaxADPSS.get()));
+        mSnapController = new ProfiledPIDController(
+                mSnapP.get(),
+                mSnapI.get(),
+                mSnapD.get(),
+                new TrapezoidProfile.Constraints(mSnapMaxVDPS.get(), mSnapMaxADPSS.get()));
 
-        // invert = (RobotBase.isReal()) ? -1.0 : 1.0;
-        snapController.enableContinuousInput(0, 360);
-        snapController.setTolerance(1.0);
+        mSnapController.enableContinuousInput(0, 360);
+        mSnapController.setTolerance(1.0);
 
         // stabilizingController =
         //     new PIDController(stablizingP.get(), stablizingI.get(), stablizingD.get());
@@ -58,30 +52,31 @@ public class HeadingController {
         // stabilizingController.setTolerance(0.0);
     }
 
-    public void setHeadingGoal(Supplier<Rotation2d> goalSupplier) {
-        goal = goalSupplier;
+    public void setHeadingGoal(Supplier<Rotation2d> pGoalSupplier) {
+        mGoal = pGoalSupplier;
     }
 
-    public void reset(Rotation2d robotRotation, Rotation2d robotRotationPerSecond) {
-        snapController.reset(robotRotation.getDegrees(), robotRotationPerSecond.getDegrees());
+    public void reset(Rotation2d pRobotRotation, Rotation2d pRobotRotationPerSecond) {
+        mSnapController.reset(pRobotRotation.getDegrees(), pRobotRotationPerSecond.getDegrees());
     }
 
     // Designed for large jumps toward a setpoint, kind of like an azimuth alignment
-    public double getSnapOutput(Rotation2d robotRotation) {
+    public double getSnapOutput(Rotation2d pRobotRotation) {
         Logger.recordOutput(
-                "Drive/HeadingController/HeadingSetpoint",
-                Rotation2d.fromDegrees(snapController.getSetpoint().position));
+            "Drive/HeadingController/HeadingSetpoint",
+            Rotation2d.fromDegrees(mSnapController.getSetpoint().position)
+        );
 
         double pidOutput =
-                snapController.calculate(robotRotation.getDegrees(), goal.get().getDegrees());
-        double ffOutput = snapController.getSetpoint().velocity;
+                mSnapController.calculate(pRobotRotation.getDegrees(), mGoal.get().getDegrees());
+        double ffOutput = mSnapController.getSetpoint().velocity;
         double output = Math.toRadians(pidOutput + ffOutput);
 
-        double setpointErrorDegrees = snapController.getSetpoint().position - robotRotation.getDegrees();
-        double goalErrorDegrees = snapController.getGoal().position - robotRotation.getDegrees();
+        double setpointErrorDegrees = mSnapController.getSetpoint().position - pRobotRotation.getDegrees();
+        double goalErrorDegrees = mSnapController.getGoal().position - pRobotRotation.getDegrees();
 
         double adjustedOutput = output;
-        if (Math.abs(goalErrorDegrees) < toleranceDegrees.get()) adjustedOutput *= 0.0;
+        if (Math.abs(goalErrorDegrees) < mToleranceDegrees.get()) adjustedOutput *= 0.0;
 
         Logger.recordOutput("Drive/HeadingController/unAdjustedOutput", output);
 
@@ -97,24 +92,24 @@ public class HeadingController {
     }
 
     // Designed for shoot on move and short distance. In most cases velocityDPS is 0.
-    public double getStabilizingOutput(Rotation2d robotRotation, double velocityDPS) {
-        return Math.toRadians(stabilizingController.calculate(
-                        robotRotation.getDegrees(), goal.get().getDegrees())
-                + velocityDPS);
+    public double getStabilizingOutput(Rotation2d pRobotRotation, double pVelocityDPS) {
+        return Math.toRadians(mStabilizingController.calculate(
+                        pRobotRotation.getDegrees(), mGoal.get().getDegrees())
+                + pVelocityDPS);
     }
 
     public void updateHeadingController() {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    snapController.setPID(snapP.get(), snapI.get(), snapD.get());
-                    snapController.setConstraints(new Constraints(snapMaxVDPS.get(), snapMaxADPSS.get()));
+                    mSnapController.setPID(mSnapP.get(), mSnapI.get(), mSnapD.get());
+                    mSnapController.setConstraints(new Constraints(mSnapMaxVDPS.get(), mSnapMaxADPSS.get()));
                 },
-                snapP,
-                snapI,
-                snapD,
-                snapMaxVDPS,
-                snapMaxADPSS);
+                mSnapP,
+                mSnapI,
+                mSnapD,
+                mSnapMaxVDPS,
+                mSnapMaxADPSS);
 
         // LoggedTunableNumber.ifChanged(hashCode(), () -> {
         //     stabilizingController.setPID(stablizingP.get(), stablizingI.get(), stablizingD.get());

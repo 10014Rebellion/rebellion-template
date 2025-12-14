@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
-    public static final Mode simMode = Mode.SIM;
-    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
-    public static final boolean tuningMode = false;
+    public static final Mode kSimMode = Mode.SIM;
+    public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : kSimMode;
+    public static final boolean kTuningMode = false;
 
     public static enum Mode {
         /** Running on a real robot. */
@@ -26,12 +26,12 @@ public final class Constants {
     }
 
     public static class DashboardConstants {
-        public static final boolean DASHBOARD_ENABLED = true;
-        public static final String DASHBOARD_PATH = "dashboard";
-        public static final int DASHBOARD_PORT = 5800;
+        public static final boolean kDashboardEnabled = true;
+        public static final String kDashboardPath = "dashboard";
+        public static final int kDashboardPort = 5800;
 
-        public static final boolean DEPLOY_SERVER_ENABLED = false;
-        public static final String DEPLOY_SERVER_PATH = "";
-        public static final int DEPLOY_SERVER_PORT = 5801;
+        public static final boolean kDeployServerEnabled = false;
+        public static final String kDeployServerPath = "";
+        public static final int kDeployServerPort = 5801;
     }
 }

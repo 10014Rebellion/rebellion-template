@@ -113,12 +113,12 @@ public class HolonomicController {
     }
 
     /* WHEN USING LINEAR CONSTRAINT, GOAL */
-    public void setConstraintType(ConstraintType type, Pose2d robotPose, Pose2d goalPose) {
-        this.type = type;
+    public void setConstraintType(ConstraintType pType) {
+        this.type = pType;
     }
 
-    public void reset(Pose2d startPose, Pose2d goalPose) {
-        reset(startPose, new ChassisSpeeds(), goalPose);
+    public void reset(Pose2d pStartPose, Pose2d pGoalPose) {
+        reset(pStartPose, new ChassisSpeeds(), pGoalPose);
     }
 
     /*
@@ -127,9 +127,9 @@ public class HolonomicController {
      * while the driver is moving before drive to pose is activated
      * GOAL POSE IS ONLY UTLIIZED WHEN IN LINEAR CONSTRAINT
      */
-    public void reset(Pose2d robotPose, ChassisSpeeds robotChassisSpeeds, Pose2d goalPose) {
+    public void reset(Pose2d pRobotPose, ChassisSpeeds pRobotChassisSpeeds, Pose2d pGoalPose) {
         if (type.equals(ConstraintType.LINEAR)) {
-            Rotation2d heading = new Rotation2d(goalPose.getX() - robotPose.getX(), goalPose.getY() - robotPose.getY());
+            Rotation2d heading = new Rotation2d(pGoalPose.getX() - pRobotPose.getX(), pGoalPose.getY() - pRobotPose.getY());
 
             // Logger.recordOutput("AutoAlign/Linear/X/Vel", distanceMaxVMPS.get() *  heading.getCos());
             // Logger.recordOutput("AutoAlign/Linear/X/Accel", distanceMaxVMPS.get() *  heading.getCos());
@@ -149,11 +149,11 @@ public class HolonomicController {
             yController.setConstraints(new TrapezoidProfile.Constraints(yMaxVMPS.get(), yMaxAMPSS.get()));
         }
 
-        xController.reset(new State(robotPose.getX(), robotChassisSpeeds.vxMetersPerSecond));
+        xController.reset(new State(pRobotPose.getX(), pRobotChassisSpeeds.vxMetersPerSecond));
 
-        yController.reset(new State(robotPose.getY(), robotChassisSpeeds.vyMetersPerSecond));
+        yController.reset(new State(pRobotPose.getY(), pRobotChassisSpeeds.vyMetersPerSecond));
 
-        omegaController.reset(new State(robotPose.getRotation().getDegrees(), 0.0));
+        omegaController.reset(new State(pRobotPose.getRotation().getDegrees(), 0.0));
     }
 
     public ChassisSpeeds calculate(Pose2d goalPose, Pose2d currentPose) {

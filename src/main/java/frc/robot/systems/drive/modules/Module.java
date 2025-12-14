@@ -59,8 +59,8 @@ public class Module {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/" + kModuleName, inputs);
 
-        currentState = new SwerveModuleState(inputs.driveVelocityMPS, inputs.azimuthPosition);
-        currentPosition = new SwerveModulePosition(inputs.drivePositionM, inputs.azimuthPosition);
+        currentState = new SwerveModuleState(inputs.iDriveVelocityMPS, inputs.iAzimuthPosition);
+        currentPosition = new SwerveModulePosition(inputs.iDrivePositionM, inputs.iAzimuthPosition);
 
         // Runs drive PID
         // if Amperage is null no feedforward is used
@@ -81,7 +81,7 @@ public class Module {
 
         // Runs azimuth PID
         if (azimuthSetpointAngle != null) {
-            double ffOutput = azimuthFF.getKs() * Math.signum(inputs.azimuthVelocity.getDegrees());
+            double ffOutput = azimuthFF.getKs() * Math.signum(inputs.iAzimuthVelocity.getDegrees());
             Logger.recordOutput("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
             io.setAzimuthPosition(azimuthSetpointAngle, ffOutput);
         }

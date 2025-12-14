@@ -5,15 +5,19 @@ package frc.robot;
 import static frc.robot.systems.drive.DriveConstants.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.bindings.BindingsConstants;
+import frc.robot.bindings.ButtonBindings;
+import frc.robot.game.StateTracker;
 import frc.robot.systems.drive.Drive;
+import frc.robot.systems.drive.controllers.ManualTeleopController.DriverProfiles;
 import frc.robot.systems.drive.gyro.GyroIO;
 import frc.robot.systems.drive.gyro.GyroIOPigeon2;
 import frc.robot.systems.drive.modules.Module;
 import frc.robot.systems.drive.modules.ModuleIO;
-import frc.robot.systems.drive.modules.ModuleIOFXFXS;
+import frc.robot.systems.drive.modules.ModuleIOKraken;
 import frc.robot.systems.drive.modules.ModuleIOSim;
 import frc.robot.systems.vision.CameraIO;
-import frc.robot.systems.vision.CameraIOPV;
+import frc.robot.systems.vision.CameraIOPVTag;
 import frc.robot.systems.vision.Vision;
 import frc.robot.systems.vision.VisionConstants;
 import frc.robot.systems.vision.VisionConstants.Orientation;
@@ -21,27 +25,28 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
     private final Drive mDrive;
-    private final LoggedDashboardChooser<Command> driverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
+    private final LoggedDashboardChooser<Command> mDriverProfileChooser = new LoggedDashboardChooser<>("DriverProfile");
+    private final ButtonBindings mButtonBindings;
 
     public RobotContainer() {
         new StateTracker();
 
-        switch (Constants.currentMode) {
+        switch (Constants.kCurrentMode) {
             case REAL:
                 mDrive = new Drive(
                         new Module[] {
-                            new Module("FL", new ModuleIOFXFXS(kFrontLeftHardware)),
-                            new Module("FR", new ModuleIOFXFXS(kFrontRightHardware)),
-                            new Module("BL", new ModuleIOFXFXS(kBackLeftHardware)),
-                            new Module("BR", new ModuleIOFXFXS(kBackRightHardware))
+                            new Module("FL", new ModuleIOKraken(kFrontLeftHardware)),
+                            new Module("FR", new ModuleIOKraken(kFrontRightHardware)),
+                            new Module("BL", new ModuleIOKraken(kBackLeftHardware)),
+                            new Module("BR", new ModuleIOKraken(kBackRightHardware))
                         },
                         new GyroIOPigeon2(),
                         new Vision(new CameraIO[] {
-                            new CameraIOPV(
+                            new CameraIOPVTag(
                                     VisionConstants.kRightCamName,
                                     VisionConstants.kRightCamTransform,
                                     Orientation.BACK),
-                            new CameraIOPV(
+                            new CameraIOPVTag(
                                     VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
                         }));
                 break;
@@ -56,11 +61,11 @@ public class RobotContainer {
                         },
                         new GyroIO() {},
                         new Vision(new CameraIO[] {
-                            new CameraIOPV(
+                            new CameraIOPVTag(
                                     VisionConstants.kRightCamName,
                                     VisionConstants.kRightCamTransform,
                                     Orientation.BACK),
-                            new CameraIOPV(
+                            new CameraIOPVTag(
                                     VisionConstants.kLeftCamName, VisionConstants.kLeftCamTransform, Orientation.BACK)
                         }));
                 break;
@@ -78,13 +83,20 @@ public class RobotContainer {
                 break;
         }
 
-        configureButtonBindings();
-    }
+        mButtonBindings = new ButtonBindings(mDrive);
 
-    private void configureButtonBindings() {}
+        initBindings();
+
+        mDriverProfileChooser.addDefaultOption(BindingsConstants.kDefaultProfile.key(), mDrive.setDriveProfile(BindingsConstants.kDefaultProfile));
+        for(DriverProfiles profile : BindingsConstants.kProfiles) mDriverProfileChooser.addOption(profile.key(), mDrive.setDriveProfile(profile));
+    }
 
     public Drive getDrivetrain() {
         return mDrive;
+    }
+
+    private void initBindings() {
+        mButtonBindings.initDriverButtonBindings();
     }
 
     public Command getAutonomousCommand() {
@@ -92,6 +104,6 @@ public class RobotContainer {
     }
 
     public Command getDriverProfileCommand() {
-        return driverProfileChooser.get();
+        return mDriverProfileChooser.get();
     }
 }
