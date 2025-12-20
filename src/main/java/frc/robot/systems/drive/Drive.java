@@ -94,7 +94,8 @@ public class Drive extends SubsystemBase {
 
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
-    private SwerveSetpoint mPreviousSetpoint = new SwerveSetpoint(new ChassisSpeeds(), SwerveUtils.zeroStates(), DriveFeedforwards.zeros(4));
+    private SwerveSetpoint mPreviousSetpoint =
+            new SwerveSetpoint(new ChassisSpeeds(), SwerveUtils.zeroStates(), DriveFeedforwards.zeros(4));
 
     @AutoLogOutput(key = "Drive/State")
     private DriveState mDriveState = DriveState.TELEOP;
@@ -122,8 +123,10 @@ public class Drive extends SubsystemBase {
 
     private GameDriveManager mGameDriveManager = new GameDriveManager(this);
 
-    private static final LoggedTunableNumber tDriftRate = new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
-    private static final LoggedTunableNumber tRotationDriftTestSpeedDeg = new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
+    private static final LoggedTunableNumber tDriftRate =
+            new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
+    private static final LoggedTunableNumber tRotationDriftTestSpeedDeg =
+            new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
     private static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
 
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
@@ -134,51 +137,41 @@ public class Drive extends SubsystemBase {
         this.mVision = vision;
 
         mRobotRotation = mGyroInputs.iYawPosition;
-        
+
         mOdometry = new SwerveDriveOdometry(kKinematics, getmRobotRotation(), getModulePositions());
-        mPoseEstimator = new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
+        mPoseEstimator =
+                new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
 
         try {
             mRobotConfig = RobotConfig.fromGUISettings();
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("<< PATH PLANNER SETTINGS DID NOT CORRECTLY LOAD. PLEASE MAKE SURE PATH PLANNER IS INSTALLED AND UP TO DATE >>>");
+            System.out.println(
+                    "<< PATH PLANNER SETTINGS DID NOT CORRECTLY LOAD. PLEASE MAKE SURE PATH PLANNER IS INSTALLED AND UP TO DATE >>>");
         }
 
-        mSetpointGenerator = new SwerveSetpointGenerator(
-            mRobotConfig, 
-            kMaxAzimuthAngularRadiansPS
-        );
+        mSetpointGenerator = new SwerveSetpointGenerator(mRobotConfig, kMaxAzimuthAngularRadiansPS);
 
         AutoBuilder.configure(
-            this::getPoseEstimate,
-            this::setPose,
-            this::getRobotChassisSpeeds,
-            (speeds, ff) -> {
-                mDriveState = DriveState.AUTON;
-                mPPDesiredSpeeds = new ChassisSpeeds(
-                    speeds.vxMetersPerSecond, 
-                    speeds.vyMetersPerSecond, 
-                    speeds.omegaRadiansPerSecond
-                );
-                mPathPlanningFF = ff;
-            },
-            new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID),
-            mRobotConfig,
-            () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-            this
-        );
+                this::getPoseEstimate,
+                this::setPose,
+                this::getRobotChassisSpeeds,
+                (speeds, ff) -> {
+                    mDriveState = DriveState.AUTON;
+                    mPPDesiredSpeeds = new ChassisSpeeds(
+                            speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+                    mPathPlanningFF = ff;
+                },
+                new PPHolonomicDriveController(kPPTranslationPID, kPPRotationPID),
+                mRobotConfig,
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this);
 
         Pathfinding.setPathfinder(new LocalADStarAK());
-        PathPlannerLogging.setLogActivePathCallback( (activePath) ->
-            Logger.recordOutput(
-                "Drive/Odometry/Trajectory", 
-                activePath.toArray(new Pose2d[activePath.size()])
-            )
-        );
+        PathPlannerLogging.setLogActivePathCallback((activePath) ->
+                Logger.recordOutput("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
         PathPlannerLogging.setLogTargetPoseCallback(
-            (targetPose) -> Logger.recordOutput("Drive/Odometry/TrajectorySetpoint", targetPose)
-        );
+                (targetPose) -> Logger.recordOutput("Drive/Odometry/TrajectorySetpoint", targetPose));
 
         SmartDashboard.putData(mField);
 
@@ -189,7 +182,6 @@ public class Drive extends SubsystemBase {
     public Command getGameDriveCommand(GameDriveStates pGameDriveStates) {
         return mGameDriveManager.getSetGameDriveStateCmd(pGameDriveStates);
     }
-
 
     @Override
     public void periodic() {
@@ -245,14 +237,14 @@ public class Drive extends SubsystemBase {
 
     private void computeDesiredSpeeds() {
         ChassisSpeeds teleopSpeeds =
-                mTeleopController.computeChassiSpeeds(getPoseEstimate().getRotation(), getRobotChassisSpeeds(), false, true);
+                mTeleopController.computeChassisSpeeds(getPoseEstimate().getRotation(), false, true);
         switch (mDriveState) {
             case TELEOP:
                 mDesiredSpeeds = teleopSpeeds;
                 break;
             case TELEOP_SNIPER:
-                mDesiredSpeeds = mTeleopController.computeChassiSpeeds(
-                        getPoseEstimate().getRotation(), getRobotChassisSpeeds(), true, true);
+                mDesiredSpeeds =
+                        mTeleopController.computeChassisSpeeds(getPoseEstimate().getRotation(), true, true);
                 break;
             case POV_SNIPER:
                 mDesiredSpeeds = mTeleopController.computeSniperPOVChassisSpeeds(
@@ -295,7 +287,6 @@ public class Drive extends SubsystemBase {
         }
     }
 
- 
     ///////////////////////// STATE SETTING \\\\\\\\\\\\\\\\\\\\\\\\
     public Command setToTeleop() {
         return setDriveStateCommandContinued(DriveState.TELEOP);

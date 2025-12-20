@@ -113,9 +113,8 @@ public class GameGoalPoseChooser {
                 goal = getTargetPoseRight(StateTracker.faceToTag(reefFace));
             } else goal = getTargetPose(StateTracker.faceToTag(reefFace));
         }
-        // Logger.recordOutput("Drive/SelectedSide", side);
 
-        return goal; // .plus(new Transform2d(0.0, 0.0, Rotation2d.fromDegrees(180)));
+        return goal;
     }
 
     public static void setSwapSides(boolean swap) {
