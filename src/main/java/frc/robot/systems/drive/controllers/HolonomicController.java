@@ -12,6 +12,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import frc.lib.tuning.LoggedTunableNumber;
+
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class HolonomicController {
@@ -84,6 +87,8 @@ public class HolonomicController {
 
     private ConstraintType type = ConstraintType.AXIS;
 
+    private Supplier<Rotation2d> mLineDirection = () -> new Rotation2d();
+
     public HolonomicController() {
 
         this.xController = new ProfiledPIDController(
@@ -110,6 +115,10 @@ public class HolonomicController {
         omegaController.setConstraints(new Constraints(omegaMaxVDPS.get(), omegaMaxADPSS.get()));
         omegaController.setTolerance(omegaToleranceDegrees.get());
         this.omegaFeedforward = new SimpleMotorFeedforward(omegaS.get(), omegaV.get());
+    }
+
+    public void setLineDirection(Supplier<Rotation2d> direction) {
+        mLineDirection = direction;
     }
 
     /* WHEN USING LINEAR CONSTRAINT, GOAL */
@@ -158,6 +167,40 @@ public class HolonomicController {
 
     public ChassisSpeeds calculate(Pose2d goalPose, Pose2d currentPose) {
         return calculate(goalPose, new ChassisSpeeds(), currentPose);
+    }
+
+
+    /* Uses 3 PID controllers to set the chassis speeds */
+    public ChassisSpeeds lineAlignCalculate(Pose2d goalPose, ChassisSpeeds goalSpeed, Pose2d currentPose, ChassisSpeeds teleopSpeeds) {
+        double ffScalar = Math.min(
+                Math.hypot(goalPose.getX() - currentPose.getX(), goalPose.getY() - currentPose.getY()) / ffRadius.get(),
+                1.0);
+
+        ChassisSpeeds teleopSpeedsRobotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(teleopSpeeds, currentPose.getRotation()) ;
+        ChassisSpeeds teleopSpeedsLineRelative = ChassisSpeeds.fromRobotRelativeSpeeds(teleopSpeedsRobotRelative, mLineDirection.get().plus(currentPose.getRotation()));
+
+        ChassisSpeeds alignRelative = ChassisSpeeds.fromFieldRelativeSpeeds(
+                (xController.calculate(
+                                currentPose.getX(),
+                                new TrapezoidProfile.State(goalPose.getX(), goalSpeed.vxMetersPerSecond))
+                        + ffScalar * xFeedforward.calculate(xController.getSetpoint().velocity)),
+                (yController.calculate(
+                                currentPose.getY(),
+                                new TrapezoidProfile.State(goalPose.getY(), goalSpeed.vyMetersPerSecond))
+                        + ffScalar * yFeedforward.calculate(yController.getSetpoint().velocity)),
+                (Math.toRadians(omegaController.calculate(
+                                currentPose.getRotation().getDegrees(),
+                                new TrapezoidProfile.State(
+                                        goalPose.getRotation().getDegrees(),
+                                        Math.toDegrees(goalSpeed.omegaRadiansPerSecond)))
+                        + omegaFeedforward.calculate(omegaController.getSetpoint().velocity))),
+                mLineDirection.get().plus(currentPose.getRotation()));
+
+        return new ChassisSpeeds(
+                teleopSpeedsLineRelative.vxMetersPerSecond + alignRelative.vxMetersPerSecond,
+                teleopSpeedsLineRelative.vxMetersPerSecond * 0 + alignRelative.vyMetersPerSecond,
+                alignRelative.omegaRadiansPerSecond
+        );
     }
 
     /* Uses 3 PID controllers to set the chassis speeds */

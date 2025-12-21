@@ -93,7 +93,7 @@ public class CameraIOPVTag implements CameraIO {
 
             if (latestValidResult == null || !latestValidResult.hasTargets()) {
                 DriverStation.reportWarning(
-                        "No valid pose found in unread PhotonVision results for " + mCamName, false);
+                        "<<< No valid pose found in unread PhotonVision results for " + mCamName + " >>>", false);
                 pInputs.iHasTarget = false;
                 return;
             }

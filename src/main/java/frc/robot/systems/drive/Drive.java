@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.math.AllianceFlipUtil;
+import frc.lib.math.EqualsUtil;
 import frc.lib.math.GeomUtil;
 import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
@@ -267,6 +268,14 @@ public class Drive extends SubsystemBase {
             case AUTO_ALIGN:
                 mDesiredSpeeds = mAutoAlignController.calculate(mGoalPoseSup.get(), getPoseEstimate());
                 break;
+            case LINE_ALIGN:
+                mDesiredSpeeds = 
+                    mAutoAlignController.lineAlignCalculate(
+                        mGoalPoseSup.get(), 
+                        new ChassisSpeeds(), 
+                        getPoseEstimate(), 
+                        teleopSpeeds);
+                break;
             case AUTON:
                 mDesiredSpeeds = mPPDesiredSpeeds;
                 break;
@@ -347,6 +356,61 @@ public class Drive extends SubsystemBase {
                 mRobotConfig,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Red),
                 this);
+    }
+
+
+    public Command setToGenericLineAlign(Supplier<Pose2d> desiredPose, Supplier<Rotation2d> desiredRotation) {
+        return setToGenericLineAlign(
+            () -> Math.atan2(desiredPose.get().getY(), desiredPose.get().getX()), 
+            () -> desiredPose.get().getX(),
+            () -> desiredPose.get().getY(),
+            desiredRotation);
+    }
+
+    /*
+     * Reference GameDriveManager to use game-specific implementation of this command
+     * @param Goal strategy, based on where you're aligning
+     * @param Constraint type, linear or on an axis
+     */
+    private Command setToGenericLineAlign(DoubleSupplier slope, DoubleSupplier anchorX, DoubleSupplier anchorY, Supplier<Rotation2d> desiredRotation) {
+        return new InstantCommand(() -> {
+                    if(!Double.isNaN(slope.getAsDouble())) {
+                        DoubleSupplier m = slope;
+                        DoubleSupplier b = ()-> - anchorX.getAsDouble() * m.getAsDouble() + anchorY.getAsDouble();
+
+                        DoubleSupplier x1 = () -> getPoseEstimate().getX();
+                        DoubleSupplier y1 = () -> getPoseEstimate().getY();
+
+                        mGoalPoseSup = () -> new Pose2d(
+                            ( x1.getAsDouble() 
+                                + m.getAsDouble() * y1.getAsDouble() 
+                                - m.getAsDouble() * b.getAsDouble() ) 
+                                    / ( 1 + m.getAsDouble() * m.getAsDouble()),
+                            ( m.getAsDouble() * x1.getAsDouble() 
+                                + m.getAsDouble() * m.getAsDouble() * y1.getAsDouble() 
+                                + b.getAsDouble() ) 
+                                    / ( 1 + m.getAsDouble() * m.getAsDouble()),
+                            desiredRotation.get()
+                        );
+
+                        mAutoAlignController.setLineDirection(() -> new Rotation2d(slope.getAsDouble(), 1.0));
+                    } else {
+                        mGoalPoseSup = () -> new Pose2d(
+                            anchorX.getAsDouble(),
+                            getPoseEstimate().getY(),
+                            desiredRotation.get());
+
+                            mAutoAlignController.setLineDirection(() -> Rotation2d.kCCW_90deg);
+                    }
+
+                    mAutoAlignController.setConstraintType(ConstraintType.AXIS);
+                    mAutoAlignController.reset(
+                            getPoseEstimate(),
+                            ChassisSpeeds.fromRobotRelativeSpeeds(
+                                    getRobotChassisSpeeds(), getPoseEstimate().getRotation()),
+                            mGoalPoseSup.get());
+                })
+                .andThen(setDriveStateCommandContinued(DriveState.LINE_ALIGN));
     }
 
     /*
