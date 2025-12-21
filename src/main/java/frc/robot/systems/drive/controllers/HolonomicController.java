@@ -129,7 +129,8 @@ public class HolonomicController {
      */
     public void reset(Pose2d pRobotPose, ChassisSpeeds pRobotChassisSpeeds, Pose2d pGoalPose) {
         if (type.equals(ConstraintType.LINEAR)) {
-            Rotation2d heading = new Rotation2d(pGoalPose.getX() - pRobotPose.getX(), pGoalPose.getY() - pRobotPose.getY());
+            Rotation2d heading =
+                    new Rotation2d(pGoalPose.getX() - pRobotPose.getX(), pGoalPose.getY() - pRobotPose.getY());
 
             // Logger.recordOutput("AutoAlign/Linear/X/Vel", distanceMaxVMPS.get() *  heading.getCos());
             // Logger.recordOutput("AutoAlign/Linear/X/Accel", distanceMaxVMPS.get() *  heading.getCos());

@@ -36,16 +36,15 @@ public class TuneableDriverProfile {
     }
 
     public TuneableDriverProfile(DriverProfiles pDefaults) {
-        this (
-            pDefaults.linearScalar(),
-            pDefaults.linearDeadband(),
-            pDefaults.linearExponent(),
-            pDefaults.rotationalScalar(),
-            pDefaults.rotationalScalar(),
-            pDefaults.rotationDeadband(),
-            pDefaults.sniperScalar(),
-            pDefaults.key()
-        );
+        this(
+                pDefaults.linearScalar(),
+                pDefaults.linearDeadband(),
+                pDefaults.linearExponent(),
+                pDefaults.rotationalScalar(),
+                pDefaults.rotationalScalar(),
+                pDefaults.rotationDeadband(),
+                pDefaults.sniperScalar(),
+                pDefaults.key());
     }
 
     public LoggedTunableNumber linearScalar() {

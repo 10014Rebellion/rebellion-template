@@ -6,17 +6,28 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.systems.telemetry.TelemetryConstants.Severity;
 import java.util.HashSet;
 import java.util.Set;
+import org.littletonrobotics.junction.Logger;
 
 public class Telemetry {
     private static final Set<TelemetryError> activeErrors = new HashSet<>();
 
     private Telemetry() {}
 
+    // TODO: ADD PROPER TELEM LATER
+    public static void log(String pKey, double pValue) {
+        Logger.recordOutput(pKey, pValue);
+    }
+
+    // TODO: ADD PROPER TELEM LATER
+    public static void log(String pMessage) {
+        System.out.println("~~~ " + pMessage + " ~~~");
+    }
+
     /*
      * Call when error is created
      * @param Error to resolve
      */
-    public static void reportError(TelemetryError pError) {
+    public static void reportIssue(TelemetryError pError) {
         if (activeErrors.add(pError)) {
             Throwable trace = new Throwable();
             publishError(pError, trace);
@@ -27,7 +38,7 @@ public class Telemetry {
      * Call when error is resolved
      * @param Error to resolve
      */
-    public static void clearError(TelemetryError pError) {
+    public static void clearIssue(TelemetryError pError) {
         if (activeErrors.remove(pError)) {
             publishClear(pError);
         }
@@ -41,12 +52,18 @@ public class Telemetry {
      */
     public static boolean conditionReport(boolean pCondition, TelemetryError pError) {
         if (pCondition) {
-            reportError(pError);
+            reportIssue(pError);
         } else {
-            clearError(pError);
+            clearIssue(pError);
         }
 
         return pCondition;
+    }
+
+    // TODO: IMPLEMENT PROPER EXCEPTION THROWING LATER
+    public static Exception reportException(Exception pException) {
+        System.out.println("<<< " + pException.getLocalizedMessage() + " >>>");
+        return pException;
     }
 
     // TODO: IMPLEMENT PROPER TELEM LATER

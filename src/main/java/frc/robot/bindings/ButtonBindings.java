@@ -1,3 +1,5 @@
+// REBELLION 10014
+
 package frc.robot.bindings;
 
 import frc.lib.controllers.FlydigiApex4;
@@ -14,10 +16,9 @@ public class ButtonBindings {
 
     public void initDriverButtonBindings() {
         mDriveSS.acceptJoystickInputs(
-            () -> - mDriverController.getLeftX(), 
-            () -> - mDriverController.getLeftY(), 
-            () -> - mDriverController.getRightX(), 
-            () -> mDriverController.getPOVAngle()
-        );
+                () -> -mDriverController.getLeftX(),
+                () -> -mDriverController.getLeftY(),
+                () -> -mDriverController.getRightX(),
+                () -> mDriverController.getPOVAngle());
     }
 }

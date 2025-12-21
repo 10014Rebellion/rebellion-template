@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.math.AllianceFlipUtil;
 import frc.lib.math.GeomUtil;
+import frc.lib.optimizations.PPRobotConfigLoader;
 import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
 import frc.lib.swerve.LocalADStarAK;
@@ -142,13 +143,7 @@ public class Drive extends SubsystemBase {
         mPoseEstimator =
                 new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
 
-        try {
-            mRobotConfig = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(
-                    "<< PATH PLANNER SETTINGS DID NOT CORRECTLY LOAD. PLEASE MAKE SURE PATH PLANNER IS INSTALLED AND UP TO DATE >>>");
-        }
+        mRobotConfig = PPRobotConfigLoader.load();
 
         mSetpointGenerator = new SwerveSetpointGenerator(mRobotConfig, kMaxAzimuthAngularRadiansPS);
 

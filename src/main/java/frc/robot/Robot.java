@@ -48,7 +48,7 @@ public class Robot extends LoggedRobot {
                 break;
 
             case REPLAY:
-                setUseTiming(false); 
+                setUseTiming(false);
                 String logPath = LogFileUtil.findReplayLog();
                 Logger.setReplaySource(new WPILOGReader(logPath));
                 Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
@@ -60,9 +60,9 @@ public class Robot extends LoggedRobot {
         if (DashboardConstants.kDashboardEnabled) {
             System.out.println("Starting Dashboard Webserver");
             System.out.println("Dashboard directory: "
-                + Filesystem.getDeployDirectory()
-                + "/"
-                + DashboardConstants.kDashboardPath);
+                    + Filesystem.getDeployDirectory()
+                    + "/"
+                    + DashboardConstants.kDashboardPath);
             try {
                 WebServer.start(
                         DashboardConstants.kDashboardPort,
@@ -129,7 +129,7 @@ public class Robot extends LoggedRobot {
     public void autonomousPeriodic() {}
 
     @Override
-    public void teleopInit() {        
+    public void teleopInit() {
         if (mAutonomousCommand != null) {
             mAutonomousCommand.cancel();
         }

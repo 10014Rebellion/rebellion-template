@@ -17,4 +17,64 @@ public class DriveErrors {
             return Severity.ERROR;
         }
     }
+
+    public record PPGuiLoadFailed() implements TelemetryError {
+        @Override
+        public String message() {
+            return "FAILED TO LOAD ROBOT CONFIG FROM PATHPLANNER GUI";
+        }
+
+        @Override
+        public Severity severity() {
+            return Severity.ERROR;
+        }
+    }
+
+    public record PPConfigLoadedFromCache() implements TelemetryError {
+        @Override
+        public String message() {
+            return "LOADED ROBOT CONFIG FROM LOCAL CACHE (MAY BE OUT OF DATE)";
+        }
+
+        @Override
+        public Severity severity() {
+            return Severity.WARNING;
+        }
+    }
+
+    public record PPConfigCacheLoadFailed() implements TelemetryError {
+        @Override
+        public String message() {
+            return "FAILED TO LOAD ROBOT CONFIG FROM LOCAL CACHE";
+        }
+
+        @Override
+        public Severity severity() {
+            return Severity.ERROR;
+        }
+    }
+
+    public record PPConfigLoadedFromDefault() implements TelemetryError {
+        @Override
+        public String message() {
+            return "LOADED ROBOT CONFIG FROM DEFAULT DEPLOY FILE";
+        }
+
+        @Override
+        public Severity severity() {
+            return Severity.WARNING;
+        }
+    }
+
+    public record PPConfigDefaultLoadFailed() implements TelemetryError {
+        @Override
+        public String message() {
+            return "FAILED TO LOAD ROBOT CONFIG FROM DEFAULT DEPLOY FILE";
+        }
+
+        @Override
+        public Severity severity() {
+            return Severity.FATAL;
+        }
+    }
 }

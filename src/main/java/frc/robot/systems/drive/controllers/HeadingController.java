@@ -63,12 +63,11 @@ public class HeadingController {
     // Designed for large jumps toward a setpoint, kind of like an azimuth alignment
     public double getSnapOutput(Rotation2d pRobotRotation) {
         Logger.recordOutput(
-            "Drive/HeadingController/HeadingSetpoint",
-            Rotation2d.fromDegrees(mSnapController.getSetpoint().position)
-        );
+                "Drive/HeadingController/HeadingSetpoint",
+                Rotation2d.fromDegrees(mSnapController.getSetpoint().position));
 
-        double pidOutput =
-                mSnapController.calculate(pRobotRotation.getDegrees(), mGoal.get().getDegrees());
+        double pidOutput = mSnapController.calculate(
+                pRobotRotation.getDegrees(), mGoal.get().getDegrees());
         double ffOutput = mSnapController.getSetpoint().velocity;
         double output = Math.toRadians(pidOutput + ffOutput);
 

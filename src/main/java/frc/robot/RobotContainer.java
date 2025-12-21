@@ -87,8 +87,10 @@ public class RobotContainer {
 
         initBindings();
 
-        mDriverProfileChooser.addDefaultOption(BindingsConstants.kDefaultProfile.key(), mDrive.setDriveProfile(BindingsConstants.kDefaultProfile));
-        for(DriverProfiles profile : BindingsConstants.kProfiles) mDriverProfileChooser.addOption(profile.key(), mDrive.setDriveProfile(profile));
+        mDriverProfileChooser.addDefaultOption(
+                BindingsConstants.kDefaultProfile.key(), mDrive.setDriveProfile(BindingsConstants.kDefaultProfile));
+        for (DriverProfiles profile : BindingsConstants.kProfiles)
+            mDriverProfileChooser.addOption(profile.key(), mDrive.setDriveProfile(profile));
     }
 
     public Drive getDrivetrain() {
