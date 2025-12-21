@@ -35,14 +35,14 @@ public class VisionConstants {
     public static final Orientation kLeftCamOrientation = Orientation.BACK; // >>> TODO: TUNE ME
     public static final Transform3d kLeftCamTransform = new Transform3d(
             new Translation3d(
-                    Units.inchesToMeters(10.284), // X: inches forward // >>> TODO: TUNE ME
-                    Units.inchesToMeters(12.7829), // Y: inches left // >>> TODO: TUNE ME
-                    Units.inchesToMeters(12.769) // Z: inches above ground // >>> TODO: TUNE ME
+                    Units.inchesToMeters(0.0), // X: inches forward // >>> TODO: TUNE ME
+                    Units.inchesToMeters(0.0), // Y: inches left // >>> TODO: TUNE ME
+                    Units.inchesToMeters(0.0) // Z: inches above ground // >>> TODO: TUNE ME
                     ),
             new Rotation3d(
-                    Units.degreesToRadians(0), // Roll: No side tilt // >>> TODO: TUNE ME
-                    Units.degreesToRadians(0), // Pitch: No upward tilt // >>> TODO: TUNE ME
-                    Units.degreesToRadians(-30) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
+                    Units.degreesToRadians(0.0), // Roll: side tilt // >>> TODO: TUNE ME
+                    Units.degreesToRadians(0.0), // Pitch: upward tilt // >>> TODO: TUNE ME
+                    Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
                     ));
 
     public static final String kRightCamName = "FrontRight-OV9281"; // >>> TODO: TUNE ME
@@ -59,7 +59,7 @@ public class VisionConstants {
                     Units.degreesToRadians(0.0) // Yaw: (angled inward/outward) // >>> TODO: TUNE ME
                     ));
 
-    /* TODO: SET TO FALSE UNLESS YOU ACTUALLY KNOW WHAT THIS DOES
+    /* NOTE: SET TO FALSE UNLESS YOU ACTUALLY KNOW WHAT THIS DOES
      * This turns on a implementation of single tag vision algorithm that may be more accurate
      * https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2025-build-thread/477314/85
      */

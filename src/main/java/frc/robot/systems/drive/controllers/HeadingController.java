@@ -7,9 +7,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class HeadingController {
     public static final LoggedTunableNumber mSnapP = new LoggedTunableNumber("SwerveHeadingController/Snap/kP", 4.0);
@@ -62,7 +62,7 @@ public class HeadingController {
 
     // Designed for large jumps toward a setpoint, kind of like an azimuth alignment
     public double getSnapOutput(Rotation2d pRobotRotation) {
-        Logger.recordOutput(
+        Telemetry.log(
                 "Drive/HeadingController/HeadingSetpoint",
                 Rotation2d.fromDegrees(mSnapController.getSetpoint().position));
 
@@ -77,15 +77,15 @@ public class HeadingController {
         double adjustedOutput = output;
         if (Math.abs(goalErrorDegrees) < mToleranceDegrees.get()) adjustedOutput *= 0.0;
 
-        Logger.recordOutput("Drive/HeadingController/unAdjustedOutput", output);
+        Telemetry.log("Drive/HeadingController/unAdjustedOutput", output);
 
-        Logger.recordOutput("Drive/HeadingController/setpointErrorDegrees", setpointErrorDegrees);
-        Logger.recordOutput("Drive/HeadingController/goalErrorDegrees", goalErrorDegrees);
+        Telemetry.log("Drive/HeadingController/setpointErrorDegrees", setpointErrorDegrees);
+        Telemetry.log("Drive/HeadingController/goalErrorDegrees", goalErrorDegrees);
 
-        Logger.recordOutput("Drive/HeadingController/adjustedOutput", adjustedOutput);
+        Telemetry.log("Drive/HeadingController/adjustedOutput", adjustedOutput);
 
-        Logger.recordOutput("Drive/HeadingController/pidOutput", pidOutput);
-        Logger.recordOutput("Drive/HeadingController/ffOutput", ffOutput);
+        Telemetry.log("Drive/HeadingController/pidOutput", pidOutput);
+        Telemetry.log("Drive/HeadingController/ffOutput", ffOutput);
 
         return output;
     }

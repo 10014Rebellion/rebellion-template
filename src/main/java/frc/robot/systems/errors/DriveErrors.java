@@ -1,9 +1,9 @@
 // REBELLION 10014
 
-package frc.robot.systems.telemetry.errors;
+package frc.robot.systems.errors;
 
-import frc.robot.systems.telemetry.TelemetryConstants.Severity;
-import frc.robot.systems.telemetry.TelemetryError;
+import frc.lib.telemetry.TelemetryConstants.Severity;
+import frc.lib.telemetry.TelemetryError;
 
 public class DriveErrors {
     public record ProfileExponentZero(int pDefaultExponent) implements TelemetryError {

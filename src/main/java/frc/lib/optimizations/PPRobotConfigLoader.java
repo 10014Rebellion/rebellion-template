@@ -17,17 +17,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
-import frc.robot.systems.telemetry.Telemetry;
-
-import frc.robot.systems.telemetry.errors.DriveErrors.PPGuiLoadFailed;
-import frc.robot.systems.telemetry.errors.DriveErrors.PPConfigLoadedFromCache;
-import frc.robot.systems.telemetry.errors.DriveErrors.PPConfigCacheLoadFailed;
-
-import frc.robot.systems.telemetry.errors.DriveErrors.PPConfigLoadedFromDefault;
-import frc.robot.systems.telemetry.errors.DriveErrors.PPConfigDefaultLoadFailed;
-
-import frc.robot.systems.telemetry.errors.DriveErrors.PPCacheSaveFailed;
-
+import frc.lib.telemetry.Telemetry;
+import frc.robot.systems.errors.DriveErrors.PPCacheSaveFailed;
+import frc.robot.systems.errors.DriveErrors.PPConfigCacheLoadFailed;
+import frc.robot.systems.errors.DriveErrors.PPConfigDefaultLoadFailed;
+import frc.robot.systems.errors.DriveErrors.PPConfigLoadedFromCache;
+import frc.robot.systems.errors.DriveErrors.PPConfigLoadedFromDefault;
+import frc.robot.systems.errors.DriveErrors.PPGuiLoadFailed;
 
 import org.json.simple.parser.ParseException;
 

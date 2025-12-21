@@ -42,6 +42,7 @@ import frc.lib.pathplanner.SwerveSetpoint;
 import frc.lib.pathplanner.SwerveSetpointGenerator;
 import frc.lib.swerve.LocalADStarAK;
 import frc.lib.swerve.SwerveUtils;
+import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.lib.tuning.SysIDCharacterization;
 import frc.robot.game.FieldConstants;
@@ -164,9 +165,9 @@ public class Drive extends SubsystemBase {
 
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback((activePath) ->
-                Logger.recordOutput("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
+                Telemetry.log("Drive/Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
         PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> Logger.recordOutput("Drive/Odometry/TrajectorySetpoint", targetPose));
+                (targetPose) -> Telemetry.log("Drive/Odometry/TrajectorySetpoint", targetPose));
 
         SmartDashboard.putData(mField);
 
@@ -177,6 +178,7 @@ public class Drive extends SubsystemBase {
     public Command getGameDriveCommand(GameDriveStates pGameDriveStates) {
         return mGameDriveManager.getSetGameDriveStateCmd(pGameDriveStates);
     }
+    ////////////////////////////////////
 
     @Override
     public void periodic() {
@@ -209,11 +211,11 @@ public class Drive extends SubsystemBase {
             if (observation.hasObserved())
                 mPoseEstimator.addVisionMeasurement(observation.pose(), observation.timeStamp(), observation.stdDevs());
 
-            Logger.recordOutput(
+            Telemetry.log(
                     observation.camName() + "/stdDevX", observation.stdDevs().get(0));
-            Logger.recordOutput(
+            Telemetry.log(
                     observation.camName() + "/stdDevY", observation.stdDevs().get(1));
-            Logger.recordOutput(
+            Telemetry.log(
                     observation.camName() + "/stdDevTheta",
                     observation.stdDevs().get(2));
         }
@@ -407,7 +409,7 @@ public class Drive extends SubsystemBase {
         /* Only for logging purposes */
         SwerveModuleState[] moduleTorques = SwerveUtils.zeroStates();
 
-        // Logger.recordOutput("Drive/Odometry/generatedFieldSpeeds",
+        // Telemetry.log("Drive/Odometry/generatedFieldSpeeds",
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
 
         for (int i = 0; i < 4; i++) {
@@ -442,7 +444,7 @@ public class Drive extends SubsystemBase {
 
                 double directionOfVelChange =
                         Math.signum(setpointStates[i].speedMetersPerSecond - mPrevStates[i].speedMetersPerSecond);
-                Logger.recordOutput("Drive/Module/Feedforward/" + i + "/dir", directionOfVelChange);
+                Telemetry.log("Drive/Module/Feedforward/" + i + "/dir", directionOfVelChange);
                 if (mDriveState.equals(DriveState.AUTON)) {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
                 }
@@ -464,15 +466,14 @@ public class Drive extends SubsystemBase {
 
         mPrevStates = optimizedSetpointStates;
 
-        Logger.recordOutput("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
-        Logger.recordOutput("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
-        Logger.recordOutput(
-                "Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
-        Logger.recordOutput(
+        Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
+        Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
+        Telemetry.log("Drive/Swerve/SetpointsChassisSpeeds", kKinematics.toChassisSpeeds(optimizedSetpointStates));
+        Telemetry.log(
                 "Drive/Odometry/FieldSetpointChassisSpeed",
                 ChassisSpeeds.fromRobotRelativeSpeeds(
                         kKinematics.toChassisSpeeds(optimizedSetpointStates), mRobotRotation));
-        Logger.recordOutput("Drive/Swerve/ModuleTorqueFF", moduleTorques);
+        Telemetry.log("Drive/Swerve/ModuleTorqueFF", moduleTorques);
     }
 
     /* Calculates DriveFeedforward based off state */
@@ -590,10 +591,10 @@ public class Drive extends SubsystemBase {
         mModules[2].setDesiredRotation(Rotation2d.fromDegrees(45.0));
         mModules[3].setDesiredRotation(Rotation2d.fromDegrees(-45.0));
 
-        Logger.recordOutput(
+        Telemetry.log(
                 "Drive/MOI/RadiansVelocity",
                 mModules[0].getInputs().iDriveVelocityMPS / DriveConstants.kDrivebaseRadiusMeters);
-        Logger.recordOutput(
+        Telemetry.log(
                 "Drive/MOI/DriveTorqueNM",
                 (SwerveUtils.getTorqueOfKrakenDriveMotor(mModules[0].getInputs().iDriveTorqueCurrentAmps)
                                 * kDriveMotorGearing

@@ -13,10 +13,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.math.AllianceFlipUtil;
+import frc.lib.telemetry.Telemetry;
 import frc.robot.game.StateTracker.ReefFace;
 import frc.robot.systems.drive.DriveConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 /* Chooses pose based of strategy and psoe */
 public class GameGoalPoseChooser {
@@ -64,7 +64,7 @@ public class GameGoalPoseChooser {
         Rotation2d angleFromReefCenter = turnFromReefOriginForHexagon(robotPose);
         Pose2d goal;
         if (inBetween(-30.0, 30.0, angleFromReefCenter.getDegrees())) {
-            Logger.recordOutput("Drive/ReefSide", "D");
+            Telemetry.log("Drive/ReefSide", "D");
             reefFace = ReefFace.F1;
 
             if (side.equals(SIDE.LEFT)) {
@@ -73,7 +73,7 @@ public class GameGoalPoseChooser {
                 goal = getTargetPoseRight(StateTracker.faceToTag(reefFace), swapSides);
             } else goal = getTargetPose(StateTracker.faceToTag(reefFace));
         } else if (inBetween(30.0, 90.0, angleFromReefCenter.getDegrees())) {
-            Logger.recordOutput("Drive/ReefSide", "E");
+            Telemetry.log("Drive/ReefSide", "E");
             reefFace = ReefFace.F2;
             if (side.equals(SIDE.LEFT)) {
                 goal = getTargetPoseLeft(StateTracker.faceToTag(reefFace), swapSides);
@@ -81,7 +81,7 @@ public class GameGoalPoseChooser {
                 goal = getTargetPoseRight(StateTracker.faceToTag(reefFace), swapSides);
             } else goal = getTargetPose(StateTracker.faceToTag(reefFace));
         } else if (inBetween(90.0, 150.0, angleFromReefCenter.getDegrees())) {
-            Logger.recordOutput("Drive/ReefSide", "F");
+            Telemetry.log("Drive/ReefSide", "F");
             reefFace = ReefFace.F3;
             if (side.equals(SIDE.LEFT)) {
                 goal = getTargetPoseLeft(StateTracker.faceToTag(reefFace));
@@ -89,7 +89,7 @@ public class GameGoalPoseChooser {
                 goal = getTargetPoseRight(StateTracker.faceToTag(reefFace));
             } else goal = getTargetPose(StateTracker.faceToTag(reefFace));
         } else if (inBetween(-150.0, -90.0, angleFromReefCenter.getDegrees())) {
-            Logger.recordOutput("Drive/ReefSide", "B");
+            Telemetry.log("Drive/ReefSide", "B");
             reefFace = ReefFace.F5;
             if (side.equals(SIDE.LEFT)) {
                 goal = getTargetPoseLeft(StateTracker.faceToTag(reefFace));
@@ -97,7 +97,7 @@ public class GameGoalPoseChooser {
                 goal = getTargetPoseRight(StateTracker.faceToTag(reefFace));
             } else goal = getTargetPose(StateTracker.faceToTag(reefFace));
         } else if (inBetween(-90.0, -30.0, angleFromReefCenter.getDegrees())) {
-            Logger.recordOutput("Drive/ReefSide", "C");
+            Telemetry.log("Drive/ReefSide", "C");
             reefFace = ReefFace.F6;
             if (side.equals(SIDE.LEFT)) {
                 goal = getTargetPoseLeft(StateTracker.faceToTag(reefFace), swapSides);
@@ -105,7 +105,7 @@ public class GameGoalPoseChooser {
                 goal = getTargetPoseRight(StateTracker.faceToTag(reefFace), swapSides);
             } else goal = getTargetPose(StateTracker.faceToTag(reefFace));
         } else {
-            Logger.recordOutput("Drive/ReefSide", "A");
+            Telemetry.log("Drive/ReefSide", "A");
             reefFace = ReefFace.F4;
             if (side.equals(SIDE.LEFT)) {
                 goal = getTargetPoseLeft(StateTracker.faceToTag(reefFace));
@@ -167,13 +167,13 @@ public class GameGoalPoseChooser {
         Pose2d targetPose2d = new Pose2d(frontOfTag, tagRotation)
                 .plus(new Transform2d(
                         0, 0, new Rotation2d(Math.toRadians(0.0)))); // .plus(new Rotation2d(Math.toRadians(-90.0)));
-        Logger.recordOutput("Robot/Vision/AprilTagSetpoint", targetPose2d);
-        Logger.recordOutput("Robot/Vision/AltAprilTagSetpoint", AllianceFlipUtil.apply(targetPose2d));
+        Telemetry.log("Robot/Vision/AprilTagSetpoint", targetPose2d);
+        Telemetry.log("Robot/Vision/AltAprilTagSetpoint", AllianceFlipUtil.apply(targetPose2d));
         return targetPose2d;
     }
 
     public static void updateSideStuff() {
-        Logger.recordOutput("Drive/SelectedSide", side);
+        Telemetry.log("Drive/SelectedSide", side);
     }
 
     public static Pose2d getIntakePose(Pose2d robotPose) {
@@ -202,7 +202,7 @@ public class GameGoalPoseChooser {
         Rotation2d finalAngle = angleFromReefCenter.times(-1.0);
         if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red))
             finalAngle = angleFromReefCenter.plus(Rotation2d.k180deg).times(-1.0);
-        Logger.recordOutput("Drive/GoalPoseAngle", finalAngle);
+        Telemetry.log("Drive/GoalPoseAngle", finalAngle);
         return finalAngle;
     }
 
@@ -213,7 +213,7 @@ public class GameGoalPoseChooser {
                 Math.atan2(robotPose.getY() - reefCenter.getY(), robotPose.getX() - reefCenter.getX()));
         if (DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red))
             angleFromReefCenter = angleFromReefCenter.plus(Rotation2d.k180deg);
-        Logger.recordOutput("Drive/GoalPoseAngle", angleFromReefCenter);
+        Telemetry.log("Drive/GoalPoseAngle", angleFromReefCenter);
         return angleFromReefCenter;
     }
 

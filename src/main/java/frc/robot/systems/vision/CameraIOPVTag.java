@@ -86,6 +86,7 @@ public class CameraIOPVTag implements CameraIO {
 
             if (!pInputs.iHasBeenUpdated) return;
 
+            // TODO: HAVE ACTUALLY GOOD LATEST VALID RESULT CODE, NOT JUST THE LAST ONE
             PhotonPipelineResult latestValidResult = unreadResults.get(unreadResults.size() - 1);
             Optional<EstimatedRobotPose> latestEstimatedRobotPose = mPoseEstimator.update(latestValidResult);
 

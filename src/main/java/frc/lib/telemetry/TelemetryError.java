@@ -1,8 +1,8 @@
 // REBELLION 10014
 
-package frc.robot.systems.telemetry;
+package frc.lib.telemetry;
 
-import frc.robot.systems.telemetry.TelemetryConstants.Severity;
+import frc.lib.telemetry.TelemetryConstants.Severity;
 
 public interface TelemetryError {
     String message();

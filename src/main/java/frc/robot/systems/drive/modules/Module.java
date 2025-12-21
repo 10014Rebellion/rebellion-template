@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.systems.drive.DriveConstants;
 import org.littletonrobotics.junction.Logger;
@@ -66,12 +67,12 @@ public class Module {
         // if Amperage is null no feedforward is used
         // Amperage is the FOC feedforward
         if (velocitySetpointMPS != null) {
-            // Logger.recordOutput("Drive/"+kModuleName+"/velocitySepointMPS", velocitySetpointMPS);
+            // Telemetry.log("Drive/"+kModuleName+"/velocitySepointMPS", velocitySetpointMPS);
             if (amperageFeedforward != null) {
-                double ffOutput = driveFF.calculate(velocitySetpointMPS, amperageFeedforward);
+                double ffOutput = driveFF.calculateWithVelocities(velocitySetpointMPS, amperageFeedforward);
 
-                Logger.recordOutput("Drive/" + kModuleName + "/AmperageFeedforward", amperageFeedforward);
-                Logger.recordOutput("Drive/" + kModuleName + "/ffOutput", ffOutput);
+                Telemetry.log("Drive/" + kModuleName + "/AmperageFeedforward", amperageFeedforward);
+                Telemetry.log("Drive/" + kModuleName + "/ffOutput", ffOutput);
 
                 io.setDriveVelocity(velocitySetpointMPS, ffOutput);
             } else {
@@ -82,7 +83,7 @@ public class Module {
         // Runs azimuth PID
         if (azimuthSetpointAngle != null) {
             double ffOutput = azimuthFF.getKs() * Math.signum(inputs.iAzimuthVelocity.getDegrees());
-            Logger.recordOutput("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
+            Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
             io.setAzimuthPosition(azimuthSetpointAngle, ffOutput);
         }
 

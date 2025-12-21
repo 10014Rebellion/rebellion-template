@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.telemetry.Telemetry;
 import frc.lib.tuning.LoggedTunableNumber;
 import frc.robot.game.FieldConstants;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class Vision {
             mCamerasData[i] = new CameraIOInputsAutoLogged();
         }
 
-        Logger.recordOutput("Vision/UseSingleTagTransform", KUseSingleTagTransform);
+        Telemetry.log("Vision/UseSingleTagTransform", KUseSingleTagTransform);
     }
 
     public void periodic(Pose2d pLastRobotPose, Pose2d pSimOdomPose) {
@@ -120,11 +121,11 @@ public class Vision {
     }
 
     public void logVisionObservation(VisionObservation pObservation, String pState) {
-        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/State", pState);
-        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/Timestamp", pObservation.timeStamp());
-        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/Pose", pObservation.pose());
-        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/hasObserved", pObservation.hasObserved());
-        Logger.recordOutput("Vision/Observation/" + pObservation.camName + "/StdDevs", pObservation.stdDevs());
+        Telemetry.log("Vision/Observation/" + pObservation.camName + "/State", pState);
+        Telemetry.log("Vision/Observation/" + pObservation.camName + "/Timestamp", pObservation.timeStamp());
+        Telemetry.log("Vision/Observation/" + pObservation.camName + "/Pose", pObservation.pose());
+        Telemetry.log("Vision/Observation/" + pObservation.camName + "/hasObserved", pObservation.hasObserved());
+        Telemetry.log("Vision/Observation/" + pObservation.camName + "/StdDevs", pObservation.stdDevs());
     }
 
     private VisionObservation makeVisionObservation(Pose2d pPose, double pXYStdev, CameraIOInputsAutoLogged pCamData) {

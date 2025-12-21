@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot.systems.telemetry;
+package frc.lib.telemetry;
 
 public class TelemetryConstants {
     public static enum Severity {

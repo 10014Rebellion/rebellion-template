@@ -9,9 +9,6 @@ import static frc.robot.systems.drive.DriveConstants.kDriveMotorGearing;
 import static frc.robot.systems.drive.DriveConstants.kKinematics;
 import static frc.robot.systems.drive.DriveConstants.kMaxLinearSpeedMPS;
 import static frc.robot.systems.drive.DriveConstants.kWheelRadiusMeters;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,6 +19,7 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.math.EqualsUtil;
 import frc.lib.pathplanner.SwerveSetpoint;
+import frc.lib.telemetry.Telemetry;
 
 public class SwerveUtils {
     private static final double dt = 0.02;
@@ -68,7 +66,7 @@ public class SwerveUtils {
     /* Check if optimize changed module velocity direction */
     public static boolean isSpeedOptimized(SwerveModuleState state, SwerveModuleState optimizedState, int i) {
         boolean isSpeedOptimized = !EqualsUtil.epsilonEquals(state.speedMetersPerSecond, optimizedState.speedMetersPerSecond);
-        Logger.recordOutput("Drive/Swerve/Feedforward/"+i+"/isSpeedOptimized", isSpeedOptimized);
+        Telemetry.log("Drive/Swerve/Feedforward/"+i+"/isSpeedOptimized", isSpeedOptimized);
         return isSpeedOptimized;
     }
 
@@ -87,9 +85,9 @@ public class SwerveUtils {
     }
 
     public static void logDriveFeedforward(DriveFeedforwards ff, int i) {
-        Logger.recordOutput("Drive/Swerve/Feedforward/"+i+"/Acceleration", ff.accelerationsMPSSq()[i]);
-        Logger.recordOutput("Drive/Swerve/Feedforward/"+i+"/Force", ff.linearForcesNewtons()[i]);
-        Logger.recordOutput("Drive/Swerve/Feedforward/"+i+"/Current", ff.torqueCurrentsAmps()[i]);
+        Telemetry.log("Drive/Swerve/Feedforward/"+i+"/Acceleration", ff.accelerationsMPSSq()[i]);
+        Telemetry.log("Drive/Swerve/Feedforward/"+i+"/Force", ff.linearForcesNewtons()[i]);
+        Telemetry.log("Drive/Swerve/Feedforward/"+i+"/Current", ff.torqueCurrentsAmps()[i]);
     }
 
     /* Log different variations of the desired swerve module states */
@@ -105,7 +103,7 @@ public class SwerveUtils {
                 unOptimizedSetpointStates[i].cosineScale(currentStates[i].angle);
             }
             SwerveDriveKinematics.desaturateWheelSpeeds(unOptimizedSetpointStates, kMaxLinearSpeedMPS);
-            Logger.recordOutput("Drive/Swerve/preOptimizedSetpoints", unOptimizedSetpointStates);
+            Telemetry.log("Drive/Swerve/preOptimizedSetpoints", unOptimizedSetpointStates);
 
             unOptimizedSetpointStates = kKinematics.toSwerveModuleStates(desiredSpeeds);
             for(int i = 0; i < 4; i++) {
@@ -115,18 +113,18 @@ public class SwerveUtils {
                 unOptimizedSetpointStates[i].optimize(currentStates[i].angle);
                 unOptimizedSetpointStates[i].cosineScale(currentStates[i].angle);
             }
-            Logger.recordOutput("Drive/Swerve/saturatedPreOptimizedSetpoints", unOptimizedSetpointStates);
-            Logger.recordOutput("Drive/Odometry/preOptimizedChassisSpeeds", kKinematics.toChassisSpeeds(unOptimizedSetpointStates));
+            Telemetry.log("Drive/Swerve/saturatedPreOptimizedSetpoints", unOptimizedSetpointStates);
+            Telemetry.log("Drive/Odometry/preOptimizedChassisSpeeds", kKinematics.toChassisSpeeds(unOptimizedSetpointStates));
 
             /* Non-generated swerve setpoints */
             SwerveModuleState[] swerveModuleStates = kKinematics.toSwerveModuleStates(desiredSpeeds);
 
-            Logger.recordOutput("Drive/Swerve/RegularSetpoints", swerveModuleStates);
+            Telemetry.log("Drive/Swerve/RegularSetpoints", swerveModuleStates);
 
             SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxLinearSpeedMPS);
 
-            Logger.recordOutput("Drive/Swerve/SaturatedRegularSetpoints", swerveModuleStates);
-            Logger.recordOutput("Drive/Odometry/FieldRegularChassisSpeeds", ChassisSpeeds.fromRobotRelativeSpeeds(
+            Telemetry.log("Drive/Swerve/SaturatedRegularSetpoints", swerveModuleStates);
+            Telemetry.log("Drive/Odometry/FieldRegularChassisSpeeds", ChassisSpeeds.fromRobotRelativeSpeeds(
                 kKinematics.toChassisSpeeds(swerveModuleStates), robotRotation));
         }
     }

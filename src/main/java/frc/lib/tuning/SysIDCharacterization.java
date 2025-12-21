@@ -85,6 +85,6 @@ public class SysIDCharacterization {
     }
 
     // private static void sysIDREVStateLogger(String key, String state) {
-    //     Logger.recordOutput(key, state);
+    //     Telemetry.log(key, state);
     // }
 }

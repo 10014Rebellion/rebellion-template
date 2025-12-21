@@ -1,22 +1,17 @@
 // REBELLION 10014
 
-package frc.robot.systems.telemetry;
+package frc.lib.telemetry;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.systems.telemetry.TelemetryConstants.Severity;
+import frc.lib.telemetry.TelemetryConstants.Severity;
+
 import java.util.HashSet;
 import java.util.Set;
-import org.littletonrobotics.junction.Logger;
 
-public class Telemetry {
+public class Telemetry extends TelemetryRecordOutput {
     private static final Set<TelemetryError> activeErrors = new HashSet<>();
 
     private Telemetry() {}
-
-    // TODO: ADD PROPER TELEM LATER
-    public static void log(String pKey, double pValue) {
-        Logger.recordOutput(pKey, pValue);
-    }
 
     // TODO: ADD PROPER TELEM LATER
     public static void log(String pMessage) {

@@ -132,11 +132,11 @@ public class HolonomicController {
             Rotation2d heading =
                     new Rotation2d(pGoalPose.getX() - pRobotPose.getX(), pGoalPose.getY() - pRobotPose.getY());
 
-            // Logger.recordOutput("AutoAlign/Linear/X/Vel", distanceMaxVMPS.get() *  heading.getCos());
-            // Logger.recordOutput("AutoAlign/Linear/X/Accel", distanceMaxVMPS.get() *  heading.getCos());
+            // Telemetry.log("AutoAlign/Linear/X/Vel", distanceMaxVMPS.get() *  heading.getCos());
+            // Telemetry.log("AutoAlign/Linear/X/Accel", distanceMaxVMPS.get() *  heading.getCos());
 
-            // Logger.recordOutput("AutoAlign/Linear/Y/Vel", distanceMaxVMPS.get() *  heading.getCos());
-            // Logger.recordOutput("AutoAlign/Linear/Y/Accel", distanceMaxVMPS.get() *  heading.getCos());
+            // Telemetry.log("AutoAlign/Linear/Y/Vel", distanceMaxVMPS.get() *  heading.getCos());
+            // Telemetry.log("AutoAlign/Linear/Y/Accel", distanceMaxVMPS.get() *  heading.getCos());
 
             xController.setConstraints(new TrapezoidProfile.Constraints(
                     distanceMaxVMPS.get() * Math.abs(heading.getCos()),
