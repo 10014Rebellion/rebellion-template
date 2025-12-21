@@ -53,6 +53,8 @@ public class PPRobotConfigLoader {
             Telemetry.reportIssue(new PPCacheSaveFailed());
             Telemetry.reportException(pFailedtoSavetoCache);
           }
+        } else {
+          Telemetry.log("Currently in sim, can't save GUI to rio cache unless deployed on a real robot");
         }
       } catch(Exception pFailedtoSavetoCache) {
         Telemetry.reportIssue(new PPCacheSaveFailed());
@@ -84,6 +86,8 @@ public class PPRobotConfigLoader {
         Telemetry.reportIssue(new PPConfigCacheLoadFailed());
         Telemetry.reportException(pCacheFail);
       }
+    } else {
+      Telemetry.log("Currently in sim, skipping caching from rio and instead attempting to use deploy folder cache");
     }
 
     // If cache failed, try defaulting to deploy config
