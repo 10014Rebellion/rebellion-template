@@ -16,6 +16,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.systems.telemetry.Telemetry;
 
 import frc.robot.systems.telemetry.errors.DriveErrors.PPGuiLoadFailed;
@@ -25,15 +26,17 @@ import frc.robot.systems.telemetry.errors.DriveErrors.PPConfigCacheLoadFailed;
 import frc.robot.systems.telemetry.errors.DriveErrors.PPConfigLoadedFromDefault;
 import frc.robot.systems.telemetry.errors.DriveErrors.PPConfigDefaultLoadFailed;
 
+import frc.robot.systems.telemetry.errors.DriveErrors.PPCacheSaveFailed;
+
+
 import org.json.simple.parser.ParseException;
 
 public class PPRobotConfigLoader {
   private static final Path kGUIConfig = Filesystem.getDeployDirectory().toPath().resolve("pathplanner/settings.json");
 
-  private static final Path kDefaultConfig = Filesystem.getDeployDirectory().toPath()
-      .resolve("cache/robotconfig-default.json");
+  private static final Path kDeployCacheConfig = Filesystem.getDeployDirectory().toPath().resolve("cache/robotconfig-cache.json");
 
-  private static final Path kCacheConfig = Paths.get("/home/lvuser/robotconfig-cache.json");
+  private static final Path kRioCacheConfig = Paths.get("/home/lvuser/robotconfig-cache.json");
 
   public static RobotConfig load() {
     // First try loading from GUI.
@@ -41,10 +44,23 @@ public class PPRobotConfigLoader {
       RobotConfig config = RobotConfig.fromGUISettings();
       validate(config);
 
-      cacheGuiConfig();
+      try {
+        cacheGuiToDeployConfig();
+        if(RobotBase.isReal()) {
+          try {
+            cacheGuiToRioConfig();
+          } catch (Exception pFailedtoSavetoCache) {
+            Telemetry.reportIssue(new PPCacheSaveFailed());
+            Telemetry.reportException(pFailedtoSavetoCache);
+          }
+        }
+      } catch(Exception pFailedtoSavetoCache) {
+        Telemetry.reportIssue(new PPCacheSaveFailed());
+        Telemetry.reportException(pFailedtoSavetoCache);
+      }
 
       // Could do reread of the saved data to ensure that its correct
-      // RobotConfig reread = loadFromDisk(kCacheConfig);
+      // RobotConfig reread = loadFromDisk(kRioCacheConfig);
       // validate(reread);
 
       Telemetry.log("Drive Config Successfully Loaded from GUI");
@@ -55,22 +71,24 @@ public class PPRobotConfigLoader {
       Telemetry.reportException(pGUIFail);
     }
 
-    // If GUI loading failed, load the cache
-    try {
-      RobotConfig config = fromSettingsFile(kCacheConfig);
-      validate(config);
-
-      Telemetry.reportIssue(new PPConfigLoadedFromCache());
-
-      return config;
-    } catch (Exception pCacheFail) {
-      Telemetry.reportIssue(new PPConfigCacheLoadFailed());
-      Telemetry.reportException(pCacheFail);
+    if(RobotBase.isReal()) {
+      // If GUI loading failed, load the cache
+      try {
+        RobotConfig config = fromSettingsFile(kRioCacheConfig);
+        validate(config);
+  
+        Telemetry.reportIssue(new PPConfigLoadedFromCache());
+  
+        return config;
+      } catch (Exception pCacheFail) {
+        Telemetry.reportIssue(new PPConfigCacheLoadFailed());
+        Telemetry.reportException(pCacheFail);
+      }
     }
 
     // If cache failed, try defaulting to deploy config
     try {
-      RobotConfig config = fromSettingsFile(kDefaultConfig);
+      RobotConfig config = fromSettingsFile(kDeployCacheConfig);
       validate(config);
 
       Telemetry.reportIssue(new PPConfigLoadedFromDefault());
@@ -86,10 +104,18 @@ public class PPRobotConfigLoader {
         "<<< NO VALID DRIVE CONFIG AVAILABLE. ROBOT MUST NOT ENABLE");
   }
 
-  private static void cacheGuiConfig() throws IOException {
+  private static void cacheGuiToDeployConfig() throws IOException {
     Files.copy(
         kGUIConfig,
-        kCacheConfig,
+        kDeployCacheConfig,
+        StandardCopyOption.REPLACE_EXISTING,
+        StandardCopyOption.COPY_ATTRIBUTES);
+  }
+
+  private static void cacheGuiToRioConfig() throws IOException {
+    Files.copy(
+        kGUIConfig,
+        kDeployCacheConfig,
         StandardCopyOption.REPLACE_EXISTING,
         StandardCopyOption.COPY_ATTRIBUTES);
   }

@@ -62,7 +62,9 @@ public class Telemetry {
 
     // TODO: IMPLEMENT PROPER EXCEPTION THROWING LATER
     public static Exception reportException(Exception pException) {
-        System.out.println("<<< " + pException.getLocalizedMessage() + " >>>");
+        pException.getStackTrace();
+        
+        System.out.println("!!! ^^^ EXCEPTION ABOVE ^^^!!!\n");
         return pException;
     }
 

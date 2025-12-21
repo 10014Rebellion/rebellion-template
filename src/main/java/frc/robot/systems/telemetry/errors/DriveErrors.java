@@ -30,6 +30,18 @@ public class DriveErrors {
         }
     }
 
+    public record PPCacheSaveFailed() implements TelemetryError {
+        @Override
+        public String message() {
+            return "FAILED TO SAVE PATHPLANNER GUI SETTINGS TO CACHE";
+        }
+
+        @Override
+        public Severity severity() {
+            return Severity.WARNING;
+        }
+    }
+
     public record PPConfigLoadedFromCache() implements TelemetryError {
         @Override
         public String message() {
