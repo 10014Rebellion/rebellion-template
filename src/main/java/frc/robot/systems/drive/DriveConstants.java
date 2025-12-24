@@ -15,11 +15,11 @@ public class DriveConstants {
 
     ///////////////////// DRIVE BASE \\\\\\\\\\\\\\\\\\\\\\\
     /* PHYSICAL CONSTANTS */
-    public static final String kDriveCANBusName = "drive";
+    public static final String kDriveCANBusName = "rebeldrive";
     public static final double kRobotWidthXMeters = Units.inchesToMeters(35);
     public static final double kRobotWidthYMeters = Units.inchesToMeters(37);
-    public static final double kTrackWidthXMeters = Units.inchesToMeters(25);
-    public static final double kTrackWidthYMeters = Units.inchesToMeters(27);
+    public static final double kTrackWidthXMeters = Units.inchesToMeters(25.5);
+    public static final double kTrackWidthYMeters = Units.inchesToMeters(27); // Wheelbase
     public static final Translation2d[] kModuleTranslations = new Translation2d[] {
         new Translation2d(kTrackWidthXMeters / 2.0, kTrackWidthYMeters / 2.0),
         new Translation2d(kTrackWidthXMeters / 2.0, -kTrackWidthYMeters / 2.0),
@@ -63,8 +63,9 @@ public class DriveConstants {
     ///////////////////// MODULES \\\\\\\\\\\\\\\\\\\\\\\
     /* GENERAL SWERVE MODULE CONSTANTS */
     public static final boolean kTurnMotorInvert = false;
-    public static final double kAzimuthMotorGearing = 1;
-    public static final double kDriveMotorGearing = 4.29 / 1.0;
+    public static final double kEncoderToMechanismRatio = 1;
+    public static final double kAzimuthMotorGearing = 22.281 / 1.0; // TODO: TUNE ME
+    public static final double kDriveMotorGearing = 4.50 / 1.0; // TODO: TUNE ME
     public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175);
     // POSSIBLE CAUSE OF ODOMETRY ISSUE: (Intended)1.5/(measured)1.4175 = 1.05
     public static final double kWheelCircumferenceMeters = 2 * Math.PI * kWheelRadiusMeters;
@@ -80,21 +81,21 @@ public class DriveConstants {
 
     public static final ModuleControlConfig kModuleControllerConfigs = RobotBase.isReal()
             ? new ModuleControlConfig(
-                    new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(7.0, 0.0, 0.0),
-                    new PIDController(9.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0))
+                    new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0), //DRIVE
+                    new PIDController(3.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH
             : new ModuleControlConfig(
                     new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005),
                     new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0));
 
     /* MODULE SPECIFIC CONSTANTS */
-    /* If 180 was added, the person who got the offset had the bevel gears on the wrong side when he did it */
-    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(12, 22, 22, 0.971);
+    /* If 180 was added, the person who got the offset had the bevel gears on the wrong side when they did it */
+    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, 0.3477);
 
-    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(11, 21, 31, -0.432);
+    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, -0.2517);
 
-    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(13, 23, 23, 0.065);
+    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, 0.253662);
 
-    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(14, 24, 24, 0.454);
+    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, 0.361);
 
     public static record ModuleHardwareConfig(int driveID, int azimuthID, int encoderID, double offset) {}
 

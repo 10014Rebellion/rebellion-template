@@ -95,8 +95,10 @@ public class ModuleIOKraken implements ModuleIO {
 
         /* CANCODER INSTANTIATION AND CONFIGURATION */
         mAbsoluteEncoderOffset = Rotation2d.fromRotations(config.offset());
+        
         mAbsoluteEncoder = new CANcoder(config.encoderID(), DriveConstants.kDriveCANBusName);
         mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
+
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
         mAbsoluteEncoder.getConfigurator().apply(encoderConfig);
 
@@ -117,7 +119,7 @@ public class ModuleIOKraken implements ModuleIO {
         turnConfig.MotorOutput.Inverted =
                 kTurnMotorInvert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        turnConfig.Feedback.SensorToMechanismRatio = kAzimuthMotorGearing;
+        turnConfig.Feedback.SensorToMechanismRatio = kEncoderToMechanismRatio;
         turnConfig.Slot0.kP = kModuleControllerConfigs.azimuthController().getP();
         turnConfig.Slot0.kD = kModuleControllerConfigs.azimuthController().getD();
         turnConfig.ClosedLoopGeneral.ContinuousWrap = true;

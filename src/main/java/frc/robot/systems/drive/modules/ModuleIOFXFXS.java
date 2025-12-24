@@ -235,7 +235,7 @@ public class ModuleIOFXFXS implements ModuleIO {
     @Override
     public void setAzimuthVolts(double volts) {
         /* Sets azimuth voltage inbetween kPeakVoltage and -kPeakVoltage */
-        driveMotor.setControl(azimuthVoltageControl.withOutput(volts));
+        azimuthMotor.setControl(azimuthVoltageControl.withOutput(volts));
     }
 
     @Override
