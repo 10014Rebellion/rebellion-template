@@ -18,6 +18,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -102,6 +104,8 @@ public class ModuleIOKraken implements ModuleIO {
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
         mAbsoluteEncoder.getConfigurator().apply(encoderConfig);
 
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, mAbsolutePositionSignal);
         mAbsoluteEncoder.optimizeBusUtilization();
 
@@ -117,9 +121,9 @@ public class ModuleIOKraken implements ModuleIO {
         turnConfig.Voltage.PeakReverseVoltage = -kPeakVoltage;
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         turnConfig.MotorOutput.Inverted =
-                kTurnMotorInvert ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+                kTurnMotorInvert ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
         turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        turnConfig.Feedback.SensorToMechanismRatio = kEncoderToMechanismRatio;
+        turnConfig.Feedback.SensorToMechanismRatio = kAzimuthMotorGearing;
         turnConfig.Slot0.kP = kModuleControllerConfigs.azimuthController().getP();
         turnConfig.Slot0.kD = kModuleControllerConfigs.azimuthController().getD();
         turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
