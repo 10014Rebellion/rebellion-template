@@ -2,6 +2,7 @@
 
 package frc.robot.systems.drive.modules;
 
+import static edu.wpi.first.units.Units.Rotations;
 import static frc.robot.systems.drive.DriveConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -99,12 +100,14 @@ public class ModuleIOKraken implements ModuleIO {
         mAbsoluteEncoderOffset = Rotation2d.fromRotations(config.offset());
         
         mAbsoluteEncoder = new CANcoder(config.encoderID(), DriveConstants.kDriveCANBusName);
-        mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
-
+        
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
         encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+        encoderConfig.MagnetSensor.withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.5));
+        encoderConfig.MagnetSensor.withMagnetOffset(Rotations.of(config.offset()));
         mAbsoluteEncoder.getConfigurator().apply(encoderConfig);
-
+        
+        mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, mAbsolutePositionSignal);
         mAbsoluteEncoder.optimizeBusUtilization();
@@ -112,18 +115,17 @@ public class ModuleIOKraken implements ModuleIO {
         /* AZIMUTH INSTANTIATION AND CONFIGURATION */
         mAzimuthMotor = new TalonFX(config.azimuthID(), DriveConstants.kDriveCANBusName);
         TalonFXConfiguration turnConfig = new TalonFXConfiguration();
-        mAzimuthMotor.getConfigurator().apply(turnConfig);
 
         turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         turnConfig.CurrentLimits.StatorCurrentLimit = kAzimuthStatorAmpLimit;
-
         turnConfig.Voltage.PeakForwardVoltage = kPeakVoltage;
         turnConfig.Voltage.PeakReverseVoltage = -kPeakVoltage;
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        turnConfig.MotorOutput.Inverted =
-                kTurnMotorInvert ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
-        turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        turnConfig.Feedback.SensorToMechanismRatio = kAzimuthMotorGearing;
+        turnConfig.MotorOutput.Inverted = kTurnMotorInvert ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        turnConfig.Feedback.FeedbackRemoteSensorID = mAbsoluteEncoder.getDeviceID();
+        turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        turnConfig.Feedback.SensorToMechanismRatio = kCANCoderToMechanismRatio;
+        turnConfig.Feedback.RotorToSensorRatio = kAzimuthMotorGearing;
         turnConfig.Slot0.kP = kModuleControllerConfigs.azimuthController().getP();
         turnConfig.Slot0.kD = kModuleControllerConfigs.azimuthController().getD();
         turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
@@ -181,10 +183,8 @@ public class ModuleIOKraken implements ModuleIO {
         inputs.iAzimuthSupplyCurrentAmps = mAzimuthSupplyCurrent.getValueAsDouble();
         inputs.iAzimuthTemperatureCelsius = mAzimuthTemp.getValueAsDouble();
 
-        inputs.iIsCancoderConnected =
-                BaseStatusSignal.refreshAll(mAbsolutePositionSignal).isOK();
-        inputs.iAzimuthAbsolutePosition = Rotation2d.fromRotations(mAbsolutePositionSignal.getValueAsDouble())
-                .minus(mAbsoluteEncoderOffset);
+        inputs.iIsCancoderConnected = BaseStatusSignal.refreshAll(mAbsolutePositionSignal).isOK();
+        inputs.iAzimuthAbsolutePosition = Rotation2d.fromRotations(mAbsolutePositionSignal.getValueAsDouble());
     }
 
     /////////// DRIVE MOTOR METHODS \\\\\\\\\\\
@@ -215,10 +215,7 @@ public class ModuleIOKraken implements ModuleIO {
     /////////// CANCODER METHODS \\\\\\\\\\\
     @Override
     public void resetAzimuthEncoder() {
-        mAzimuthMotor.setPosition(
-                Rotation2d.fromRotations(mAbsoluteEncoder.getAbsolutePosition().getValueAsDouble())
-                        .minus(mAbsoluteEncoderOffset)
-                        .getRotations());
+        mAzimuthMotor.setPosition(Rotation2d.fromRotations(mAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()).getRotations());
     }
 
     /////////// AZIMUTH MOTOR METHODS \\\\\\\\\\\
