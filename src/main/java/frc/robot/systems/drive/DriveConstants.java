@@ -77,25 +77,26 @@ public class DriveConstants {
     public static final double kDriveSupplyAmpLimit = 80.0;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
-    public static final double kAzimuthFOCAmpLimit = -30.0;
+    public static final double kAzimuthFOCAmpLimit = 40.0;
 
     public static final ModuleControlConfig kModuleControllerConfigs = RobotBase.isReal()
             ? new ModuleControlConfig(
                     new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0), //DRIVE
-                    new PIDController(3.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH
+                    new PIDController(3.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH
             : new ModuleControlConfig(
                     new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005),
                     new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0));
 
     /* MODULE SPECIFIC CONSTANTS */
     /* If 180 was added, the person who got the offset had the bevel gears on the wrong side when they did it */
-    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, 0.3477);
+    // BEVEL FACING LEFT
+    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, -0.350 + 0.5);
 
-    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, -0.2517);
+    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, 0.259766 + 0.5);
 
-    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, 0.253662);
+    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, -0.249 + 0.5);
 
-    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, 0.361);
+    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, -0.368 + 0.5);
 
     public static record ModuleHardwareConfig(int driveID, int azimuthID, int encoderID, double offset) {}
 

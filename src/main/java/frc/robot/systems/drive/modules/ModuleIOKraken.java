@@ -102,9 +102,9 @@ public class ModuleIOKraken implements ModuleIO {
         mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
 
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         mAbsoluteEncoder.getConfigurator().apply(encoderConfig);
 
-        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, mAbsolutePositionSignal);
         mAbsoluteEncoder.optimizeBusUtilization();
@@ -225,7 +225,7 @@ public class ModuleIOKraken implements ModuleIO {
     @Override
     public void setAzimuthVolts(double volts) {
         /* Sets azimuth voltage inbetween kPeakVoltage and -kPeakVoltage */
-        mDriveMotor.setControl(mAzimuthVoltageControl.withOutput(volts));
+        mAzimuthMotor.setControl(mAzimuthVoltageControl.withOutput(volts));
     }
 
     @Override
