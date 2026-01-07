@@ -13,7 +13,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.systems.drive.DriveConstants;
 
 public class GyroIOPigeon2 implements GyroIO {
-    private Pigeon2 mGyro = new Pigeon2(5, DriveConstants.kDriveCANBusName);
+    private Pigeon2 mGyro = new Pigeon2(DriveConstants.kPigeonCANID, DriveConstants.kDriveCANBusName);
 
     private StatusSignal<Angle> mYaw = mGyro.getYaw();
     private StatusSignal<AngularVelocity> mYawVelocity = mGyro.getAngularVelocityXWorld();

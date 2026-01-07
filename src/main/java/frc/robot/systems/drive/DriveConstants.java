@@ -63,7 +63,7 @@ public class DriveConstants {
     ///////////////////// MODULES \\\\\\\\\\\\\\\\\\\\\\\
     /* GENERAL SWERVE MODULE CONSTANTS */
     public static final boolean kTurnMotorInvert = false;
-    public static final double kEncoderToMechanismRatio = 1;
+    public static final double kCANCoderToMechanismRatio = 1;
     public static final double kAzimuthMotorGearing = 22.281 / 1.0; // TODO: TUNE ME
     public static final double kDriveMotorGearing = 4.50 / 1.0; // TODO: TUNE ME
     public static final double kWheelRadiusMeters = Units.inchesToMeters(1.4175);
@@ -72,9 +72,9 @@ public class DriveConstants {
 
     public static final double kPeakVoltage = 12.0;
 
-    public static final double kDriveStatorAmpLimit = 80.0;
-    public static final double kDriveFOCAmpLimit = 80.0;
-    public static final double kDriveSupplyAmpLimit = 80.0;
+    public static final double kDriveStatorAmpLimit = 70.0;
+    public static final double kDriveFOCAmpLimit = 70.0;
+    public static final double kDriveSupplyAmpLimit = 70.0;
 
     public static final double kAzimuthStatorAmpLimit = 40.0;
     public static final double kAzimuthFOCAmpLimit = 40.0;
@@ -89,7 +89,9 @@ public class DriveConstants {
 
     /* MODULE SPECIFIC CONSTANTS */
     /* If 180 was added, the person who got the offset had the bevel gears on the wrong side when they did it */
-    // BEVEL FACING LEFT
+    // BEVEL FACING LEFT (it shoulda been facing right tho)
+    public static final int kPigeonCANID = 5;
+
     public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, -0.350 + 0.5);
 
     public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, 0.259766 + 0.5);
