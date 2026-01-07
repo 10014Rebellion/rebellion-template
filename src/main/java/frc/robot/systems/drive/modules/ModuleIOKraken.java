@@ -102,9 +102,9 @@ public class ModuleIOKraken implements ModuleIO {
         mAbsoluteEncoder = new CANcoder(config.encoderID(), DriveConstants.kDriveCANBusName);
         
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
-        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encoderConfig.MagnetSensor.withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.5));
-        encoderConfig.MagnetSensor.withMagnetOffset(Rotations.of(config.offset()));
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+        encoderConfig.MagnetSensor.withMagnetOffset(Rotations.of(-config.offset()));
         mAbsoluteEncoder.getConfigurator().apply(encoderConfig);
         
         mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
@@ -143,7 +143,7 @@ public class ModuleIOKraken implements ModuleIO {
         mAzimuthSupplyCurrent = mAzimuthMotor.getSupplyCurrent();
         mAzimuthTemp = mAzimuthMotor.getDeviceTemp();
 
-        resetAzimuthEncoder();
+        // resetAzimuthEncoder();
     }
 
     @Override
