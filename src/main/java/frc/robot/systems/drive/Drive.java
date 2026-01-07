@@ -109,7 +109,10 @@ public class Drive extends SubsystemBase {
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
     private PathConstraints mDriveConstraints = DriveConstants.kAutoDriveConstraints;
 
-    private SwerveModuleState[] mPrevStates = SwerveUtils.zeroStates();
+    private SwerveModuleState[] mPrevSetpointStates = SwerveUtils.zeroStates();
+
+    private SwerveModuleState[] mPrevStates = null;
+    private SwerveModulePosition[] mPrevPositions = null;
 
     private ManualTeleopController mTeleopController = new ManualTeleopController();
 
@@ -192,6 +195,14 @@ public class Drive extends SubsystemBase {
     }
 
     private void updateSensorsAndOdometry() {
+        if(mPrevStates == null || mPrevPositions == null) {
+            mPrevStates = SwerveUtils.zeroStates();
+            mPrevPositions = SwerveUtils.zeroPositions();
+        } else {
+            mPrevStates = getModuleStates();
+            mPrevPositions = getModulePositions();
+        }
+
         /* GYRO */
         mGyro.updateInputs(mGyroInputs);
         Logger.processInputs("Drive/Gyro", mGyroInputs);
@@ -218,6 +229,16 @@ public class Drive extends SubsystemBase {
             Telemetry.log(
                     observation.camName() + "/stdDevTheta",
                     observation.stdDevs().get(2));
+        }
+
+        for(int i = 0; i < mModules.length; i++) {
+            Rotation2d deltaChange = mPrevPositions[i].angle.minus(getModulePositions()[i].angle);
+
+            double deltaD = deltaChange.getRadians() * DriveConstants.kDriveMotorGearing * DriveConstants.kWheelCircumferenceMeters;
+
+            getModulePositions()[i] = new SwerveModulePosition(
+                getModulePositions()[i].distanceMeters + deltaD,
+                getModulePositions()[i].angle); 
         }
 
         mPoseEstimator.update(mRobotRotation, getModulePositions());
@@ -443,7 +464,7 @@ public class Drive extends SubsystemBase {
                 setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
 
                 double directionOfVelChange =
-                        Math.signum(setpointStates[i].speedMetersPerSecond - mPrevStates[i].speedMetersPerSecond);
+                        Math.signum(setpointStates[i].speedMetersPerSecond - mPrevSetpointStates[i].speedMetersPerSecond);
                 Telemetry.log("Drive/Module/Feedforward/" + i + "/dir", directionOfVelChange);
                 if (mDriveState.equals(DriveState.AUTON)) {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
@@ -464,7 +485,7 @@ public class Drive extends SubsystemBase {
             }
         }
 
-        mPrevStates = optimizedSetpointStates;
+        mPrevSetpointStates = optimizedSetpointStates;
 
         Telemetry.log("Drive/Swerve/Setpoints", unOptimizedSetpointStates);
         Telemetry.log("Drive/Swerve/SetpointsOptimized", optimizedSetpointStates);
