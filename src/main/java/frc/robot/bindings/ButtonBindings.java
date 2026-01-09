@@ -32,5 +32,9 @@ public class ButtonBindings {
                 Commands.runOnce(() -> mDriveSS.setPose(new Pose2d()), mDriveSS)
                     .andThen(mDriveSS.setToGenericAutoAlign(() -> new Pose2d(0.5, 0, Rotation2d.kCCW_Pi_2), ConstraintType.LINEAR)))
             .onFalse(mDriveSS.setToTeleop());
+
+        mDriverController.x()
+            .onTrue(mDriveSS.characterizeAzimuths(0))
+            .onFalse(mDriveSS.setToTeleop());
     }
 }

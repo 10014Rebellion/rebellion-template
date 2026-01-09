@@ -53,7 +53,7 @@ public class DriveConstants {
 
     /* MISC */
     public static final double kDriftRate = RobotBase.isReal() ? 2.5 : 5.57;
-    public static final double kAzimuthDriveScalar = RobotBase.isReal() ? 1.0 : 0.0;
+    public static final double kAzimuthDriveScalar = RobotBase.isReal() ? 0.0 : 0.0;
     public static final double kSniperSpeed = 0.2;
 
     public static final boolean kDoExtraLogging = false;
@@ -83,7 +83,7 @@ public class DriveConstants {
     public static final ModuleControlConfig kModuleControllerConfigs = RobotBase.isReal()
             ? new ModuleControlConfig(
                     new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0), //DRIVE
-                    new PIDController(3.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0)) // AZIMUTH
+                    new PIDController(3.5, 0.0, 0.0), new SimpleMotorFeedforward(0.3, 2.25, 0.0)) // AZIMUTH
             : new ModuleControlConfig(
                     new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005),
                     new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0));

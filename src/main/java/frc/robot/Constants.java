@@ -2,6 +2,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -12,7 +13,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
     public static final Mode kSimMode = Mode.SIM;
     public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : kSimMode;
-    public static final boolean kTuningMode = false;
+    public static final boolean kTuningMode = !DriverStation.isFMSAttached();
 
     public static enum Mode {
         /** Running on a real robot. */

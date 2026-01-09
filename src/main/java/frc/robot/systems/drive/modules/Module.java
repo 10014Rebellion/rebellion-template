@@ -78,11 +78,11 @@ public class Module {
             } else {
                 io.setDriveVelocity(velocitySetpointMPS, 0.0);
             }
-        }
+        
 
         // Runs azimuth PID
         if (azimuthSetpointAngle != null) {
-            double ffOutput = azimuthFF.getKs() * Math.signum(inputs.iAzimuthVelocity.getDegrees());
+            double ffOutput = azimuthFF.calculate(0, 0);
             Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
             io.setAzimuthPosition(azimuthSetpointAngle, ffOutput);
         }
@@ -121,6 +121,7 @@ public class Module {
                     azimuthFF = new SimpleMotorFeedforward(turnS.get(), 0.0, 0.0);
                 },
                 turnS);
+            }
     }
 
     /* Sets the desired setpoint of the module with FF. Disables the all FF include velocity FF

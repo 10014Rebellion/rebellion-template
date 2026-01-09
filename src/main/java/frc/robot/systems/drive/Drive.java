@@ -136,6 +136,7 @@ public class Drive extends SubsystemBase {
             new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
     private static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
     private static final LoggedTunableNumber tAzimuthDriveScalar = new LoggedTunableNumber("Drive/AzimuthDriveScalar", DriveConstants.kAzimuthDriveScalar);
+    private static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
 
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 
@@ -633,6 +634,15 @@ public class Drive extends SubsystemBase {
                                 / kWheelRadiusMeters)
                         * kDrivebaseRadiusMeters);
     }
+
+    public Command characterizeAzimuths(int pModNumber) {
+        return new FunctionalCommand(
+            () -> setDriveState(DriveState.SYSID_CHARACTERIZATION), 
+            () -> mModules[pModNumber].setAzimuthVoltage(tAzimuthCharacterizationVoltage.get()), 
+            (interrupted) -> {}, 
+            () -> false, 
+            this);
+    } 
 
     ///////////////////////// GETTERS \\\\\\\\\\\\\\\\\\\\\\\\
     @AutoLogOutput(key = "Drive/Swerve/MeasuredStates")
