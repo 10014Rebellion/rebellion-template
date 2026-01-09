@@ -13,6 +13,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -133,6 +135,7 @@ public class Drive extends SubsystemBase {
     private static final LoggedTunableNumber tRotationDriftTestSpeedDeg =
             new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
     private static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
+    private static final LoggedTunableNumber tAzimuthDriveScalar = new LoggedTunableNumber("Drive/AzimuthDriveScalar", DriveConstants.kAzimuthDriveScalar);
 
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
 
@@ -469,6 +472,14 @@ public class Drive extends SubsystemBase {
                 if (mDriveState.equals(DriveState.AUTON)) {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
                 }
+
+                Rotation2d deltaChange = mPrevPositions[i].angle.minus(getModulePositions()[i].angle);
+
+                double deltaV = deltaChange.getRadians() * DriveConstants.kDriveMotorGearing * DriveConstants.kWheelCircumferenceMeters / 0.02;
+                double desV = Math.abs(setpointStates[i].speedMetersPerSecond);
+                double desDriveV = desV - deltaV;
+
+                setpointStates[i] = new SwerveModuleState(desDriveV, setpointStates[i].angle);
 
                 optimizedSetpointStates[i] = mModules[i].setDesiredStateWithAmpFF(setpointStates[i], driveAmps);
 
