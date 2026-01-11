@@ -1,12 +1,8 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// REBELLION 10014
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -15,17 +11,28 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
-  public static final Mode simMode = Mode.SIM;
-  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+    public static final Mode kSimMode = Mode.SIM;
+    public static final Mode kCurrentMode = RobotBase.isReal() ? Mode.REAL : kSimMode;
+    public static final boolean kTuningMode = !DriverStation.isFMSAttached();
 
-  public static enum Mode {
-    /** Running on a real robot. */
-    REAL,
+    public static enum Mode {
+        /** Running on a real robot. */
+        REAL,
 
-    /** Running a physics simulator. */
-    SIM,
+        /** Running a physics simulator. */
+        SIM,
 
-    /** Replaying from a log file. */
-    REPLAY
-  }
+        /** Replaying from a log file. */
+        REPLAY
+    }
+
+    public static class DashboardConstants {
+        public static final boolean kDashboardEnabled = true;
+        public static final String kDashboardPath = "dashboard";
+        public static final int kDashboardPort = 5800;
+
+        public static final boolean kDeployServerEnabled = false;
+        public static final String kDeployServerPath = "";
+        public static final int kDeployServerPort = 5801;
+    }
 }
