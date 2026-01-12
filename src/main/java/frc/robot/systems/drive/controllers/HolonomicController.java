@@ -20,101 +20,94 @@ public class HolonomicController {
         LINEAR
     }
 
-    public static final LoggedTunableNumber xP = new LoggedTunableNumber("AutoAlign/X/kP", 3.0);
-    public static final LoggedTunableNumber xD = new LoggedTunableNumber("AutoAlign/X/kD", 0.0);
-    public static final LoggedTunableNumber xI = new LoggedTunableNumber("AutoAlign/X/kI", 0.0);
-    public static final LoggedTunableNumber xIZone = new LoggedTunableNumber("AutoAlign/X/kIZone", 0.0);
-    public static final LoggedTunableNumber xIRange = new LoggedTunableNumber("AutoAlign/X/kIRange", 0.0);
-    public static final LoggedTunableNumber xMaxVMPS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPS", 3.5);
-    public static final LoggedTunableNumber xMaxAMPSS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPSS", 7.0);
+    public static final LoggedTunableNumber tXP = new LoggedTunableNumber("AutoAlign/X/kP", 3.0);
+    public static final LoggedTunableNumber tXD = new LoggedTunableNumber("AutoAlign/X/kD", 0.0);
+    public static final LoggedTunableNumber tXI = new LoggedTunableNumber("AutoAlign/X/kI", 0.0);
+    public static final LoggedTunableNumber tXIZone = new LoggedTunableNumber("AutoAlign/X/kIZone", 0.0);
+    public static final LoggedTunableNumber tXIRange = new LoggedTunableNumber("AutoAlign/X/kIRange", 0.0);
+    public static final LoggedTunableNumber tXMaxVMPS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPS", 3.5);
+    public static final LoggedTunableNumber tXMaxAMPSS = new LoggedTunableNumber("AutoAlign/X/kMaxVMPSS", 7.0);
 
-    public static final LoggedTunableNumber xS = new LoggedTunableNumber("AutoAlign/X/kS", 0.0);
-    public static final LoggedTunableNumber xV = new LoggedTunableNumber("AutoAlign/X/kV", 0.65);
+    public static final LoggedTunableNumber tXS = new LoggedTunableNumber("AutoAlign/X/kS", 0.0);
+    public static final LoggedTunableNumber tXV = new LoggedTunableNumber("AutoAlign/X/kV", 0.65);
 
-    public static final LoggedTunableNumber xToleranceMeters =
-            new LoggedTunableNumber("AutoAlign/X/ToleranceMeters", 0.03);
+    public static final LoggedTunableNumber tXToleranceMeters = new LoggedTunableNumber("AutoAlign/X/ToleranceMeters", 0.03);
 
-    public static final LoggedTunableNumber yP = new LoggedTunableNumber("AutoAlign/Y/kP", 3.0);
-    public static final LoggedTunableNumber yD = new LoggedTunableNumber("AutoAlign/Y/kD", 0.0);
-    public static final LoggedTunableNumber yI = new LoggedTunableNumber("AutoAlign/Y/kI", 0.0);
-    public static final LoggedTunableNumber yIZone = new LoggedTunableNumber("AutoAlign/Y/kIZone", 0.0);
-    public static final LoggedTunableNumber yIRange = new LoggedTunableNumber("AutoAlign/Y/kIRange", 0.0);
-    public static final LoggedTunableNumber yMaxVMPS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPS", 3.5);
-    public static final LoggedTunableNumber yMaxAMPSS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPSS", 7.0);
+    public static final LoggedTunableNumber tYP = new LoggedTunableNumber("AutoAlign/Y/kP", 3.0);
+    public static final LoggedTunableNumber tYD = new LoggedTunableNumber("AutoAlign/Y/kD", 0.0);
+    public static final LoggedTunableNumber tYI = new LoggedTunableNumber("AutoAlign/Y/kI", 0.0);
+    public static final LoggedTunableNumber tYIZone = new LoggedTunableNumber("AutoAlign/Y/kIZone", 0.0);
+    public static final LoggedTunableNumber tYIRange = new LoggedTunableNumber("AutoAlign/Y/kIRange", 0.0);
+    public static final LoggedTunableNumber tYMaxVMPS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPS", 3.5);
+    public static final LoggedTunableNumber tYMaxAMPSS = new LoggedTunableNumber("AutoAlign/Y/kMaxVMPSS", 7.0);
 
-    public static final LoggedTunableNumber yS = new LoggedTunableNumber("AutoAlign/Y/kS", 0.0);
-    public static final LoggedTunableNumber yV = new LoggedTunableNumber("AutoAlign/Y/kV", 0.65);
+    public static final LoggedTunableNumber tYS = new LoggedTunableNumber("AutoAlign/Y/kS", 0.0);
+    public static final LoggedTunableNumber tYV = new LoggedTunableNumber("AutoAlign/Y/kV", 0.65);
 
-    public static final LoggedTunableNumber yToleranceMeters =
-            new LoggedTunableNumber("AutoAlign/Y/ToleranceMeters", 0.05);
+    public static final LoggedTunableNumber tYToleranceMeters = new LoggedTunableNumber("AutoAlign/Y/ToleranceMeters", 0.05);
 
-    public static final LoggedTunableNumber omegaP = new LoggedTunableNumber("AutoAlign/Omega/kP", 3.0);
-    public static final LoggedTunableNumber omegaD = new LoggedTunableNumber("AutoAlign/Omega/kD", 0.0);
+    public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("AutoAlign/Omega/kP", 3.0);
+    public static final LoggedTunableNumber tOmegaD = new LoggedTunableNumber("AutoAlign/Omega/kD", 0.0);
 
-    public static final LoggedTunableNumber omegaI = new LoggedTunableNumber("AutoAlign/Omega/kI", 0.0);
-    public static final LoggedTunableNumber omegaIZone = new LoggedTunableNumber("AutoAlign/Omega/kIZone", 0.0);
-    public static final LoggedTunableNumber omegaIRange = new LoggedTunableNumber("AutoAlign/Omega/kIRange", 0.0);
+    public static final LoggedTunableNumber tOmegaI = new LoggedTunableNumber("AutoAlign/Omega/kI", 0.0);
+    public static final LoggedTunableNumber tOmegaIZone = new LoggedTunableNumber("AutoAlign/Omega/kIZone", 0.0);
+    public static final LoggedTunableNumber tOmegaIRange = new LoggedTunableNumber("AutoAlign/Omega/kIRange", 0.0);
 
-    public static final LoggedTunableNumber omegaMaxVDPS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPS", 720);
-    public static final LoggedTunableNumber omegaMaxADPSS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPSS", 2500);
+    public static final LoggedTunableNumber tOmegaMaxVDPS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPS", 720);
+    public static final LoggedTunableNumber tOmegaMaxADPSS = new LoggedTunableNumber("AutoAlign/Omega/kMaxVDPSS", 2500);
 
-    public static final LoggedTunableNumber omegaS = new LoggedTunableNumber("AutoAlign/Omega/kS", 0.0);
-    public static final LoggedTunableNumber omegaV = new LoggedTunableNumber("AutoAlign/Omega/kV", 1.0);
+    public static final LoggedTunableNumber tOmegaS = new LoggedTunableNumber("AutoAlign/Omega/kS", 0.0);
+    public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("AutoAlign/Omega/kV", 1.0);
 
-    public static final LoggedTunableNumber omegaToleranceDegrees =
-            new LoggedTunableNumber("AutoAlign/Omega/ToleranceDegrees", 1.5);
+    public static final LoggedTunableNumber tOmegaToleranceDegrees = new LoggedTunableNumber("AutoAlign/Omega/ToleranceDegrees", 1.5);
+    public static final LoggedTunableNumber tDistanceMaxVMPS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPS", 3.75);
+    public static final LoggedTunableNumber tDistanceMaxAMPSS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPSS", 10.0);
 
-    public static final LoggedTunableNumber distanceMaxVMPS =
-            new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPS", 3.75);
-    public static final LoggedTunableNumber distanceMaxAMPSS =
-            new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPSS", 10.0);
+    public static final LoggedTunableNumber tDistanceToleranceMeters = new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.03);
 
-    public static final LoggedTunableNumber distanceToleranceMeters =
-            new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.03);
+    public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 1.0);
 
-    public static final LoggedTunableNumber ffRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 1.0);
+    private ProfiledPIDController tXController;
+    private ProfiledPIDController tYController;
+    private ProfiledPIDController tOmegaController;
 
-    private ProfiledPIDController xController;
-    private ProfiledPIDController yController;
-    private ProfiledPIDController omegaController;
+    private SimpleMotorFeedforward tXFeedforward;
+    private SimpleMotorFeedforward tYFeedforward;
+    private SimpleMotorFeedforward tOmegaFeedforward;
 
-    private SimpleMotorFeedforward xFeedforward;
-    private SimpleMotorFeedforward yFeedforward;
-    private SimpleMotorFeedforward omegaFeedforward;
-
-    private ConstraintType type = ConstraintType.AXIS;
+    private ConstraintType tType = ConstraintType.AXIS;
 
     public HolonomicController() {
 
-        this.xController = new ProfiledPIDController(
-                xP.get(), xI.get(), xD.get(), new Constraints(xMaxVMPS.get(), xMaxAMPSS.get()));
-        xController.setIntegratorRange(-xIRange.get(), xIRange.get());
-        xController.setIZone(xIZone.get());
-        xController.setConstraints(new Constraints(xMaxVMPS.get(), xMaxAMPSS.get()));
-        xController.setTolerance(xToleranceMeters.get());
-        this.xFeedforward = new SimpleMotorFeedforward(xS.get(), xV.get());
+        this.tXController = new ProfiledPIDController(
+                tXP.get(), tXI.get(), tXD.get(), new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
+        tXController.setIntegratorRange(-tXIRange.get(), tXIRange.get());
+        tXController.setIZone(tXIZone.get());
+        tXController.setConstraints(new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
+        tXController.setTolerance(tXToleranceMeters.get());
+        this.tXFeedforward = new SimpleMotorFeedforward(tXS.get(), tXV.get());
 
-        this.yController = new ProfiledPIDController(
-                yP.get(), yI.get(), yD.get(), new Constraints(yMaxVMPS.get(), yMaxAMPSS.get()));
-        yController.setIntegratorRange(-yIRange.get(), yIRange.get());
-        yController.setIZone(yIZone.get());
-        yController.setConstraints(new Constraints(yMaxVMPS.get(), yMaxAMPSS.get()));
-        yController.setTolerance(yToleranceMeters.get());
-        this.yFeedforward = new SimpleMotorFeedforward(yS.get(), yV.get());
+        this.tYController = new ProfiledPIDController(
+                tYP.get(), tYI.get(), tYD.get(), new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
+        tYController.setIntegratorRange(-tYIRange.get(), tYIRange.get());
+        tYController.setIZone(tYIZone.get());
+        tYController.setConstraints(new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
+        tYController.setTolerance(tYToleranceMeters.get());
+        this.tYFeedforward = new SimpleMotorFeedforward(tYS.get(), tYV.get());
 
-        this.omegaController = new ProfiledPIDController(
-                omegaP.get(), omegaI.get(), omegaD.get(), new Constraints(omegaMaxVDPS.get(), omegaMaxADPSS.get()));
-        omegaController.enableContinuousInput(-180.0, 180.0);
-        omegaController.setIntegratorRange(-omegaIRange.get(), omegaIRange.get());
-        omegaController.setIZone(omegaIZone.get());
-        omegaController.setConstraints(new Constraints(omegaMaxVDPS.get(), omegaMaxADPSS.get()));
-        omegaController.setTolerance(omegaToleranceDegrees.get());
-        this.omegaFeedforward = new SimpleMotorFeedforward(omegaS.get(), omegaV.get());
+        this.tOmegaController = new ProfiledPIDController(
+                tOmegaP.get(), tOmegaI.get(), tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
+        tOmegaController.enableContinuousInput(-180.0, 180.0);
+        tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
+        tOmegaController.setIZone(tOmegaIZone.get());
+        tOmegaController.setConstraints(new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
+        tOmegaController.setTolerance(tOmegaToleranceDegrees.get());
+        this.tOmegaFeedforward = new SimpleMotorFeedforward(tOmegaS.get(), tOmegaV.get());
     }
 
     /* WHEN USING LINEAR CONSTRAINT, GOAL */
     public void setConstraintType(ConstraintType pType) {
-        this.type = pType;
+        this.tType = pType;
     }
 
     public void reset(Pose2d pStartPose, Pose2d pGoalPose) {
@@ -128,7 +121,7 @@ public class HolonomicController {
      * GOAL POSE IS ONLY UTLIIZED WHEN IN LINEAR CONSTRAINT
      */
     public void reset(Pose2d pRobotPose, ChassisSpeeds pRobotChassisSpeeds, Pose2d pGoalPose) {
-        if (type.equals(ConstraintType.LINEAR)) {
+        if (tType.equals(ConstraintType.LINEAR)) {
             Rotation2d heading =
                     new Rotation2d(pGoalPose.getX() - pRobotPose.getX(), pGoalPose.getY() - pRobotPose.getY());
 
@@ -138,71 +131,71 @@ public class HolonomicController {
             // Telemetry.log("AutoAlign/Linear/Y/Vel", distanceMaxVMPS.get() *  heading.getCos());
             // Telemetry.log("AutoAlign/Linear/Y/Accel", distanceMaxVMPS.get() *  heading.getCos());
 
-            xController.setConstraints(new TrapezoidProfile.Constraints(
-                    distanceMaxVMPS.get() * Math.abs(heading.getCos()),
-                    distanceMaxAMPSS.get() * Math.abs(heading.getCos())));
+            tXController.setConstraints(new TrapezoidProfile.Constraints(
+                    tDistanceMaxVMPS.get() * Math.abs(heading.getCos()),
+                    tDistanceMaxAMPSS.get() * Math.abs(heading.getCos())));
 
-            yController.setConstraints(new TrapezoidProfile.Constraints(
-                    distanceMaxVMPS.get() * Math.abs(heading.getSin()),
-                    distanceMaxAMPSS.get() * Math.abs(heading.getSin())));
+            tYController.setConstraints(new TrapezoidProfile.Constraints(
+                    tDistanceMaxVMPS.get() * Math.abs(heading.getSin()),
+                    tDistanceMaxAMPSS.get() * Math.abs(heading.getSin())));
         } else {
-            xController.setConstraints(new TrapezoidProfile.Constraints(xMaxVMPS.get(), xMaxAMPSS.get()));
-            yController.setConstraints(new TrapezoidProfile.Constraints(yMaxVMPS.get(), yMaxAMPSS.get()));
+            tXController.setConstraints(new TrapezoidProfile.Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
+            tYController.setConstraints(new TrapezoidProfile.Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
         }
 
-        xController.reset(new State(pRobotPose.getX(), pRobotChassisSpeeds.vxMetersPerSecond));
+        tXController.reset(new State(pRobotPose.getX(), pRobotChassisSpeeds.vxMetersPerSecond));
 
-        yController.reset(new State(pRobotPose.getY(), pRobotChassisSpeeds.vyMetersPerSecond));
+        tYController.reset(new State(pRobotPose.getY(), pRobotChassisSpeeds.vyMetersPerSecond));
 
-        omegaController.reset(new State(pRobotPose.getRotation().getDegrees(), 0.0));
+        tOmegaController.reset(new State(pRobotPose.getRotation().getDegrees(), 0.0));
     }
 
-    public ChassisSpeeds calculate(Pose2d goalPose, Pose2d currentPose) {
-        return calculate(goalPose, new ChassisSpeeds(), currentPose);
+    public ChassisSpeeds calculate(Pose2d pGoalPose, Pose2d pCurrentPose) {
+        return calculate(pGoalPose, new ChassisSpeeds(), pCurrentPose);
     }
 
     /* Uses 3 PID controllers to set the chassis speeds */
-    public ChassisSpeeds calculate(Pose2d goalPose, ChassisSpeeds goalSpeed, Pose2d currentPose) {
+    public ChassisSpeeds calculate(Pose2d pGoalPose, ChassisSpeeds pGoalSpeed, Pose2d pCurrentPose) {
         double ffScalar = Math.min(
-                Math.hypot(goalPose.getX() - currentPose.getX(), goalPose.getY() - currentPose.getY()) / ffRadius.get(),
+                Math.hypot(pGoalPose.getX() - pCurrentPose.getX(), pGoalPose.getY() - pCurrentPose.getY()) / tFFRadius.get(),
                 1.0);
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
-                (xController.calculate(
-                                currentPose.getX(),
-                                new TrapezoidProfile.State(goalPose.getX(), goalSpeed.vxMetersPerSecond))
-                        + ffScalar * xFeedforward.calculate(xController.getSetpoint().velocity)),
-                (yController.calculate(
-                                currentPose.getY(),
-                                new TrapezoidProfile.State(goalPose.getY(), goalSpeed.vyMetersPerSecond))
-                        + ffScalar * yFeedforward.calculate(yController.getSetpoint().velocity)),
-                (Math.toRadians(omegaController.calculate(
-                                currentPose.getRotation().getDegrees(),
+                (tXController.calculate(
+                                pCurrentPose.getX(),
+                                new TrapezoidProfile.State(pGoalPose.getX(), pGoalSpeed.vxMetersPerSecond))
+                        + ffScalar * tXFeedforward.calculate(tXController.getSetpoint().velocity)),
+                (tYController.calculate(
+                                pCurrentPose.getY(),
+                                new TrapezoidProfile.State(pGoalPose.getY(), pGoalSpeed.vyMetersPerSecond))
+                        + ffScalar * tYFeedforward.calculate(tYController.getSetpoint().velocity)),
+                (Math.toRadians(tOmegaController.calculate(
+                                pCurrentPose.getRotation().getDegrees(),
                                 new TrapezoidProfile.State(
-                                        goalPose.getRotation().getDegrees(),
-                                        Math.toDegrees(goalSpeed.omegaRadiansPerSecond)))
-                        + omegaFeedforward.calculate(omegaController.getSetpoint().velocity))),
-                currentPose.getRotation());
+                                        pGoalPose.getRotation().getDegrees(),
+                                        Math.toDegrees(pGoalSpeed.omegaRadiansPerSecond)))
+                        + tOmegaFeedforward.calculate(tOmegaController.getSetpoint().velocity))),
+                pCurrentPose.getRotation());
     }
 
     ////////////////////////// GETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\
     @AutoLogOutput(key = "Drive/HolonomicController/AtGoal")
     public boolean atGoal() {
-        return xController.atGoal() && yController.atGoal() && omegaController.atGoal();
+        return tXController.atGoal() && tYController.atGoal() && tOmegaController.atGoal();
     }
 
     @AutoLogOutput(key = "Drive/HolonomicController/PositionGoal")
     public Pose2d getPositionGoal() {
         return new Pose2d(
-                new Translation2d(xController.getGoal().position, yController.getGoal().position),
-                Rotation2d.fromDegrees(omegaController.getGoal().position));
+                new Translation2d(tXController.getGoal().position, tYController.getGoal().position),
+                Rotation2d.fromDegrees(tOmegaController.getGoal().position));
     }
 
     @AutoLogOutput(key = "Drive/HolonomicController/PositionSetpoint")
     public Pose2d getPositionSetpoint() {
         return new Pose2d(
-                new Translation2d(xController.getSetpoint().position, yController.getSetpoint().position),
-                Rotation2d.fromDegrees(omegaController.getSetpoint().position));
+                new Translation2d(tXController.getSetpoint().position, tYController.getSetpoint().position),
+                Rotation2d.fromDegrees(tOmegaController.getSetpoint().position));
     }
 
     @AutoLogOutput(key = "Drive/HolonomicController/AtPositionTimeout")
@@ -221,17 +214,17 @@ public class HolonomicController {
     @AutoLogOutput(key = "Drive/HolonomicController/VelocitySetpoint")
     public ChassisSpeeds getVelocitySetpoint() {
         return new ChassisSpeeds(
-                xController.getSetpoint().velocity,
-                yController.getSetpoint().velocity,
-                Math.toRadians(omegaController.getSetpoint().velocity));
+                tXController.getSetpoint().velocity,
+                tYController.getSetpoint().velocity,
+                Math.toRadians(tOmegaController.getSetpoint().velocity));
     }
 
     @AutoLogOutput(key = "Drive/HolonomicController/PoseError")
     public Pose2d getPoseError() {
         return new Pose2d(
-                xController.getPositionError(),
-                yController.getPositionError(),
-                new Rotation2d(omegaController.getPositionError()));
+                tXController.getPositionError(),
+                tYController.getPositionError(),
+                new Rotation2d(tOmegaController.getPositionError()));
     }
 
     ////////////////////////// SETTERS \\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -239,86 +232,86 @@ public class HolonomicController {
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    xController.setPID(xP.get(), xI.get(), xD.get());
-                    xController.setIntegratorRange(-xIRange.get(), xIRange.get());
-                    xController.setIZone(xIZone.get());
-                    if (type.equals(ConstraintType.LINEAR))
-                        xController.setConstraints(new Constraints(xMaxVMPS.get(), xMaxAMPSS.get()));
+                    tXController.setPID(tXP.get(), tXI.get(), tXD.get());
+                    tXController.setIntegratorRange(-tXIRange.get(), tXIRange.get());
+                    tXController.setIZone(tXIZone.get());
+                    if (tType.equals(ConstraintType.LINEAR))
+                        tXController.setConstraints(new Constraints(tXMaxVMPS.get(), tXMaxAMPSS.get()));
                 },
-                xP,
-                xI,
-                xD,
-                xIRange,
-                xIZone,
-                xMaxVMPS,
-                xMaxAMPSS);
+                tXP,
+                tXI,
+                tXD,
+                tXIRange,
+                tXIZone,
+                tXMaxVMPS,
+                tXMaxAMPSS);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    xFeedforward = new SimpleMotorFeedforward(xS.get(), xV.get());
+                    tXFeedforward = new SimpleMotorFeedforward(tXS.get(), tXV.get());
                 },
-                xS,
-                xV);
+                tXS,
+                tXV);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    yController.setPID(yP.get(), yI.get(), yD.get());
-                    yController.setIntegratorRange(-yIRange.get(), yIRange.get());
-                    yController.setIZone(yIZone.get());
-                    if (type.equals(ConstraintType.LINEAR))
-                        yController.setConstraints(new Constraints(yMaxVMPS.get(), yMaxAMPSS.get()));
+                    tYController.setPID(tYP.get(), tYI.get(), tYD.get());
+                    tYController.setIntegratorRange(-tYIRange.get(), tYIRange.get());
+                    tYController.setIZone(tYIZone.get());
+                    if (tType.equals(ConstraintType.LINEAR))
+                        tYController.setConstraints(new Constraints(tYMaxVMPS.get(), tYMaxAMPSS.get()));
                 },
-                yP,
-                yI,
-                yD,
-                yIRange,
-                yIZone,
-                yMaxVMPS,
-                yMaxAMPSS);
+                tYP,
+                tYI,
+                tYD,
+                tYIRange,
+                tYIZone,
+                tYMaxVMPS,
+                tYMaxAMPSS);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    yFeedforward = new SimpleMotorFeedforward(yS.get(), yV.get());
+                    tYFeedforward = new SimpleMotorFeedforward(tYS.get(), tYV.get());
                 },
-                yS,
-                yV);
+                tYS,
+                tYV);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    omegaController.setPID(omegaP.get(), omegaI.get(), omegaD.get());
-                    omegaController.setIntegratorRange(-omegaIRange.get(), omegaIRange.get());
-                    omegaController.setIZone(omegaIZone.get());
-                    omegaController.setConstraints(new Constraints(omegaMaxVDPS.get(), omegaMaxADPSS.get()));
+                    tOmegaController.setPID(tOmegaP.get(), tOmegaI.get(), tOmegaD.get());
+                    tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
+                    tOmegaController.setIZone(tOmegaIZone.get());
+                    tOmegaController.setConstraints(new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
                 },
-                omegaP,
-                omegaI,
-                omegaD,
-                omegaIRange,
-                omegaIZone,
-                omegaMaxVDPS,
-                omegaMaxADPSS);
+                tOmegaP,
+                tOmegaI,
+                tOmegaD,
+                tOmegaIRange,
+                tOmegaIZone,
+                tOmegaMaxVDPS,
+                tOmegaMaxADPSS);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    omegaFeedforward = new SimpleMotorFeedforward(omegaS.get(), omegaV.get());
+                    tOmegaFeedforward = new SimpleMotorFeedforward(tOmegaS.get(), tOmegaV.get());
                 },
-                omegaS,
-                omegaV);
+                tOmegaS,
+                tOmegaV);
 
         LoggedTunableNumber.ifChanged(
                 hashCode(),
                 () -> {
-                    xController.setTolerance(xToleranceMeters.get());
-                    yController.setTolerance(yToleranceMeters.get());
-                    omegaController.setTolerance(omegaToleranceDegrees.get());
+                    tXController.setTolerance(tXToleranceMeters.get());
+                    tYController.setTolerance(tYToleranceMeters.get());
+                    tOmegaController.setTolerance(tOmegaToleranceDegrees.get());
                 },
-                xToleranceMeters,
-                yToleranceMeters,
-                omegaToleranceDegrees);
+                tXToleranceMeters,
+                tYToleranceMeters,
+                tOmegaToleranceDegrees);
     }
 }

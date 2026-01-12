@@ -65,7 +65,7 @@ public class ModuleIOFXFXS implements ModuleIO {
 
     public ModuleIOFXFXS(ModuleHardwareConfig config) {
         /* DRIVE INSTANTIATION AND CONFIGURATION */
-        driveMotor = new TalonFX(config.driveID(), DriveConstants.kDriveCANBusName);
+        driveMotor = new TalonFX(config.driveID(), DriveConstants.kCANBus);
         var driveConfig = new TalonFXConfiguration();
 
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -112,7 +112,7 @@ public class ModuleIOFXFXS implements ModuleIO {
         // absoluteEncoder.optimizeBusUtilization();
 
         /* AZIMUTH INSTANTIATION AND CONFIGURATION */
-        azimuthMotor = new TalonFXS(config.azimuthID(), DriveConstants.kDriveCANBusName);
+        azimuthMotor = new TalonFXS(config.azimuthID(), DriveConstants.kCANBus);
         var turnConfig = new TalonFXSConfiguration();
         azimuthMotor.getConfigurator().apply(turnConfig);
 

@@ -42,8 +42,7 @@ public class CameraIOPVTag implements CameraIO {
         this.mCameraTransform = pCameraTransform;
         this.mOrientation = pOrientation;
 
-        mPoseEstimator = new PhotonPoseEstimator(
-                FieldConstants.kFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, pCameraTransform);
+        mPoseEstimator = new PhotonPoseEstimator(FieldConstants.kFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, pCameraTransform);
 
         mPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_LAST_POSE);
 

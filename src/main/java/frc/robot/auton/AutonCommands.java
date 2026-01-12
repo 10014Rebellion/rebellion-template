@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -31,148 +32,129 @@ public class AutonCommands extends SubsystemBase {
         IntakeCoral
     }
 
-    private SendableChooser<Command> autoChooser;
+    private final Drive mRobotDrive;
 
-    private Drive robotDrive;
+    private final SendableChooser<Command> mAutoChooser;
 
-    private AutoState autoState = AutoState.PreScoreCoral;
+    private Trigger mIR1;
+    private Trigger mIR2;
+    private Trigger mIR3;
 
-    private Trigger preScoreCoral;
-    private Trigger scoreCoral;
-    private Trigger prIntakeCoral;
-    private Trigger IntakeCoral;
-
-    private Trigger IR1;
-    private Trigger IR2;
-    private Trigger IR3;
-
-    private Trigger elevInIntakeWristExitRange;
-    private Trigger wristInIntakeEntryRange;
-    private Trigger wristInIntakeExitRange;
-    private Trigger wristInScoringRange;
+    private Trigger mElevInIntakeWristExitRange;
+    private Trigger mWristInIntakeEntryRange;
+    private Trigger mWristInScoringRange;
     
-    private Trigger inAutoAlignRange;
-    private Trigger inDrivingScoringTolerance;
-    private Trigger inIntakeStartTolerance;
-    private Trigger inIntakeTolerance;
+    private Trigger mInAutoAlignRange;
+    private Trigger mInDrivingScoringTolerance;
+    private Trigger mInIntakeStartTolerance;
 
-    private Pose2d pose;
+    public AutonCommands(Drive pRobotDrive) {
+        this.mRobotDrive = pRobotDrive;
 
-    public AutonCommands(Drive robotDrive) {
-        // store subsystems
-        this.robotDrive = robotDrive;
+        mAutoChooser = new SendableChooser<>();
 
-        autoChooser = new SendableChooser<>();
-
-        autoChooser.setDefaultOption("Stationary", backUpAuton());
+        mAutoChooser.setDefaultOption("Stationary", backUpAuton());
         tryToAddPathToChooser("String", nextScoreCoralPath("A1-Barge"));
-
-        preScoreCoral = new Trigger(() ->  true);
-        scoreCoral = new Trigger(() ->  true);
-        prIntakeCoral = new Trigger(() ->  true);
-        IntakeCoral = new Trigger(() ->  true);
     
-        IR1 = new Trigger(() ->  true);
-        IR2 = new Trigger(() ->  true);
-        IR3 = new Trigger(() ->  true);
+        mIR1 = new Trigger(() ->  true);
+        mIR2 = new Trigger(() ->  true);
+        mIR3 = new Trigger(() ->  true);
     
-        elevInIntakeWristExitRange = new Trigger(() ->  true);
-        wristInIntakeEntryRange = new Trigger(() ->  true);
-        wristInIntakeExitRange = new Trigger(() ->  true);
-        wristInScoringRange = new Trigger(() ->  true);
+        mElevInIntakeWristExitRange = new Trigger(() ->  true);
+        mWristInIntakeEntryRange = new Trigger(() ->  true);
+        mWristInScoringRange = new Trigger(() ->  true);
         
-        inAutoAlignRange = new Trigger(() ->  true);
-        inDrivingScoringTolerance = new Trigger(() ->  true);
-        inIntakeStartTolerance = new Trigger(() ->  true);
-        inIntakeTolerance = new Trigger(() ->  true);
+        mInAutoAlignRange = new Trigger(() ->  true);
+        mInDrivingScoringTolerance = new Trigger(() ->  true);
+        mInIntakeStartTolerance = new Trigger(() ->  true);
     }
 
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
-    public void tryToAddPathToChooser(String pathName, Command... commands) {
-        for(Command path : commands) {
-            tryToAddPathToChooser(pathName, new Runnable() {
+    public void tryToAddPathToChooser(String pPathName, Command... pCommands) {
+        for(Command path : pCommands) {
+            tryToAddPathToChooser(pPathName, new Runnable() {
                 @Override
                 public void run() {
-                    autoChooser.addOption(pathName, path);
+                    mAutoChooser.addOption(pPathName, path);
                 }
             });
         }
     }  
     
     /* Stops magic auton errors from occuring due to FMS or some BS I cook up */
-    public void tryToAddPathToChooser(String pathName, Runnable pathAdding) {
+    public void tryToAddPathToChooser(String pPathName, Runnable pPathAdding) {
         try {
-            pathAdding.run();
+            pPathAdding.run();
         } catch(Exception e) {
-            autoChooser.addOption("Failed: "+pathName, backUpAuton());
+            mAutoChooser.addOption("Failed: "+pPathName, backUpAuton());
         }
     }
 
-    public SendableChooser<Command> getAutoChooser() {
-        return autoChooser;
+    public SendableChooser<Command> getmAutoChooser() {
+        return mAutoChooser;
     }
 
     ///////////////// PATH CHAINING LOGIC \\\\\\\\\\\\\\\\\\\\\\
-    public PathPlannerAuto firstPath(String name, Rotation2d startingRotation, BooleanSupplier conditionSupplier, Command nextCommand, Command nextAuto) {
-        PathPlannerAuto firstAuto = new PathPlannerAuto(followFirstChoreoPath(name, startingRotation));
-        firstAuto.condition(conditionSupplier).onTrue(nextCommand.andThen(Commands.runOnce(() -> nextAutoChecker(nextAuto).schedule())));
+    public PathPlannerAuto firstPath(String pName, Rotation2d pStartingRotation, BooleanSupplier pConditionSupplier, Command pNextCommand, Command pNextAuto) {
+        PathPlannerAuto firstAuto = new PathPlannerAuto(followFirstChoreoPath(pName, pStartingRotation));
+        firstAuto.condition(pConditionSupplier).onTrue(pNextCommand.andThen(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(nextAutoChecker(pNextAuto)))));
         return firstAuto;
     }
 
-    public PathPlannerAuto nextPath(String name, BooleanSupplier conditionSupplier, Command nextCommand, Command nextAuto) {
-        PathPlannerAuto auto = new PathPlannerAuto(followChoreoPath(name));
-        auto.condition(conditionSupplier).onTrue(nextCommand.andThen(Commands.runOnce(() -> nextAutoChecker(nextAuto).schedule())));
+    public PathPlannerAuto nextPath(String pName, BooleanSupplier pConditionSupplier, Command pNextCommand, Command pNextAuto) {
+        PathPlannerAuto auto = new PathPlannerAuto(followChoreoPath(pName));
+        auto.condition(pConditionSupplier).onTrue(pNextCommand.andThen(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(nextAutoChecker(pNextAuto)))));
         return auto;
     }
 
-    public PathPlannerAuto nextPath(String name, BooleanSupplier conditionSupplier, Command nextCommand, Command nextAuto, PPHolonomicDriveController PID) {
-        PathPlannerAuto auto = new PathPlannerAuto(followChoreoPath(name, PID));
-        auto.condition(conditionSupplier).onTrue(nextCommand.andThen(Commands.runOnce(() -> nextAutoChecker(nextAuto).schedule())));
+    public PathPlannerAuto nextPath(String pName, BooleanSupplier pConditionSupplier, Command pNextCommand, Command pNextAuto, PPHolonomicDriveController pPID) {
+        PathPlannerAuto auto = new PathPlannerAuto(followChoreoPath(pName, pPID));
+        auto.condition(pConditionSupplier).onTrue(pNextCommand.andThen(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(nextAutoChecker(pNextAuto)))));
         return auto;
     }
 
-    public Command nextAutoChecker(Command auto) {
-        return (auto == null) ? robotDrive.setToStop() : auto;
+    public Command nextAutoChecker(Command pAuto) {
+        return (pAuto == null) ? mRobotDrive.setToStop() : pAuto;
     }
 
     public Command backUpAuton() {
         return new InstantCommand();
     }
 
-    public PathPlannerAuto nextScoreCoralPath(String name) {
+    public PathPlannerAuto nextScoreCoralPath(String pName) {
         PathPlannerAuto auto = new PathPlannerAuto(autoPlaceholder());
 
-        auto.activePath(name)
-            .onTrue(followChoreoPath(name))
+        auto.activePath(pName)
+            .onTrue(followChoreoPath(pName))
             .onTrue(elevatorToPreScoreCommand())
             .onTrue(wristToPreScoreCommand())
             .onTrue(intakePivotToPreScoreCommand())
             .onTrue(intakeToPreScoreCommand())
             .onTrue(indexerToPreScoreCommand());
 
-        auto.condition(inAutoAlignRange)
-            .onTrue(robotDrive.setToGenericAutoAlign(null, null));
+        auto.condition(mInAutoAlignRange)
+            .onTrue(mRobotDrive.setToGenericAutoAlign(null, null));
 
-        auto.condition(inDrivingScoringTolerance)
+        auto.condition(mInDrivingScoringTolerance)
             .onTrue(wristToScoreCommand());
 
-        auto.condition(inDrivingScoringTolerance.and(wristInScoringRange))
+        auto.condition(mInDrivingScoringTolerance.and(mWristInScoringRange))
             .onTrue(clawEjectCommand());
 
-        auto.condition(IR3.negate())
+        auto.condition(mIR3.negate())
             .onTrue(clawHoldCommand())
             .onTrue(Commands.run(() -> auto.cancel()));
 
         return auto;
     }
 
-    public PathPlannerAuto nextIntakeCoralPath(String name) {
+    public PathPlannerAuto nextIntakeCoralPath(String pName) {
         PathPlannerAuto auto = new PathPlannerAuto(autoPlaceholder());
 
-        auto.activePath(name)
-            .onTrue(followChoreoPath(name));
+        auto.activePath(pName)
+            .onTrue(followChoreoPath(pName));
 
-        auto.condition(inIntakeStartTolerance)
+        auto.condition(mInIntakeStartTolerance)
             .onTrue(elevatorToPreIntakeCommand())
             .onTrue(wristToPreIntakeCommand())
             .onTrue(intakePivotCoralCommand())
@@ -205,7 +187,7 @@ public class AutonCommands extends SubsystemBase {
                 )
             );
 
-        auto.condition(IR1)
+        auto.condition(mIR1)
             .onTrue(new SequentialCommandGroup(
                 Commands.waitSeconds(1),
                     new RepeatCommand(
@@ -231,15 +213,15 @@ public class AutonCommands extends SubsystemBase {
                 )
             );
 
-        auto.condition(IR2.and(wristInIntakeEntryRange))
+        auto.condition(mIR2.and(mWristInIntakeEntryRange))
             .onTrue(clawIntakeCommand())
             .onTrue(elevatorToIntakeCommand());
 
-        auto.condition(IR3)
+        auto.condition(mIR3)
             .onTrue(clawHoldCommand())
             .onTrue(elevatorToIntakeCommand());
 
-        auto.condition(IR3.and(elevInIntakeWristExitRange))
+        auto.condition(mIR3.and(mElevInIntakeWristExitRange))
             .onTrue(Commands.run(() -> auto.cancel()));
 
         return auto;
@@ -356,10 +338,10 @@ public class AutonCommands extends SubsystemBase {
 
         return new SequentialCommandGroup(
             new InstantCommand(() -> {
-                robotDrive.setPose(AllianceFlipUtil.apply(new Pose2d(path.getPathPoses().get(0).getTranslation(), startingRotation)));
+                mRobotDrive.setPose(AllianceFlipUtil.apply(new Pose2d(path.getPathPoses().get(0).getTranslation(), startingRotation)));
             }), 
-            robotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds), 
-            robotDrive.setToStop());
+            mRobotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds), 
+            mRobotDrive.setToStop());
     }
 
     public Command followChoreoPath(String pathName) {
@@ -367,8 +349,8 @@ public class AutonCommands extends SubsystemBase {
         path.getIdealTrajectory(Drive.mRobotConfig);
         double totalTimeSeconds = path.getIdealTrajectory(Drive.mRobotConfig).get().getTotalTimeSeconds();
         return 
-                robotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds).andThen(
-                robotDrive.setToStop());
+                mRobotDrive.customFollowPathComamnd(path).withTimeout(totalTimeSeconds).andThen(
+                mRobotDrive.setToStop());
     }
 
     public Command followChoreoPath(String pathName, PPHolonomicDriveController PID) {
@@ -376,8 +358,8 @@ public class AutonCommands extends SubsystemBase {
         path.getIdealTrajectory(Drive.mRobotConfig);
         double totalTimeSeconds = path.getIdealTrajectory(Drive.mRobotConfig).get().getTotalTimeSeconds();
         return 
-        robotDrive.customFollowPathComamnd(path, PID).withTimeout(totalTimeSeconds).andThen(
-            robotDrive.setToStop());
+        mRobotDrive.customFollowPathComamnd(path, PID).withTimeout(totalTimeSeconds).andThen(
+            mRobotDrive.setToStop());
     }
 
     public Optional<PathPlannerPath> getTraj(String pathName) {

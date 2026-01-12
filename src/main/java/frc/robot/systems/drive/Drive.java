@@ -3,7 +3,6 @@
 package frc.robot.systems.drive;
 
 import static frc.robot.systems.drive.DriveConstants.*;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.RobotConfig;
@@ -13,8 +12,6 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
-
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -86,15 +83,15 @@ public class Drive extends SubsystemBase {
         WHEEL_CHARACTERIZATION
     }
 
-    private Module[] mModules;
-    private GyroIO mGyro;
-    private GyroInputsAutoLogged mGyroInputs = new GyroInputsAutoLogged();
-    private Vision mVision;
+    private final Module[] mModules;
+    private final GyroIO mGyro;
+    private final GyroInputsAutoLogged mGyroInputs = new GyroInputsAutoLogged();
+    private final Vision mVision;
 
     private Rotation2d mRobotRotation;
-    private SwerveDriveOdometry mOdometry;
-    private SwerveDrivePoseEstimator mPoseEstimator;
-    private Field2d mField = new Field2d();
+    private final SwerveDriveOdometry mOdometry;
+    private final SwerveDrivePoseEstimator mPoseEstimator;
+    private final Field2d mField = new Field2d();
 
     public static RobotConfig mRobotConfig;
     private final SwerveSetpointGenerator mSetpointGenerator;
@@ -104,41 +101,39 @@ public class Drive extends SubsystemBase {
     @AutoLogOutput(key = "Drive/State")
     private DriveState mDriveState = DriveState.TELEOP;
 
-    private boolean mUseGenerator = true;
+    private final boolean kUseGenerator = true;
 
     private ChassisSpeeds mDesiredSpeeds = new ChassisSpeeds();
     private ChassisSpeeds mPPDesiredSpeeds = new ChassisSpeeds();
     private DriveFeedforwards mPathPlanningFF = DriveFeedforwards.zeros(4);
-    private PathConstraints mDriveConstraints = DriveConstants.kAutoDriveConstraints;
+    private final PathConstraints mDriveConstraints = DriveConstants.kAutoDriveConstraints;
 
     private SwerveModuleState[] mPrevSetpointStates = SwerveUtils.zeroStates();
-
     private SwerveModuleState[] mPrevStates = null;
     private SwerveModulePosition[] mPrevPositions = null;
 
-    private ManualTeleopController mTeleopController = new ManualTeleopController();
+    private final ManualTeleopController mTeleopController = new ManualTeleopController();
 
-    private HeadingController mHeadingController = new HeadingController();
+    private final HeadingController mHeadingController = new HeadingController();
 
     @AutoLogOutput(key = "Drive/HeadingController/GoalRotation")
     private Supplier<Rotation2d> mGoalRotationSup = () -> new Rotation2d();
 
-    private HolonomicController mAutoAlignController = new HolonomicController();
+    private final HolonomicController mAutoAlignController = new HolonomicController();
 
     @AutoLogOutput(key = "Drive/HeadingController/GoalPose")
     private Supplier<Pose2d> mGoalPoseSup = () -> new Pose2d();
 
-    private GameDriveManager mGameDriveManager = new GameDriveManager(this);
+    private final GameDriveManager mGameDriveManager = new GameDriveManager(this);
 
-    private static final LoggedTunableNumber tDriftRate =
-            new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
-    private static final LoggedTunableNumber tRotationDriftTestSpeedDeg =
-            new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
-    private static final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
-    private static final LoggedTunableNumber tAzimuthDriveScalar = new LoggedTunableNumber("Drive/AzimuthDriveScalar", DriveConstants.kAzimuthDriveScalar);
-    private static final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
+    private final LoggedTunableNumber tDriftRate = new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
+    private final LoggedTunableNumber tRotationDriftTestSpeedDeg = new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
+    private final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
+    private final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
+    // private final LoggedTunableNumber tAzimuthDriveScalar = new LoggedTunableNumber("Drive/AzimuthDriveScalar", DriveConstants.kAzimuthDriveScalar);
 
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
+    
 
     public Drive(Module[] modules, GyroIO gyro, Vision vision) {
         this.mModules = modules;
@@ -148,8 +143,7 @@ public class Drive extends SubsystemBase {
         mRobotRotation = mGyroInputs.iYawPosition;
 
         mOdometry = new SwerveDriveOdometry(kKinematics, getmRobotRotation(), getModulePositions());
-        mPoseEstimator =
-                new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
+        mPoseEstimator = new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
 
         mRobotConfig = PPRobotConfigLoader.load();
 
@@ -438,7 +432,7 @@ public class Drive extends SubsystemBase {
         // ChassisSpeeds.fromRobotRelativeSpeeds(previousSetpoint.robotRelativeSpeeds(), robotRotation));
 
         for (int i = 0; i < 4; i++) {
-            if (mUseGenerator) {
+            if (kUseGenerator) {
                 /* Logs the drive feedforward stuff */
                 SwerveUtils.logDriveFeedforward(mPreviousSetpoint.feedforwards(), i);
 
