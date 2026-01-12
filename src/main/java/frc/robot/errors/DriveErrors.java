@@ -1,6 +1,6 @@
 // REBELLION 10014
 
-package frc.robot.systems.errors;
+package frc.robot.errors;
 
 import frc.lib.telemetry.TelemetryConstants.Severity;
 import frc.lib.telemetry.TelemetryError;

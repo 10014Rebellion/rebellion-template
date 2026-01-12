@@ -121,7 +121,7 @@ public class Robot extends LoggedRobot {
         mAutonomousCommand = mRobotContainer.getAutonomousCommand();
 
         if (mAutonomousCommand != null) {
-            mAutonomousCommand.schedule();
+            CommandScheduler.getInstance().schedule(mAutonomousCommand);
         }
     }
 
@@ -134,7 +134,7 @@ public class Robot extends LoggedRobot {
             mAutonomousCommand.cancel();
         }
 
-        mRobotContainer.getDriverProfileCommand().schedule();
+        CommandScheduler.getInstance().schedule(mRobotContainer.getDriverProfileCommand());
     }
 
     @Override

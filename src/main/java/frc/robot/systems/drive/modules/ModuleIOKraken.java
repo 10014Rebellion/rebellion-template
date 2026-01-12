@@ -28,42 +28,40 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.systems.drive.DriveConstants;
 import frc.robot.systems.drive.DriveConstants.ModuleHardwareConfig;
 
 public class ModuleIOKraken implements ModuleIO {
-    private TalonFX mDriveMotor;
-    private VelocityTorqueCurrentFOC mDriveControl = new VelocityTorqueCurrentFOC(0.0);
-    private VoltageOut mDriveVoltageControl = new VoltageOut(0.0);
-    private double mDriveAppliedVolts = 0.0;
+    private final TalonFX mDriveMotor;
+    private final VelocityTorqueCurrentFOC mDriveControl = new VelocityTorqueCurrentFOC(0.0);
+    private final VoltageOut mDriveVoltageControl = new VoltageOut(0.0);
+    private final double mDriveAppliedVolts = 0.0;
 
-    private StatusSignal<Angle> mDrivePositionM;
-    private StatusSignal<AngularVelocity> mDriveVelocityMPS;
-    private StatusSignal<Voltage> mDriveVoltage;
-    private StatusSignal<Current> mDriveSupplyCurrent;
-    private StatusSignal<Current> mDriveStatorCurrent;
-    private StatusSignal<Current> mDriveTorqueCurrent;
-    private StatusSignal<Temperature> mDriveTempCelsius;
-    private StatusSignal<AngularAcceleration> mDriveAccelerationMPSS;
+    private final StatusSignal<Angle> mDrivePositionM;
+    private final StatusSignal<AngularVelocity> mDriveVelocityMPS;
+    private final StatusSignal<Voltage> mDriveVoltage;
+    private final StatusSignal<Current> mDriveSupplyCurrent;
+    private final StatusSignal<Current> mDriveStatorCurrent;
+    private final StatusSignal<Current> mDriveTorqueCurrent;
+    private final StatusSignal<Temperature> mDriveTempCelsius;
+    private final StatusSignal<AngularAcceleration> mDriveAccelerationMPSS;
 
-    private TalonFX mAzimuthMotor;
-    private PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0);
-    private VoltageOut mAzimuthVoltageControl = new VoltageOut(0.0);
-    private double mAzimuthAppliedVolts = 0.0;
+    private final TalonFX mAzimuthMotor;
+    private final PositionDutyCycle mAzimuthPositionControl = new PositionDutyCycle(0.0);
+    private final VoltageOut mAzimuthVoltageControl = new VoltageOut(0.0);
+    private final double mAzimuthAppliedVolts = 0.0;
 
-    private StatusSignal<Angle> mAzimuthPosition;
-    private StatusSignal<AngularVelocity> mAzimuthVelocity;
-    private StatusSignal<Voltage> mAzimuthVoltage;
-    private StatusSignal<Current> mAzimuthStatorCurrent;
-    private StatusSignal<Current> mAzimuthSupplyCurrent;
-    private StatusSignal<Temperature> mAzimuthTemp;
+    private final StatusSignal<Angle> mAzimuthPosition;
+    private final StatusSignal<AngularVelocity> mAzimuthVelocity;
+    private final StatusSignal<Voltage> mAzimuthVoltage;
+    private final StatusSignal<Current> mAzimuthStatorCurrent;
+    private final StatusSignal<Current> mAzimuthSupplyCurrent;
+    private final StatusSignal<Temperature> mAzimuthTemp;
 
-    private CANcoder mAbsoluteEncoder;
-    private StatusSignal<Angle> mAbsolutePositionSignal;
-    private Rotation2d mAbsoluteEncoderOffset;
+    private final CANcoder mAbsoluteEncoder;
+    private final StatusSignal<Angle> mAbsolutePositionSignal;
 
-    public ModuleIOKraken(ModuleHardwareConfig config) {
-        mDriveMotor = new TalonFX(config.driveID(), DriveConstants.kDriveCANBusName);
+    public ModuleIOKraken(ModuleHardwareConfig pConfig) {
+        mDriveMotor = new TalonFX(pConfig.driveID(), kCANBus);
         var driveConfig = new TalonFXConfiguration();
 
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -95,16 +93,13 @@ public class ModuleIOKraken implements ModuleIO {
         mDriveAccelerationMPSS = mDriveMotor.getAcceleration();
 
         mDriveMotor.getConfigurator().apply(driveConfig);
-
-        /* CANCODER INSTANTIATION AND CONFIGURATION */
-        mAbsoluteEncoderOffset = Rotation2d.fromRotations(config.offset());
         
-        mAbsoluteEncoder = new CANcoder(config.encoderID(), DriveConstants.kDriveCANBusName);
+        mAbsoluteEncoder = new CANcoder(pConfig.encoderID(), kCANBus);
         
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
         encoderConfig.MagnetSensor.withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.5));
         encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-        encoderConfig.MagnetSensor.withMagnetOffset(Rotations.of(-config.offset()));
+        encoderConfig.MagnetSensor.withMagnetOffset(Rotations.of(-pConfig.offset()));
         mAbsoluteEncoder.getConfigurator().apply(encoderConfig);
         
         mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
@@ -113,7 +108,7 @@ public class ModuleIOKraken implements ModuleIO {
         mAbsoluteEncoder.optimizeBusUtilization();
 
         /* AZIMUTH INSTANTIATION AND CONFIGURATION */
-        mAzimuthMotor = new TalonFX(config.azimuthID(), DriveConstants.kDriveCANBusName);
+        mAzimuthMotor = new TalonFX(pConfig.azimuthID(), kCANBus);
         TalonFXConfiguration turnConfig = new TalonFXConfiguration();
 
         turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -130,7 +125,6 @@ public class ModuleIOKraken implements ModuleIO {
         turnConfig.Slot0.kD = kModuleControllerConfigs.azimuthController().getD();
         turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
-        /* Configured but FOC not used on azimuth, just drive motors */
         turnConfig.TorqueCurrent.PeakForwardTorqueCurrent = kAzimuthFOCAmpLimit;
         turnConfig.TorqueCurrent.PeakReverseTorqueCurrent = -kAzimuthFOCAmpLimit;
 
@@ -142,32 +136,30 @@ public class ModuleIOKraken implements ModuleIO {
         mAzimuthStatorCurrent = mAzimuthMotor.getStatorCurrent();
         mAzimuthSupplyCurrent = mAzimuthMotor.getSupplyCurrent();
         mAzimuthTemp = mAzimuthMotor.getDeviceTemp();
-
-        // resetAzimuthEncoder();
     }
 
     @Override
-    public void updateInputs(ModuleInputs inputs) {
-        inputs.iIsDriveConnected = BaseStatusSignal.refreshAll(
-                        mDriveVelocityMPS,
-                        mDrivePositionM,
-                        mDriveVoltage,
-                        mDriveSupplyCurrent,
-                        mDriveStatorCurrent,
-                        mDriveTorqueCurrent,
-                        mDriveTempCelsius)
-                .isOK();
-        inputs.iDrivePositionM = (mDrivePositionM.getValueAsDouble());
-        inputs.iDriveVelocityMPS = (mDriveVelocityMPS.getValueAsDouble());
-        inputs.iDriveAppliedVolts = mDriveAppliedVolts;
-        inputs.iDriveMotorVolts = mDriveVoltage.getValueAsDouble();
-        inputs.iDriveSupplyCurrentAmps = mDriveSupplyCurrent.getValueAsDouble();
-        inputs.iDriveStatorCurrentAmps = mDriveStatorCurrent.getValueAsDouble();
-        inputs.iDriveTorqueCurrentAmps = mDriveTorqueCurrent.getValueAsDouble();
-        inputs.iDriveTemperatureCelsius = mDriveTempCelsius.getValueAsDouble();
-        inputs.iDriveAccelerationMPSS = mDriveAccelerationMPSS.getValueAsDouble();
+    public void updateInputs(ModuleInputs pInputs) {
+        pInputs.iIsDriveConnected = BaseStatusSignal.refreshAll(
+            mDriveVelocityMPS,
+            mDrivePositionM,
+            mDriveVoltage,
+            mDriveSupplyCurrent,
+            mDriveStatorCurrent,
+            mDriveTorqueCurrent,
+            mDriveTempCelsius
+        ).isOK();
+        pInputs.iDrivePositionM = (mDrivePositionM.getValueAsDouble());
+        pInputs.iDriveVelocityMPS = (mDriveVelocityMPS.getValueAsDouble());
+        pInputs.iDriveAppliedVolts = mDriveAppliedVolts;
+        pInputs.iDriveMotorVolts = mDriveVoltage.getValueAsDouble();
+        pInputs.iDriveSupplyCurrentAmps = mDriveSupplyCurrent.getValueAsDouble();
+        pInputs.iDriveStatorCurrentAmps = mDriveStatorCurrent.getValueAsDouble();
+        pInputs.iDriveTorqueCurrentAmps = mDriveTorqueCurrent.getValueAsDouble();
+        pInputs.iDriveTemperatureCelsius = mDriveTempCelsius.getValueAsDouble();
+        pInputs.iDriveAccelerationMPSS = mDriveAccelerationMPSS.getValueAsDouble();
 
-        inputs.iIsAzimuthConnected = BaseStatusSignal.refreshAll(
+        pInputs.iIsAzimuthConnected = BaseStatusSignal.refreshAll(
                         mAzimuthVelocity,
                         mAzimuthVoltage,
                         mAzimuthStatorCurrent,
@@ -175,72 +167,72 @@ public class ModuleIOKraken implements ModuleIO {
                         mAzimuthTemp,
                         mAzimuthPosition)
                 .isOK();
-        inputs.iAzimuthPosition = Rotation2d.fromRotations(mAzimuthPosition.getValueAsDouble());
-        inputs.iAzimuthVelocity = Rotation2d.fromRotations(mAzimuthVelocity.getValueAsDouble());
-        inputs.iAzimuthAppliedVolts = mAzimuthAppliedVolts;
-        inputs.iAzimuthMotorVolts = mAzimuthVoltage.getValueAsDouble();
-        inputs.iAzimuthStatorCurrentAmps = mAzimuthStatorCurrent.getValueAsDouble();
-        inputs.iAzimuthSupplyCurrentAmps = mAzimuthSupplyCurrent.getValueAsDouble();
-        inputs.iAzimuthTemperatureCelsius = mAzimuthTemp.getValueAsDouble();
+        pInputs.iAzimuthPosition = Rotation2d.fromRotations(mAzimuthPosition.getValueAsDouble());
+        pInputs.iAzimuthVelocity = Rotation2d.fromRotations(mAzimuthVelocity.getValueAsDouble());
+        pInputs.iAzimuthAppliedVolts = mAzimuthAppliedVolts;
+        pInputs.iAzimuthMotorVolts = mAzimuthVoltage.getValueAsDouble();
+        pInputs.iAzimuthStatorCurrentAmps = mAzimuthStatorCurrent.getValueAsDouble();
+        pInputs.iAzimuthSupplyCurrentAmps = mAzimuthSupplyCurrent.getValueAsDouble();
+        pInputs.iAzimuthTemperatureCelsius = mAzimuthTemp.getValueAsDouble();
 
-        inputs.iIsCancoderConnected = BaseStatusSignal.refreshAll(mAbsolutePositionSignal).isOK();
-        inputs.iAzimuthAbsolutePosition = Rotation2d.fromRotations(mAbsolutePositionSignal.getValueAsDouble());
+        pInputs.iIsCancoderConnected = BaseStatusSignal.refreshAll(mAbsolutePositionSignal).isOK();
+        pInputs.iAzimuthAbsolutePosition = Rotation2d.fromRotations(mAbsolutePositionSignal.getValueAsDouble());
     }
 
     /////////// DRIVE MOTOR METHODS \\\\\\\\\\\
     @Override
-    public void setDriveVolts(double volts) {
-        mDriveMotor.setControl(mDriveVoltageControl.withOutput(volts));
+    public void setDriveVolts(double pVolts) {
+        mDriveMotor.setControl(mDriveVoltageControl.withOutput(pVolts));
     }
 
     @Override
-    public void setDriveAmperage(double amps) {
-        mDriveMotor.setControl(new TorqueCurrentFOC(amps));
+    public void setDriveAmperage(double pAmps) {
+        mDriveMotor.setControl(new TorqueCurrentFOC(pAmps));
     }
 
     @Override
-    public void setDriveVelocity(double velocityMPS, double feedforward) {
-        mDriveMotor.setControl(mDriveControl.withVelocity(velocityMPS).withFeedForward(feedforward));
+    public void setDriveVelocity(double pVelocityMPS, double pFeedforward) {
+        mDriveMotor.setControl(mDriveControl.withVelocity(pVelocityMPS).withFeedForward(pFeedforward));
     }
 
     @Override
-    public void setDrivePID(double kP, double kI, double kD) {
+    public void setDrivePID(double pKP, double pKI, double pKD) {
         var slotConfig = new Slot0Configs();
-        slotConfig.kP = kP;
-        slotConfig.kI = kI;
-        slotConfig.kD = kD;
+        slotConfig.kP = pKP;
+        slotConfig.kI = pKI;
+        slotConfig.kD = pKD;
         mDriveMotor.getConfigurator().apply(slotConfig);
     }
 
     /////////// CANCODER METHODS \\\\\\\\\\\
     @Override
     public void resetAzimuthEncoder() {
-        mAzimuthMotor.setPosition(Rotation2d.fromRotations(mAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()).getRotations());
+        return;
     }
 
     /////////// AZIMUTH MOTOR METHODS \\\\\\\\\\\
     @Override
-    public void setAzimuthVolts(double volts) {
+    public void setAzimuthVolts(double pVolts) {
         /* Sets azimuth voltage inbetween kPeakVoltage and -kPeakVoltage */
-        mAzimuthMotor.setControl(mAzimuthVoltageControl.withOutput(volts));
+        mAzimuthMotor.setControl(mAzimuthVoltageControl.withOutput(pVolts));
     }
 
     @Override
-    public void setAzimuthPosition(Rotation2d rotation, double feedforward) {
+    public void setAzimuthPosition(Rotation2d pRotation, double pFeedforward) {
         /* Uses voltage PID with a arbitrary FF on the with Slot 0 gains */
         mAzimuthMotor.setControl(mAzimuthPositionControl
-                .withPosition(rotation.getRotations())
-                .withFeedForward(feedforward)
+                .withPosition(pRotation.getRotations())
+                .withFeedForward(pFeedforward)
                 .withSlot(0));
     }
 
     /* Sets azimuth PID values on slot 0, used for tunable numbers */
     @Override
-    public void setAzimuthPID(double kP, double kI, double kD) {
+    public void setAzimuthPID(double pKP, double pKI, double pKD) {
         var slotConfig = new Slot0Configs();
-        slotConfig.kP = kP;
-        slotConfig.kI = kI;
-        slotConfig.kD = kD;
+        slotConfig.kP = pKP;
+        slotConfig.kI = pKI;
+        slotConfig.kD = pKD;
         mAzimuthMotor.getConfigurator().apply(slotConfig);
     }
 }
