@@ -2,14 +2,20 @@ name: Generate Javadoc
 
 permissions:
   contents: write
+  pull-requests: write 
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    # Explicitly define types so we can catch when a PR is closed
+    types: [opened, synchronize, reopened, closed]
 
 jobs:
   publish:
+    # Run on pushes, OR on PRs that are NOT being closed
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -21,14 +27,87 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Generate Javadoc
-        run: gradle javadoc
+        run: ./gradlew javadoc
         shell: bash
       
+      - name: Determine Destination Directory
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "dir=${{ github.head_ref }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=" >> "$GITHUB_OUTPUT"
+          fi
+        shell: bash
+
       - name: Publish javadoc to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: javadocs
           publish_dir: build/docs/javadoc
-          force_orphan: true
+          destination_dir: ${{ steps.target.outputs.dir }}
+          keep_files: true
+          
+      - name: Comment PR with Javadoc Link
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = context.payload.pull_request.head.ref;
+            
+            const url = `https://${owner}.github.io/${repo}/${branch}/`;
+            const body = `📚 **Javadocs updated!**\n\nView the documentation for this PR here: [${branch} Javadocs](${url})`;
+            
+            const { data: comments } = await github.rest.issues.listComments({
+              owner, repo, issue_number: context.issue.number
+            });
+            const botComment = comments.find(c => c.user.type === 'Bot' && c.body.includes('📚 **Javadocs updated!**'));
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: botComment.id, body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: context.issue.number, body
+              });
+            }
+
+  cleanup:
+    # Only run this job when a pull request is closed or merged
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Javadocs Branch
+        uses: actions/checkout@v4
+        with:
+          ref: javadocs # Checkout the pages branch directly
+          
+      - name: Delete PR Directory
+        run: |
+          DIR_TO_DELETE="${{ github.head_ref }}"
+          
+          # Check if the directory actually exists before trying to delete it
+          if [ -d "$DIR_TO_DELETE" ]; then
+            echo "Cleaning up directory: $DIR_TO_DELETE"
+            
+            # Configure git identity for the commit
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            
+            # Remove the folder, commit, and push
+            git rm -r "$DIR_TO_DELETE"
+            git commit -m "Cleanup javadocs for closed PR branch: $DIR_TO_DELETE"
+            git push origin javadocs
+          else
+            echo "Directory $DIR_TO_DELETE does not exist. Nothing to clean up."
+          fi
+        shell: bash
+        
