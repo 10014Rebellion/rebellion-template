@@ -2,6 +2,8 @@ plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
+    id "com.diffplug.spotless" version "7.0.4"
+    id "com.github.spotbugs" version "6.2.1"
 }
 
 java {
@@ -125,4 +127,67 @@ gversion {
     dateFormat   = "yyyy-MM-dd HH:mm:ss z"
     timeZone     = "America/Chicago"
     indent       = "  "
+}
+
+// Spotless formatting
+spotless {
+    java {
+        target fileTree(".") {
+            include "**/*.java"
+            exclude "**/build/**", "**/build-*/**", "**/generated/**", "**/BuildConstants.java"
+        }
+        licenseHeaderFile "${project.rootDir}/LicenseHeader.txt"
+        toggleOffOn()
+        palantirJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    groovyGradle {
+        target fileTree(".") {
+            include "**/*.gradle"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        greclipse()
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    json {
+        target fileTree(".") {
+            include "**/*.json"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        gson().indentWithSpaces(2)
+    }
+    format "misc", {
+        target fileTree(".") {
+            include "**/*.md", "**/.gitignore"
+            exclude "**/build/**", "**/build-*/**"
+        }
+        trimTrailingWhitespace()
+        leadingTabsToSpaces(2)
+        endWithNewline()
+    }
+}
+
+if (!System.getenv().containsKey("CI")) {
+    tasks.named('build') {
+        dependsOn 'spotlessApply'
+    }
+}
+
+spotbugs {
+    ignoreFailures = true
+}
+
+tasks.spotbugsMain {
+    reports.create("xml") {
+        required = true
+        outputLocation = file("$buildDir/reports/spotbugsXml.xml")
+    }
+}
+
+javadoc {
+    exclude '**/BuildConstants.java' // Exclude generated BuildConstants
 }
