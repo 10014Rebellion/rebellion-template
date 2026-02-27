@@ -13,18 +13,16 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class ModuleIOSim implements ModuleIO {
     private final DCMotorSim mDriveMotor = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.004, kDriveMotorGearing),
-        DCMotor.getKrakenX60Foc(1),
-        0.0,
-        0.0
-    );
+            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.004, kDriveMotorGearing),
+            DCMotor.getKrakenX60Foc(1),
+            0.0,
+            0.0);
 
     private final DCMotorSim mAzimuthMotor = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.025, 52),
-        DCMotor.getKrakenX60Foc(1),
-        0.0,
-        0.0
-    );
+            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.025, 52),
+            DCMotor.getKrakenX60Foc(1),
+            0.0,
+            0.0);
 
     private double mDriveAppliedVolts = 0.0;
     private double mAzimuthAppliedVolts = 0.0;
@@ -67,7 +65,9 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDriveVelocity(double pVelocityMPS, double pFeedforward) {
-        setDriveVolts(mDrivePID.calculate(mDriveMotor.getAngularVelocityRPM() * kWheelCircumferenceMeters / 60.0, pVelocityMPS) + pFeedforward);
+        setDriveVolts(mDrivePID.calculate(
+                        mDriveMotor.getAngularVelocityRPM() * kWheelCircumferenceMeters / 60.0, pVelocityMPS)
+                + pFeedforward);
     }
 
     @Override
@@ -89,7 +89,8 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setAzimuthPosition(Rotation2d pPosition, double pFeedforward) {
-        setAzimuthVolts(mAzimuthPID.calculate(mAzimuthMotor.getAngularPositionRad(), pPosition.getRadians()) + pFeedforward);
+        setAzimuthVolts(
+                mAzimuthPID.calculate(mAzimuthMotor.getAngularPositionRad(), pPosition.getRadians()) + pFeedforward);
     }
 
     @Override

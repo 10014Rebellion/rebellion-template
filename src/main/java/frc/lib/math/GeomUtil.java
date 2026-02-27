@@ -136,8 +136,6 @@ public class GeomUtil {
                                 .minus(Rotation2d.k180deg)
                                 .minus(rotation1)
                                 .getRadians())),
-                Math.abs(rotation2
-                        .minus(rotation1.minus(Rotation2d.k180deg))
-                        .getRadians())));
+                Math.abs(rotation2.minus(rotation1.minus(Rotation2d.k180deg)).getRadians())));
     }
 }

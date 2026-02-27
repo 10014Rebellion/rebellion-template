@@ -4,7 +4,6 @@ package frc.lib.telemetry;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.telemetry.TelemetryConstants.Severity;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,7 +57,7 @@ public class Telemetry extends TelemetryRecordOutput {
     // TODO: IMPLEMENT PROPER EXCEPTION THROWING LATER
     public static Exception reportException(Exception pException) {
         pException.getStackTrace();
-        
+
         System.out.println("!!! ^^^ EXCEPTION ABOVE ^^^!!!\n");
         return pException;
     }

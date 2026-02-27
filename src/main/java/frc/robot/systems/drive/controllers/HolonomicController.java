@@ -31,7 +31,8 @@ public class HolonomicController {
     public static final LoggedTunableNumber tXS = new LoggedTunableNumber("AutoAlign/X/kS", 0.0);
     public static final LoggedTunableNumber tXV = new LoggedTunableNumber("AutoAlign/X/kV", 0.65);
 
-    public static final LoggedTunableNumber tXToleranceMeters = new LoggedTunableNumber("AutoAlign/X/ToleranceMeters", 0.03);
+    public static final LoggedTunableNumber tXToleranceMeters =
+            new LoggedTunableNumber("AutoAlign/X/ToleranceMeters", 0.03);
 
     public static final LoggedTunableNumber tYP = new LoggedTunableNumber("AutoAlign/Y/kP", 3.0);
     public static final LoggedTunableNumber tYD = new LoggedTunableNumber("AutoAlign/Y/kD", 0.0);
@@ -44,7 +45,8 @@ public class HolonomicController {
     public static final LoggedTunableNumber tYS = new LoggedTunableNumber("AutoAlign/Y/kS", 0.0);
     public static final LoggedTunableNumber tYV = new LoggedTunableNumber("AutoAlign/Y/kV", 0.65);
 
-    public static final LoggedTunableNumber tYToleranceMeters = new LoggedTunableNumber("AutoAlign/Y/ToleranceMeters", 0.05);
+    public static final LoggedTunableNumber tYToleranceMeters =
+            new LoggedTunableNumber("AutoAlign/Y/ToleranceMeters", 0.05);
 
     public static final LoggedTunableNumber tOmegaP = new LoggedTunableNumber("AutoAlign/Omega/kP", 3.0);
     public static final LoggedTunableNumber tOmegaD = new LoggedTunableNumber("AutoAlign/Omega/kD", 0.0);
@@ -59,11 +61,15 @@ public class HolonomicController {
     public static final LoggedTunableNumber tOmegaS = new LoggedTunableNumber("AutoAlign/Omega/kS", 0.0);
     public static final LoggedTunableNumber tOmegaV = new LoggedTunableNumber("AutoAlign/Omega/kV", 1.0);
 
-    public static final LoggedTunableNumber tOmegaToleranceDegrees = new LoggedTunableNumber("AutoAlign/Omega/ToleranceDegrees", 1.5);
-    public static final LoggedTunableNumber tDistanceMaxVMPS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPS", 3.75);
-    public static final LoggedTunableNumber tDistanceMaxAMPSS = new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPSS", 10.0);
+    public static final LoggedTunableNumber tOmegaToleranceDegrees =
+            new LoggedTunableNumber("AutoAlign/Omega/ToleranceDegrees", 1.5);
+    public static final LoggedTunableNumber tDistanceMaxVMPS =
+            new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPS", 3.75);
+    public static final LoggedTunableNumber tDistanceMaxAMPSS =
+            new LoggedTunableNumber("AutoAlign/Distance/kMaxVMPSS", 10.0);
 
-    public static final LoggedTunableNumber tDistanceToleranceMeters = new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.03);
+    public static final LoggedTunableNumber tDistanceToleranceMeters =
+            new LoggedTunableNumber("AutoAlign/Distance/ToleranceMeters", 0.03);
 
     public static final LoggedTunableNumber tFFRadius = new LoggedTunableNumber("AutoAlign/ffRadius", 1.0);
 
@@ -96,7 +102,10 @@ public class HolonomicController {
         this.tYFeedforward = new SimpleMotorFeedforward(tYS.get(), tYV.get());
 
         this.tOmegaController = new ProfiledPIDController(
-                tOmegaP.get(), tOmegaI.get(), tOmegaD.get(), new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
+                tOmegaP.get(),
+                tOmegaI.get(),
+                tOmegaD.get(),
+                new Constraints(tOmegaMaxVDPS.get(), tOmegaMaxADPSS.get()));
         tOmegaController.enableContinuousInput(-180.0, 180.0);
         tOmegaController.setIntegratorRange(-tOmegaIRange.get(), tOmegaIRange.get());
         tOmegaController.setIZone(tOmegaIZone.get());
@@ -157,7 +166,8 @@ public class HolonomicController {
     /* Uses 3 PID controllers to set the chassis speeds */
     public ChassisSpeeds calculate(Pose2d pGoalPose, ChassisSpeeds pGoalSpeed, Pose2d pCurrentPose) {
         double ffScalar = Math.min(
-                Math.hypot(pGoalPose.getX() - pCurrentPose.getX(), pGoalPose.getY() - pCurrentPose.getY()) / tFFRadius.get(),
+                Math.hypot(pGoalPose.getX() - pCurrentPose.getX(), pGoalPose.getY() - pCurrentPose.getY())
+                        / tFFRadius.get(),
                 1.0);
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(

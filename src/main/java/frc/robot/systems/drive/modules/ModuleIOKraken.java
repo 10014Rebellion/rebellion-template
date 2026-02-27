@@ -20,7 +20,6 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -93,15 +92,15 @@ public class ModuleIOKraken implements ModuleIO {
         mDriveAccelerationMPSS = mDriveMotor.getAcceleration();
 
         mDriveMotor.getConfigurator().apply(driveConfig);
-        
+
         mAbsoluteEncoder = new CANcoder(pConfig.encoderID(), kCANBus);
-        
+
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
         encoderConfig.MagnetSensor.withAbsoluteSensorDiscontinuityPoint(Rotations.of(0.5));
         encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         encoderConfig.MagnetSensor.withMagnetOffset(Rotations.of(-pConfig.offset()));
         mAbsoluteEncoder.getConfigurator().apply(encoderConfig);
-        
+
         mAbsolutePositionSignal = mAbsoluteEncoder.getAbsolutePosition();
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, mAbsolutePositionSignal);
@@ -116,7 +115,8 @@ public class ModuleIOKraken implements ModuleIO {
         turnConfig.Voltage.PeakForwardVoltage = kPeakVoltage;
         turnConfig.Voltage.PeakReverseVoltage = -kPeakVoltage;
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        turnConfig.MotorOutput.Inverted = kTurnMotorInvert ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+        turnConfig.MotorOutput.Inverted =
+                kTurnMotorInvert ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
         turnConfig.Feedback.FeedbackRemoteSensorID = mAbsoluteEncoder.getDeviceID();
         turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         turnConfig.Feedback.SensorToMechanismRatio = kCANCoderToMechanismRatio;
@@ -141,14 +141,14 @@ public class ModuleIOKraken implements ModuleIO {
     @Override
     public void updateInputs(ModuleInputs pInputs) {
         pInputs.iIsDriveConnected = BaseStatusSignal.refreshAll(
-            mDriveVelocityMPS,
-            mDrivePositionM,
-            mDriveVoltage,
-            mDriveSupplyCurrent,
-            mDriveStatorCurrent,
-            mDriveTorqueCurrent,
-            mDriveTempCelsius
-        ).isOK();
+                        mDriveVelocityMPS,
+                        mDrivePositionM,
+                        mDriveVoltage,
+                        mDriveSupplyCurrent,
+                        mDriveStatorCurrent,
+                        mDriveTorqueCurrent,
+                        mDriveTempCelsius)
+                .isOK();
         pInputs.iDrivePositionM = (mDrivePositionM.getValueAsDouble());
         pInputs.iDriveVelocityMPS = (mDriveVelocityMPS.getValueAsDouble());
         pInputs.iDriveAppliedVolts = mDriveAppliedVolts;
@@ -175,7 +175,8 @@ public class ModuleIOKraken implements ModuleIO {
         pInputs.iAzimuthSupplyCurrentAmps = mAzimuthSupplyCurrent.getValueAsDouble();
         pInputs.iAzimuthTemperatureCelsius = mAzimuthTemp.getValueAsDouble();
 
-        pInputs.iIsCancoderConnected = BaseStatusSignal.refreshAll(mAbsolutePositionSignal).isOK();
+        pInputs.iIsCancoderConnected =
+                BaseStatusSignal.refreshAll(mAbsolutePositionSignal).isOK();
         pInputs.iAzimuthAbsolutePosition = Rotation2d.fromRotations(mAbsolutePositionSignal.getValueAsDouble());
     }
 

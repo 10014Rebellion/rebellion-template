@@ -3,6 +3,7 @@
 package frc.robot.systems.drive;
 
 import static frc.robot.systems.drive.DriveConstants.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.RobotConfig;
@@ -126,14 +127,17 @@ public class Drive extends SubsystemBase {
 
     private final GameDriveManager mGameDriveManager = new GameDriveManager(this);
 
-    private final LoggedTunableNumber tDriftRate = new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
-    private final LoggedTunableNumber tRotationDriftTestSpeedDeg = new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
+    private final LoggedTunableNumber tDriftRate =
+            new LoggedTunableNumber("Drive/DriftRate", DriveConstants.kDriftRate);
+    private final LoggedTunableNumber tRotationDriftTestSpeedDeg =
+            new LoggedTunableNumber("Drive/DriftRotationTestDeg", 360);
     private final LoggedTunableNumber tLinearTestSpeedMPS = new LoggedTunableNumber("Drive/LinearTestMPS", 4.5);
-    private final LoggedTunableNumber tAzimuthCharacterizationVoltage = new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
-    // private final LoggedTunableNumber tAzimuthDriveScalar = new LoggedTunableNumber("Drive/AzimuthDriveScalar", DriveConstants.kAzimuthDriveScalar);
+    private final LoggedTunableNumber tAzimuthCharacterizationVoltage =
+            new LoggedTunableNumber("Drive/AzimuthCharacterizationVoltage", 0);
+    // private final LoggedTunableNumber tAzimuthDriveScalar = new LoggedTunableNumber("Drive/AzimuthDriveScalar",
+    // DriveConstants.kAzimuthDriveScalar);
 
     private final Debouncer mAutoAlignTimeout = new Debouncer(0.1, DebounceType.kRising);
-    
 
     public Drive(Module[] modules, GyroIO gyro, Vision vision) {
         this.mModules = modules;
@@ -143,7 +147,8 @@ public class Drive extends SubsystemBase {
         mRobotRotation = mGyroInputs.iYawPosition;
 
         mOdometry = new SwerveDriveOdometry(kKinematics, getmRobotRotation(), getModulePositions());
-        mPoseEstimator = new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
+        mPoseEstimator =
+                new SwerveDrivePoseEstimator(kKinematics, getmRobotRotation(), getModulePositions(), new Pose2d());
 
         mRobotConfig = PPRobotConfigLoader.load();
 
@@ -193,7 +198,7 @@ public class Drive extends SubsystemBase {
     }
 
     private void updateSensorsAndOdometry() {
-        if(mPrevStates == null || mPrevPositions == null) {
+        if (mPrevStates == null || mPrevPositions == null) {
             mPrevStates = SwerveUtils.zeroStates();
             mPrevPositions = SwerveUtils.zeroPositions();
         } else {
@@ -229,14 +234,15 @@ public class Drive extends SubsystemBase {
                     observation.stdDevs().get(2));
         }
 
-        for(int i = 0; i < mModules.length; i++) {
+        for (int i = 0; i < mModules.length; i++) {
             Rotation2d deltaChange = mPrevPositions[i].angle.minus(getModulePositions()[i].angle);
 
-            double deltaD = deltaChange.getRadians() * DriveConstants.kDriveMotorGearing * DriveConstants.kWheelCircumferenceMeters;
+            double deltaD = deltaChange.getRadians()
+                    * DriveConstants.kDriveMotorGearing
+                    * DriveConstants.kWheelCircumferenceMeters;
 
             getModulePositions()[i] = new SwerveModulePosition(
-                getModulePositions()[i].distanceMeters + deltaD,
-                getModulePositions()[i].angle); 
+                    getModulePositions()[i].distanceMeters + deltaD, getModulePositions()[i].angle);
         }
 
         mPoseEstimator.update(mRobotRotation, getModulePositions());
@@ -461,8 +467,8 @@ public class Drive extends SubsystemBase {
                  */
                 setpointStates[i].cosineScale(mModules[i].getCurrentState().angle);
 
-                double directionOfVelChange =
-                        Math.signum(setpointStates[i].speedMetersPerSecond - mPrevSetpointStates[i].speedMetersPerSecond);
+                double directionOfVelChange = Math.signum(
+                        setpointStates[i].speedMetersPerSecond - mPrevSetpointStates[i].speedMetersPerSecond);
                 Telemetry.log("Drive/Module/Feedforward/" + i + "/dir", directionOfVelChange);
                 if (mDriveState.equals(DriveState.AUTON)) {
                     driveAmps = Math.abs(driveAmps) * Math.signum(directionOfVelChange);
@@ -470,7 +476,10 @@ public class Drive extends SubsystemBase {
 
                 Rotation2d deltaChange = mPrevPositions[i].angle.minus(getModulePositions()[i].angle);
 
-                double deltaV = deltaChange.getRadians() * DriveConstants.kDriveMotorGearing * DriveConstants.kWheelCircumferenceMeters / 0.02;
+                double deltaV = deltaChange.getRadians()
+                        * DriveConstants.kDriveMotorGearing
+                        * DriveConstants.kWheelCircumferenceMeters
+                        / 0.02;
                 double desV = Math.abs(setpointStates[i].speedMetersPerSecond);
                 double desDriveV = desV - deltaV;
 
@@ -631,12 +640,12 @@ public class Drive extends SubsystemBase {
 
     public Command characterizeAzimuths(int pModNumber) {
         return new FunctionalCommand(
-            () -> setDriveState(DriveState.SYSID_CHARACTERIZATION), 
-            () -> mModules[pModNumber].setAzimuthVoltage(tAzimuthCharacterizationVoltage.get()), 
-            (interrupted) -> {}, 
-            () -> false, 
-            this);
-    } 
+                () -> setDriveState(DriveState.SYSID_CHARACTERIZATION),
+                () -> mModules[pModNumber].setAzimuthVoltage(tAzimuthCharacterizationVoltage.get()),
+                (interrupted) -> {},
+                () -> false,
+                this);
+    }
 
     ///////////////////////// GETTERS \\\\\\\\\\\\\\\\\\\\\\\\
     @AutoLogOutput(key = "Drive/Swerve/MeasuredStates")

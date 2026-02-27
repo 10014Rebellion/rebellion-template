@@ -17,8 +17,10 @@ public class DriveConstants {
     ///////////////////// DRIVE BASE \\\\\\\\\\\\\\\\\\\\\\\
     public static final double kRobotWidthXMeters = Units.inchesToMeters(35); // TODO: TUNE ME
     public static final double kRobotWidthYMeters = Units.inchesToMeters(37); // TODO: TUNE ME
-    public static final double kTrackWidthXMeters = Units.inchesToMeters(25.5); // Track Width (front to front / back to back) // TODO: TUNE ME
-    public static final double kTrackWidthYMeters = Units.inchesToMeters(27); // Wheelbase (Left to left / right to right) // TODO: TUNE ME
+    public static final double kTrackWidthXMeters =
+            Units.inchesToMeters(25.5); // Track Width (front to front / back to back) // TODO: TUNE ME
+    public static final double kTrackWidthYMeters =
+            Units.inchesToMeters(27); // Wheelbase (Left to left / right to right) // TODO: TUNE ME
     public static final Translation2d[] kModuleTranslations = new Translation2d[] {
         new Translation2d(kTrackWidthXMeters / 2.0, kTrackWidthYMeters / 2.0),
         new Translation2d(kTrackWidthXMeters / 2.0, -kTrackWidthYMeters / 2.0),
@@ -35,7 +37,7 @@ public class DriveConstants {
 
     public static final double kMaxRotationSpeedRadiansPS = Math.toRadians(360); // TODO: TUNE ME
     public static final double kMaxRotationAccelRadiansPS = Math.toRadians(360) * 10; // TODO: TUNE ME
- 
+
     public static final double kMaxAzimuthAngularRadiansPS = Math.toRadians(1200); // TODO: TUNE ME
 
     /* Plugged into setpoint generator */
@@ -62,7 +64,7 @@ public class DriveConstants {
 
     public static final double kPeakVoltage = 12.0;
 
-    public static final double kDriveStatorAmpLimit = 70.0; 
+    public static final double kDriveStatorAmpLimit = 70.0;
     public static final double kDriveFOCAmpLimit = 70.0;
     public static final double kDriveSupplyAmpLimit = 70.0;
 
@@ -71,8 +73,10 @@ public class DriveConstants {
 
     public static final ModuleControlConfig kModuleControllerConfigs = RobotBase.isReal()
             ? new ModuleControlConfig(
-                    new PIDController(100.0, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0, 0.0), // DRIVE // TODO: TUNE ME
-                    new PIDController(3.5, 0.0, 0.0), new SimpleMotorFeedforward(0.3, 2.25, 0.0)) // AZIMUTH // TODO: TUNE ME
+                    new PIDController(100.0, 0.0, 0.0),
+                            new SimpleMotorFeedforward(0.0, 0.0, 0.0), // DRIVE // TODO: TUNE ME
+                    new PIDController(3.5, 0.0, 0.0),
+                            new SimpleMotorFeedforward(0.3, 2.25, 0.0)) // AZIMUTH // TODO: TUNE ME
             : new ModuleControlConfig(
                     new PIDController(0.1, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 2.36, 0.005), // TODO: TUNE ME
                     new PIDController(4.5, 0.0, 0.0), new SimpleMotorFeedforward(0.0, 0.0)); // TODO: TUNE ME
@@ -84,13 +88,17 @@ public class DriveConstants {
 
     public static final int kPigeonCANID = 5; // TODO: TUNE ME
 
-    public static final ModuleHardwareConfig kFrontLeftHardware = new ModuleHardwareConfig(31, 21, 11, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kFrontLeftHardware =
+            new ModuleHardwareConfig(31, 21, 11, 0); // TODO: TUNE ME
 
-    public static final ModuleHardwareConfig kFrontRightHardware = new ModuleHardwareConfig(32, 22, 12, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kFrontRightHardware =
+            new ModuleHardwareConfig(32, 22, 12, 0); // TODO: TUNE ME
 
-    public static final ModuleHardwareConfig kBackLeftHardware = new ModuleHardwareConfig(33, 23, 13, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kBackLeftHardware =
+            new ModuleHardwareConfig(33, 23, 13, 0); // TODO: TUNE ME
 
-    public static final ModuleHardwareConfig kBackRightHardware = new ModuleHardwareConfig(34, 24, 14, 0); // TODO: TUNE ME
+    public static final ModuleHardwareConfig kBackRightHardware =
+            new ModuleHardwareConfig(34, 24, 14, 0); // TODO: TUNE ME
 
     public static record ModuleHardwareConfig(int driveID, int azimuthID, int encoderID, double offset) {}
 

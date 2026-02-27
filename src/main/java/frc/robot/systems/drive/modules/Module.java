@@ -15,15 +15,23 @@ import frc.robot.systems.drive.DriveConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
-    public static final LoggedTunableNumber tDriveP = new LoggedTunableNumber("Module/Drive/kP", kModuleControllerConfigs.driveController().getP());
-    public static final LoggedTunableNumber tDriveD = new LoggedTunableNumber("Module/Drive/kD", kModuleControllerConfigs.driveController().getD());
-    public static final LoggedTunableNumber tDriveS = new LoggedTunableNumber("Module/Drive/kS", kModuleControllerConfigs.driveFF().getKs());
-    public static final LoggedTunableNumber tDriveV = new LoggedTunableNumber("Module/Drive/kV", kModuleControllerConfigs.driveFF().getKv());
-    public static final LoggedTunableNumber tDriveA = new LoggedTunableNumber("Module/Drive/kA", kModuleControllerConfigs.driveFF().getKa());
+    public static final LoggedTunableNumber tDriveP = new LoggedTunableNumber(
+            "Module/Drive/kP", kModuleControllerConfigs.driveController().getP());
+    public static final LoggedTunableNumber tDriveD = new LoggedTunableNumber(
+            "Module/Drive/kD", kModuleControllerConfigs.driveController().getD());
+    public static final LoggedTunableNumber tDriveS = new LoggedTunableNumber(
+            "Module/Drive/kS", kModuleControllerConfigs.driveFF().getKs());
+    public static final LoggedTunableNumber tDriveV = new LoggedTunableNumber(
+            "Module/Drive/kV", kModuleControllerConfigs.driveFF().getKv());
+    public static final LoggedTunableNumber tDriveA = new LoggedTunableNumber(
+            "Module/Drive/kA", kModuleControllerConfigs.driveFF().getKa());
 
-    public static final LoggedTunableNumber tTurnP = new LoggedTunableNumber("Module/AzimuthP", kModuleControllerConfigs.azimuthController().getP());
-    public static final LoggedTunableNumber tTurnD = new LoggedTunableNumber("Module/AzimuthD", kModuleControllerConfigs.azimuthController().getD());
-    public static final LoggedTunableNumber tTurnS = new LoggedTunableNumber("Module/AzimuthS", kModuleControllerConfigs.azimuthFF().getKs());
+    public static final LoggedTunableNumber tTurnP = new LoggedTunableNumber(
+            "Module/AzimuthP", kModuleControllerConfigs.azimuthController().getP());
+    public static final LoggedTunableNumber tTurnD = new LoggedTunableNumber(
+            "Module/AzimuthD", kModuleControllerConfigs.azimuthController().getD());
+    public static final LoggedTunableNumber tTurnS = new LoggedTunableNumber(
+            "Module/AzimuthS", kModuleControllerConfigs.azimuthFF().getKs());
 
     private final ModuleIO mIO;
     private final ModuleInputsAutoLogged mInputs = new ModuleInputsAutoLogged();
@@ -63,7 +71,7 @@ public class Module {
             } else {
                 mIO.setDriveVelocity(mVelocitySetpointMPS, 0.0);
             }
-        
+
             if (mAzimuthSetpointAngle != null) {
                 double ffOutput = mAzimuthFF.calculateWithVelocities(0, 0);
                 Telemetry.log("Drive/" + kModuleName + "/SimpleFeedforward", ffOutput);
@@ -73,40 +81,36 @@ public class Module {
             if (DriverStation.isDisabled()) stop();
 
             LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
-                },
-                tDriveP,
-                tDriveD
-            );
+                    hashCode(),
+                    () -> {
+                        mIO.setDrivePID(tDriveP.get(), 0.0, tDriveD.get());
+                    },
+                    tDriveP,
+                    tDriveD);
 
             LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mDriveFF = new SimpleMotorFeedforward(tDriveS.get(), tDriveV.get(), tDriveA.get());
-                },
-                tDriveS,
-                tDriveV,
-                tDriveA
-            );
+                    hashCode(),
+                    () -> {
+                        mDriveFF = new SimpleMotorFeedforward(tDriveS.get(), tDriveV.get(), tDriveA.get());
+                    },
+                    tDriveS,
+                    tDriveV,
+                    tDriveA);
 
             LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mIO.setAzimuthPID(tTurnP.get(), 0.0, tTurnD.get());
-                },
-                tTurnP,
-                tTurnD
-            );
+                    hashCode(),
+                    () -> {
+                        mIO.setAzimuthPID(tTurnP.get(), 0.0, tTurnD.get());
+                    },
+                    tTurnP,
+                    tTurnD);
 
             LoggedTunableNumber.ifChanged(
-                hashCode(),
-                () -> {
-                    mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), 0.0, 0.0);
-                },
-                tTurnS
-            );
+                    hashCode(),
+                    () -> {
+                        mAzimuthFF = new SimpleMotorFeedforward(tTurnS.get(), 0.0, 0.0);
+                    },
+                    tTurnS);
         }
     }
 

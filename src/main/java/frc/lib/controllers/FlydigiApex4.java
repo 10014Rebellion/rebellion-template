@@ -1,3 +1,5 @@
+// REBELLION 10014
+
 package frc.lib.controllers;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,7 +25,8 @@ public class FlydigiApex4 extends CommandXboxController {
 
     public Rotation2d getPOVAngle() {
         double povAngle = super.getHID().getPOV();
-        if(povAngle == -1) DriverStation.reportError("<<< FATAL: NO POV WAS DETECTED ON CONTROLLER PORT: " + mPort + " >>>", true);
+        if (povAngle == -1)
+            DriverStation.reportError("<<< FATAL: NO POV WAS DETECTED ON CONTROLLER PORT: " + mPort + " >>>", true);
         return Rotation2d.fromDegrees(povAngle);
     }
 }

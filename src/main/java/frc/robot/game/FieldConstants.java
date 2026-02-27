@@ -11,7 +11,10 @@ import edu.wpi.first.math.util.Units;
 public class FieldConstants {
     private static final boolean isFieldAndymark = true; // TODO: TUNE ME
 
-    public static final AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(isFieldAndymark ? AprilTagFields.k2025ReefscapeAndyMark : AprilTagFields.k2025ReefscapeWelded); // TODO: TUNE ME
+    public static final AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(
+            isFieldAndymark
+                    ? AprilTagFields.k2025ReefscapeAndyMark
+                    : AprilTagFields.k2025ReefscapeWelded); // TODO: TUNE ME
 
     public static final double kFieldLengthMeters = kFieldLayout.getFieldLength();
     public static final double kFieldWidthMeters = kFieldLayout.getFieldWidth();
